@@ -26,16 +26,17 @@ define('CRYPTO_HMAC_BYTES', strlen(hash_hmac(CRYPTO_HMAC_ALG, '', '', true)));
 define('ENCR_DISTINGUISHER', 'DefusePHP|KeyForEncryption');
 define('AUTH_DISTINGUISHER', 'DefusePHP|KeyForAuthentication');
 
+class CannotPerformOperationException extends Exception {}
+
 class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
     public static function Encrypt($plaintext, $key)
     {
-        if(strlen($key) < 16)
+        if (strlen($key) < 16)
         {
-            trigger_error("Key too small.", E_USER_ERROR);
-            return false;
+            throw new CannotPerformOperationException("Key too small.");
         }
 
         // Open the encryption module and get some parameters.
@@ -80,7 +81,7 @@ class Crypto
         $akey = self::CreateSubkey($key, AUTH_DISTINGUISHER, CRYPTO_KEY_BYTE_SIZE);
 
         // Make sure the HMAC is correct. If not, the ciphertext has been changed.
-        if(self::SlowEquals($hmac, hash_hmac(CRYPTO_HMAC_ALG, $ciphertext, $akey, true)))
+        if (self::VerifyHMAC($hmac, $ciphertext, $akey))
         {
             // Open the encryption module and get some parameters.
             $crypt = mcrypt_module_open(CRYPTO_CIPHER_ALG, "", CRYPTO_CIPHER_MODE, "");
@@ -120,7 +121,12 @@ class Crypto
      */
     public static function SecureRandom($octets)
     {
-        return mcrypt_create_iv($octets, MCRYPT_DEV_URANDOM);
+        $random = mcrypt_create_iv($octets, MCRYPT_DEV_URANDOM);
+        if ($random === FALSE) {
+            throw new CannotPerformOperationException();
+        } else {
+            return $random;
+        }
     }
 
     /*
@@ -186,17 +192,30 @@ class Crypto
         return substr($source, 0, $bytes);
     }
 
-    /*
-     * Compares two strings in constant time.
-     */
-    private static function SlowEquals($a, $b)
+    private static function VerifyHMAC($correct_hmac, $message, $key)
     {
-        $diff = strlen($a) ^ strlen($b);
-        for($i = 0; $i < strlen($a) && $i < strlen($b); $i++)
-        {
-            $diff |= ord($a[$i]) ^ ord($b[$i]);
+        $message_hmac = hash_hmac(CRYPTO_HMAC_ALG, $message, $key, true);
+
+        // We can't just compare the strings with '==', since it would make
+        // timing attacks possible. We could use the XOR-OR constant-time
+        // comparison algorithm, but I'm not sure if that's good enough way up
+        // here in an interpreted language. So we use the method of HMACing the 
+        // strings we want to compare with a random key, then comparing those.
+
+        // NOTE: This leaks information when the strings are not the same
+        // length, but they should always be the same length here. Enforce it:
+        if (strlen($correct_hmac) !== strlen($message_hmac)) {
+            throw new CannotPerformOperationException();
         }
-        return $diff === 0;
+
+        $blind = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+        if ($blind === FALSE) {
+            throw new CannotPerformOperationException();
+        }
+
+        $message_compare = hash_hmac(CRYPTO_HMAC_ALG, $message_hmac, $blind);
+        $correct_compare = hash_hmac(CRYPTO_HMAC_ALG, $correct_hmac, $blind);
+        return $correct_compare === $message_compare;
     }
 
 }
