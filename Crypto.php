@@ -22,6 +22,10 @@ define('CRYPTO_CIPHER_MODE', 'cbc');
 // The length of an HMAC, so it can be extracted from the ciphertext.
 define('CRYPTO_HMAC_BYTES', strlen(hash_hmac(CRYPTO_HMAC_ALG, '', '', true)));
 
+// Distinguisher strings for the KDF.
+define('ENCR_DISTINGUISHER', 'DefusePHP|KeyForEncryption');
+define('AUTH_DISTINGUISHER', 'DefusePHP|KeyForAuthentication');
+
 class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
@@ -40,7 +44,7 @@ class Crypto
         $ivsize = mcrypt_enc_get_iv_size($crypt);
 
         // Generate a sub-key for encryption.
-        $ekey = self::CreateSubkey($key, "encryption", $keysize);
+        $ekey = self::CreateSubkey($key, ENCR_DISTINGUISHER, $keysize);
         // Generate a random initialization vector.
         $iv = self::SecureRandom($ivsize);
 
@@ -56,7 +60,7 @@ class Crypto
         mcrypt_module_close($crypt);
 
         // Generate a sub-key for authentication.
-        $akey = self::CreateSubkey($key, "authentication", CRYPTO_KEY_BYTE_SIZE);
+        $akey = self::CreateSubkey($key, AUTH_DISTINGUISHER, CRYPTO_KEY_BYTE_SIZE);
         // Apply the HMAC.
         $auth = hash_hmac(CRYPTO_HMAC_ALG, $ciphertext, $akey, true);
         $ciphertext = $auth . $ciphertext;
@@ -73,7 +77,7 @@ class Crypto
         $ciphertext = substr($ciphertext, CRYPTO_HMAC_BYTES);
 
         // Re-generate the same authentication sub-key.
-        $akey = self::CreateSubkey($key, "authentication", CRYPTO_KEY_BYTE_SIZE);
+        $akey = self::CreateSubkey($key, AUTH_DISTINGUISHER, CRYPTO_KEY_BYTE_SIZE);
 
         // Make sure the HMAC is correct. If not, the ciphertext has been changed.
         if(self::SlowEquals($hmac, hash_hmac(CRYPTO_HMAC_ALG, $ciphertext, $akey, true)))
@@ -84,7 +88,7 @@ class Crypto
             $ivsize = mcrypt_enc_get_iv_size($crypt);
 
             // Re-generate the same encryption sub-key.
-            $ekey = self::CreateSubkey($key, "encryption", $keysize);
+            $ekey = self::CreateSubkey($key, ENCR_DISTINGUISHER, $keysize);
 
             // Extract the initialization vector from the ciphertext.
             if(strlen($ciphertext) <= $ivsize)
