@@ -32,9 +32,17 @@ class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
+    /*
+     * Use this to generate the encryption key.
+     */
+    public static function CreateNewRandomKey()
+    {
+        return self::SecureRandom(CRYPTO_KEY_BYTE_SIZE);
+    }
+
     public static function Encrypt($plaintext, $key)
     {
-        if (strlen($key) < 16)
+        if (strlen($key) < CRYPTO_KEY_BYTE_SIZE)
         {
             throw new CannotPerformOperationException("Key too small.");
         }
@@ -119,7 +127,7 @@ class Crypto
     /*
      * Returns a random binary string of length $octets bytes.
      */
-    public static function SecureRandom($octets)
+    private static function SecureRandom($octets)
     {
         $random = mcrypt_create_iv($octets, MCRYPT_DEV_URANDOM);
         if ($random === FALSE) {
@@ -136,7 +144,7 @@ class Crypto
     {
         echo "Running crypto test...\n";
 
-        $key = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+        $key = Crypto::CreateNewRandomKey();
         $data = "EnCrYpT EvErYThInG\x00\x00";
 
         $ciphertext = Crypto::Encrypt($data, $key);
