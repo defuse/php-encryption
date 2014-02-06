@@ -53,7 +53,7 @@ class Crypto
         $ivsize = mcrypt_enc_get_iv_size($crypt);
 
         // Generate a sub-key for encryption.
-        $ekey = self::CreateSubkey($key, ENCR_DISTINGUISHER, $keysize);
+        $ekey = self::HKDF($key, $keysize, ENCR_DISTINGUISHER);
         // Generate a random initialization vector.
         $iv = self::SecureRandom($ivsize);
 
@@ -69,7 +69,7 @@ class Crypto
         mcrypt_module_close($crypt);
 
         // Generate a sub-key for authentication.
-        $akey = self::CreateSubkey($key, AUTH_DISTINGUISHER, CRYPTO_KEY_BYTE_SIZE);
+        $akey = self::HKDF($key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
         // Apply the HMAC.
         $auth = hash_hmac(CRYPTO_HMAC_ALG, $ciphertext, $akey, true);
         $ciphertext = $auth . $ciphertext;
@@ -86,7 +86,7 @@ class Crypto
         $ciphertext = substr($ciphertext, CRYPTO_HMAC_BYTES);
 
         // Re-generate the same authentication sub-key.
-        $akey = self::CreateSubkey($key, AUTH_DISTINGUISHER, CRYPTO_KEY_BYTE_SIZE);
+        $akey = self::HKDF($key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
 
         // Make sure the HMAC is correct. If not, the ciphertext has been changed.
         if (self::VerifyHMAC($hmac, $ciphertext, $akey))
@@ -97,7 +97,7 @@ class Crypto
             $ivsize = mcrypt_enc_get_iv_size($crypt);
 
             // Re-generate the same encryption sub-key.
-            $ekey = self::CreateSubkey($key, ENCR_DISTINGUISHER, $keysize);
+            $ekey = self::HKDF($key, $keysize, ENCR_DISTINGUISHER);
 
             // Extract the initialization vector from the ciphertext.
             if(strlen($ciphertext) <= $ivsize)
@@ -152,6 +152,49 @@ class Crypto
         return substr($source, 0, $bytes);
     }
 
+    /*
+     * Use HKDF to derive multiple keys from one.
+     * http://tools.ietf.org/html/rfc5869
+     */
+    private static function HKDF($ikm, $length, $info = '', $salt = NULL)
+    {
+        if (empty($length) || !is_int($length) ||
+            $length < 0 || $length > 255 * CRYPTO_HMAC_BYTES) {
+            return CannotPerformOperationException();
+        }
+
+        // "if [salt] not provided, is set to a string of HashLen zeroes."
+        if (is_null($salt)) {
+            $salt = str_repeat("\x00", CRYPTO_HMAC_BYTES);
+        }
+
+        // HKDF-Extract:
+        // PRK = HMAC-Hash(salt, IKM)
+        // The salt is the HMAC key.
+        $prk = hash_hmac(CRYPTO_HMAC_ALG, $ikm, $salt, true);
+
+        // HKDF-Expand:
+
+        // This check is useless, but it serves as a reminder to the spec.
+        if (strlen($prk) < CRYPTO_HMAC_BYTES) {
+            throw new CannotPerformOperationException();
+        }
+
+        $t = '';
+        $last_block = '';
+        for ($block_index = 1; strlen($t) < $length; $block_index++) {
+            $last_block = hash_hmac(
+                CRYPTO_HMAC_ALG,
+                $last_block . $info . chr($block_index),
+                $prk,
+                true
+            );
+            $t .= $last_block;
+        }
+
+        return substr($t, 0, $length);
+    }
+
     private static function VerifyHMAC($correct_hmac, $message, $key)
     {
         $message_hmac = hash_hmac(CRYPTO_HMAC_ALG, $message, $key, true);
@@ -183,6 +226,7 @@ class Crypto
      */
     public static function Test()
     {
+        // TODO: Make this better so it can be a runtime test.
         echo "Running crypto test...\n";
 
         $key = Crypto::CreateNewRandomKey();
@@ -221,6 +265,40 @@ class Crypto
         {
             echo "FAIL: Ciphertext decrypts with an incorrect key.";
             return false;
+        }
+
+
+        $hkdf_tests = array(
+            // Test Case 1
+            array(
+                "ikm" => str_repeat("\x0b", 22),
+                "salt" => "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C",
+                "info" => "\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7\xF8\xF9",
+                "l" => 42,
+                "okm" => "\x3c\xb2\x5f\x25\xfa\xac\xd5\x7a\x90\x43\x4f\x64\xd0\x36\x2f\x2a\x2d\x2d\x0a\x90\xcf\x1a\x5a\x4c\x5d\xb0\x2d\x56\xec\xc4\xc5\xbf\x34\x00\x72\x08\xd5\xb8\x87\x18\x58\x65"
+            ),
+            // Test Case 3
+            array(
+                "ikm" => str_repeat("\x0b", 22),
+                "salt" => "",
+                "info" => "",
+                "l" => 42,
+                "okm" => "\x8d\xa4\xe7\x75\xa5\x63\xc1\x8f\x71\x5f\x80\x2a\x06\x3c\x5a\x31\xb8\xa1\x1f\x5c\x5e\xe1\x87\x9e\xc3\x45\x4e\x5f\x3c\x73\x8d\x2d\x9d\x20\x13\x95\xfa\xa4\xb6\x1a\x96\xc8"
+            )
+            // TODO: add the other test cases, espcially the one where no salt
+            // is provided. We may have to make HKDF() take the hash as
+            // a paremeter to accomodate this, but that's better anyway.
+        );
+
+        foreach ($hkdf_tests as $test) {
+            $computed = self::HKDF($test['ikm'], $test['l'], $test['info'], $test['salt']);
+            $correct = $test['okm'];
+            if ($computed !== $correct) {
+                echo "FAIL: HKDF test vector.\n";
+                echo "COMPUTED " . bin2hex($computed) . "\n";
+                echo "CORRECT " . bin2hex($correct) . "\n";
+                return FALSE;
+            }
         }
 
         echo "PASS\n";
