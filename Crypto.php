@@ -137,6 +137,47 @@ class Crypto
         }
     }
 
+
+    /*
+     * Creates a sub-key from a master key for a specific purpose.
+     */
+    private static function CreateSubkey($master, $purpose, $bytes)
+    {
+        $source = hash_hmac("sha512", $purpose, $master, true);
+        if(strlen($source) < $bytes) {
+            trigger_error("Subkey too big.", E_USER_ERROR);
+            return $source; // fail safe
+        }
+
+        return substr($source, 0, $bytes);
+    }
+
+    private static function VerifyHMAC($correct_hmac, $message, $key)
+    {
+        $message_hmac = hash_hmac(CRYPTO_HMAC_ALG, $message, $key, true);
+
+        // We can't just compare the strings with '==', since it would make
+        // timing attacks possible. We could use the XOR-OR constant-time
+        // comparison algorithm, but I'm not sure if that's good enough way up
+        // here in an interpreted language. So we use the method of HMACing the 
+        // strings we want to compare with a random key, then comparing those.
+
+        // NOTE: This leaks information when the strings are not the same
+        // length, but they should always be the same length here. Enforce it:
+        if (strlen($correct_hmac) !== strlen($message_hmac)) {
+            throw new CannotPerformOperationException();
+        }
+
+        $blind = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+        if ($blind === FALSE) {
+            throw new CannotPerformOperationException();
+        }
+
+        $message_compare = hash_hmac(CRYPTO_HMAC_ALG, $message_hmac, $blind);
+        $correct_compare = hash_hmac(CRYPTO_HMAC_ALG, $correct_hmac, $blind);
+        return $correct_compare === $message_compare;
+    }
+
     /*
      * A simple test and demonstration of how to use this class.
      */
@@ -184,46 +225,6 @@ class Crypto
 
         echo "PASS\n";
         return true;
-    }
-
-    /*
-     * Creates a sub-key from a master key for a specific purpose.
-     */
-    private static function CreateSubkey($master, $purpose, $bytes)
-    {
-        $source = hash_hmac("sha512", $purpose, $master, true);
-        if(strlen($source) < $bytes) {
-            trigger_error("Subkey too big.", E_USER_ERROR);
-            return $source; // fail safe
-        }
-
-        return substr($source, 0, $bytes);
-    }
-
-    private static function VerifyHMAC($correct_hmac, $message, $key)
-    {
-        $message_hmac = hash_hmac(CRYPTO_HMAC_ALG, $message, $key, true);
-
-        // We can't just compare the strings with '==', since it would make
-        // timing attacks possible. We could use the XOR-OR constant-time
-        // comparison algorithm, but I'm not sure if that's good enough way up
-        // here in an interpreted language. So we use the method of HMACing the 
-        // strings we want to compare with a random key, then comparing those.
-
-        // NOTE: This leaks information when the strings are not the same
-        // length, but they should always be the same length here. Enforce it:
-        if (strlen($correct_hmac) !== strlen($message_hmac)) {
-            throw new CannotPerformOperationException();
-        }
-
-        $blind = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
-        if ($blind === FALSE) {
-            throw new CannotPerformOperationException();
-        }
-
-        $message_compare = hash_hmac(CRYPTO_HMAC_ALG, $message_hmac, $blind);
-        $correct_compare = hash_hmac(CRYPTO_HMAC_ALG, $correct_hmac, $blind);
-        return $correct_compare === $message_compare;
     }
 
 }
