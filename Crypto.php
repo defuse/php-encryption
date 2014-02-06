@@ -32,6 +32,8 @@ class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
+    // TODO: add good documentation.
+
     /*
      * Use this to generate the encryption key.
      */
@@ -135,21 +137,6 @@ class Crypto
         } else {
             return $random;
         }
-    }
-
-
-    /*
-     * Creates a sub-key from a master key for a specific purpose.
-     */
-    private static function CreateSubkey($master, $purpose, $bytes)
-    {
-        $source = hash_hmac("sha512", $purpose, $master, true);
-        if(strlen($source) < $bytes) {
-            trigger_error("Subkey too big.", E_USER_ERROR);
-            return $source; // fail safe
-        }
-
-        return substr($source, 0, $bytes);
     }
 
     /*
