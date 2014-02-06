@@ -59,7 +59,7 @@ class Crypto
         $ivsize = mcrypt_enc_get_iv_size($crypt);
 
         // Generate a sub-key for encryption.
-        $ekey = self::HKDF($key, $keysize, ENCR_DISTINGUISHER);
+        $ekey = self::HKDF(CRYPTO_HMAC_ALG, $key, $keysize, ENCR_DISTINGUISHER);
         // Generate a random initialization vector.
         $iv = self::SecureRandom($ivsize);
 
@@ -75,7 +75,7 @@ class Crypto
         mcrypt_module_close($crypt);
 
         // Generate a sub-key for authentication.
-        $akey = self::HKDF($key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
+        $akey = self::HKDF(CRYPTO_HMAC_ALG, $key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
         // Apply the HMAC.
         $auth = hash_hmac(CRYPTO_HMAC_ALG, $ciphertext, $akey, true);
         $ciphertext = $auth . $ciphertext;
@@ -92,7 +92,7 @@ class Crypto
         $ciphertext = substr($ciphertext, CRYPTO_HMAC_BYTES);
 
         // Re-generate the same authentication sub-key.
-        $akey = self::HKDF($key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
+        $akey = self::HKDF(CRYPTO_HMAC_ALG, $key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
 
         // Make sure the HMAC is correct. If not, the ciphertext has been changed.
         if (self::VerifyHMAC($hmac, $ciphertext, $akey))
@@ -103,7 +103,7 @@ class Crypto
             $ivsize = mcrypt_enc_get_iv_size($crypt);
 
             // Re-generate the same encryption sub-key.
-            $ekey = self::HKDF($key, $keysize, ENCR_DISTINGUISHER);
+            $ekey = self::HKDF(CRYPTO_HMAC_ALG, $key, $keysize, ENCR_DISTINGUISHER);
 
             // Extract the initialization vector from the ciphertext.
             if(strlen($ciphertext) <= $ivsize)
@@ -147,27 +147,34 @@ class Crypto
      * Use HKDF to derive multiple keys from one.
      * http://tools.ietf.org/html/rfc5869
      */
-    private static function HKDF($ikm, $length, $info = '', $salt = NULL)
+    private static function HKDF($hash, $ikm, $length, $info = '', $salt = NULL)
     {
+        // Find the correct digest length as quickly as we can.
+        $digest_length = CRYPTO_HMAC_BYTES;
+        if ($hash != CRYPTO_HMAC_ALG) {
+            $digest_length = strlen(hash_hmac($hash, '', '', true));
+        }
+
+        // Sanity-check the desired output length.
         if (empty($length) || !is_int($length) ||
-            $length < 0 || $length > 255 * CRYPTO_HMAC_BYTES) {
+            $length < 0 || $length > 255 * $digest_length) {
             return CannotPerformOperationException();
         }
 
         // "if [salt] not provided, is set to a string of HashLen zeroes."
         if (is_null($salt)) {
-            $salt = str_repeat("\x00", CRYPTO_HMAC_BYTES);
+            $salt = str_repeat("\x00", $digest_length);
         }
 
         // HKDF-Extract:
         // PRK = HMAC-Hash(salt, IKM)
         // The salt is the HMAC key.
-        $prk = hash_hmac(CRYPTO_HMAC_ALG, $ikm, $salt, true);
+        $prk = hash_hmac($hash, $ikm, $salt, true);
 
         // HKDF-Expand:
 
         // This check is useless, but it serves as a reminder to the spec.
-        if (strlen($prk) < CRYPTO_HMAC_BYTES) {
+        if (strlen($prk) < $digest_length) {
             throw new CannotPerformOperationException();
         }
 
@@ -177,7 +184,7 @@ class Crypto
         for ($block_index = 1; strlen($t) < $length; $block_index++) {
             // T(i) = HMAC-Hash(PRK, T(i-1) | info | 0x??)
             $last_block = hash_hmac(
-                CRYPTO_HMAC_ALG,
+                $hash,
                 $last_block . $info . chr($block_index),
                 $prk,
                 true
@@ -266,27 +273,61 @@ class Crypto
         $hkdf_tests = array(
             // Test Case 1
             array(
+                "hash" => "sha256",
                 "ikm" => str_repeat("\x0b", 22),
                 "salt" => "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C",
                 "info" => "\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7\xF8\xF9",
                 "l" => 42,
                 "okm" => "\x3c\xb2\x5f\x25\xfa\xac\xd5\x7a\x90\x43\x4f\x64\xd0\x36\x2f\x2a\x2d\x2d\x0a\x90\xcf\x1a\x5a\x4c\x5d\xb0\x2d\x56\xec\xc4\xc5\xbf\x34\x00\x72\x08\xd5\xb8\x87\x18\x58\x65"
             ),
+            // TODO: wrap these strings
+            // Test Case 2
+            array(
+                "hash" => "sha256",
+                "ikm" => "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b" .
+                         "\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17" . 
+                         "\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23" . 
+                         "\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f" . 
+                         "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b" .
+                         "\x3c\x3d\x3e\x3f\x40\x41\x42\x43\x44\x45\x46\x47" .
+                         "\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f",
+                "salt" => "\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a" . 
+                          "\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75" .
+                          "\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f\x80" .
+                          "\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b" .
+                          "\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96" .
+                          "\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1" .
+                          "\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac" .
+                          "\xad\xae\xaf",
+                "info" => "\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff",
+                "l" => 82,
+                "okm" => "\xb1\x1e\x39\x8d\xc8\x03\x27\xa1\xc8\xe7\xf7\x8c\x59\x6a\x49\x34\x4f\x01\x2e\xda\x2d\x4e\xfa\xd8\xa0\x50\xcc\x4c\x19\xaf\xa9\x7c\x59\x04\x5a\x99\xca\xc7\x82\x72\x71\xcb\x41\xc6\x5e\x59\x0e\x09\xda\x32\x75\x60\x0c\x2f\x09\xb8\x36\x77\x93\xa9\xac\xa3\xdb\x71\xcc\x30\xc5\x81\x79\xec\x3e\x87\xc1\x4c\x01\xd5\xc1\xf3\x43\x4f\x1d\x87"
+            ),
             // Test Case 3
             array(
+                "hash" => "sha256",
                 "ikm" => str_repeat("\x0b", 22),
                 "salt" => "",
                 "info" => "",
                 "l" => 42,
                 "okm" => "\x8d\xa4\xe7\x75\xa5\x63\xc1\x8f\x71\x5f\x80\x2a\x06\x3c\x5a\x31\xb8\xa1\x1f\x5c\x5e\xe1\x87\x9e\xc3\x45\x4e\x5f\x3c\x73\x8d\x2d\x9d\x20\x13\x95\xfa\xa4\xb6\x1a\x96\xc8"
-            )
+            ),
+            // Test Case 7
+            array(
+                "hash" => "sha1",
+                "ikm" => str_repeat("\x0c", 22),
+                "salt" => NULL,
+                "info" => '',
+                "l" => 42,
+                "okm" => "\x2c\x91\x11\x72\x04\xd7\x45\xf3\x50\x0d\x63\x6a\x62\xf6\x4f\x0a\xb3\xba\xe5\x48\xaa\x53\xd4\x23\xb0\xd1\xf2\x7e\xbb\xa6\xf5\xe5\x67\x3a\x08\x1d\x70\xcc\xe7\xac\xfc\x48"
+            ),
             // TODO: add the other test cases, espcially the one where no salt
             // is provided. We may have to make HKDF() take the hash as
             // a paremeter to accomodate this, but that's better anyway.
         );
 
         foreach ($hkdf_tests as $test) {
-            $computed = self::HKDF($test['ikm'], $test['l'], $test['info'], $test['salt']);
+            $computed = self::HKDF($test['hash'], $test['ikm'], $test['l'], $test['info'], $test['salt']);
             $correct = $test['okm'];
             if ($computed !== $correct) {
                 echo "FAIL: HKDF test vector.\n";
