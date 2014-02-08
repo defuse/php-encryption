@@ -249,22 +249,34 @@ class Crypto
 
     public static function RuntimeTest()
     {
-        static $test_running = false;
+        // 0: Tests haven't been run yet.
+        // 1: Tests have passed.
+        // 2: Tests are running right now.
+        // 3: Tests have failed.
+        static $test_state = 0;
 
-        if ($test_running === true) {
+        if ($test_state === 1 || $test_state === 2) {
             return;
         }
 
-        self::AESTestVector();
-        self::HMACTestVector();
-        self::HKDFTestVector();
+        try {
+            $test_state = 2;
+            self::AESTestVector();
+            self::HMACTestVector();
+            self::HKDFTestVector();
 
-        $test_running = true;
-        self::TestEncryptDecrypt();
-        if (strlen(Crypto::CreateNewRandomKey()) != CRYPTO_KEY_BYTE_SIZE) {
+            self::TestEncryptDecrypt();
+            if (strlen(Crypto::CreateNewRandomKey()) != CRYPTO_KEY_BYTE_SIZE) {
+                throw new CryptoTestFailedException();
+            }
+        } catch (CryptoTestFailedException $ex) {
+            // Do this, otherwise it will stay in the "tests are running" state.
+            $test_state = 3;
             throw new CryptoTestFailedException();
         }
-        $test_running = false;
+
+        // Change this to '0' make the tests always re-run (for benchmarking).
+        $test_state = 1;
     }
 
     private static function TestEncryptDecrypt()
