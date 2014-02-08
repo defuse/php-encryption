@@ -68,7 +68,7 @@ class Crypto
 
         if (strlen($key) !== CRYPTO_KEY_BYTE_SIZE)
         {
-            throw new CannotPerformOperationException("Key too small.");
+            throw new CannotPerformOperationException("Bad key.");
         }
 
         // Open the encryption module and get some parameters.
