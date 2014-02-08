@@ -2,6 +2,9 @@
 
 require_once('Crypto.php');
 
+// Note: By default, the runtime tests are "cached" and not re-executed for
+// every call. To disable this, look at the RuntimeTest() function.
+
 $start = microtime(true);
 for ($i = 0; $i < 1000; $i++) {
     $key = Crypto::CreateNewRandomKey();
