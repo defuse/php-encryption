@@ -46,6 +46,7 @@ define('AUTH_DISTINGUISHER', 'DefusePHP|KeyForAuthentication');
 
 class CannotPerformOperationException extends Exception {}
 class InvalidCiphertextException extends Exception {}
+class CryptoTestFailedException extends Exception {}
 
 class Crypto
 {
@@ -56,11 +57,15 @@ class Crypto
      */
     public static function CreateNewRandomKey()
     {
+        Crypto::RuntimeTest();
+
         return self::SecureRandom(CRYPTO_KEY_BYTE_SIZE);
     }
 
     public static function Encrypt($plaintext, $key)
     {
+        Crypto::RuntimeTest();
+
         if (strlen($key) !== CRYPTO_KEY_BYTE_SIZE)
         {
             throw new CannotPerformOperationException("Key too small.");
@@ -68,7 +73,7 @@ class Crypto
 
         // Open the encryption module and get some parameters.
         $crypt = mcrypt_module_open(CRYPTO_CIPHER_ALG, "", CRYPTO_CIPHER_MODE, "");
-        $keysize = mcrypt_enc_get_key_size($crypt);
+        $keysize = CRYPTO_KEY_BYTE_SIZE;
         $ivsize = mcrypt_enc_get_iv_size($crypt);
 
         // Generate a sub-key for encryption.
@@ -98,6 +103,8 @@ class Crypto
 
     public static function Decrypt($ciphertext, $key)
     {
+        Crypto::RuntimeTest();
+
         // Extract the HMAC from the front of the ciphertext.
         if(strlen($ciphertext) <= CRYPTO_HMAC_BYTES)
             return false;
@@ -112,7 +119,7 @@ class Crypto
         {
             // Open the encryption module and get some parameters.
             $crypt = mcrypt_module_open(CRYPTO_CIPHER_ALG, "", CRYPTO_CIPHER_MODE, "");
-            $keysize = mcrypt_enc_get_key_size($crypt);
+            $keysize = CRYPTO_KEY_BYTE_SIZE;
             $ivsize = mcrypt_enc_get_iv_size($crypt);
 
             // Re-generate the same encryption sub-key.
@@ -143,7 +150,7 @@ class Crypto
              * a script that doesn't handle this condition to CRASH, instead
              * of thinking the ciphertext decrypted to the value FALSE.
              */
-            throw new InvalidCiphertextException();
+             throw new InvalidCiphertextException();
         }
     }
 
@@ -240,149 +247,147 @@ class Crypto
         return $correct_compare === $message_compare;
     }
 
-    /*
-     * A simple test and demonstration of how to use this class.
-     */
-    public static function Test()
+    public static function RuntimeTest()
     {
-        echo "Running crypto test...\n";
+        static $test_running = false;
 
+        if ($test_running === true) {
+            return;
+        }
+
+        self::AESTestVector();
+        self::HMACTestVector();
+        self::HKDFTestVector();
+
+        $test_running = true;
+        self::TestEncryptDecrypt();
+        if (strlen(Crypto::CreateNewRandomKey()) != CRYPTO_KEY_BYTE_SIZE) {
+            throw new CryptoTestFailedException();
+        }
+        $test_running = false;
+    }
+
+    private static function TestEncryptDecrypt()
+    {
         $key = Crypto::CreateNewRandomKey();
         $data = "EnCrYpT EvErYThInG\x00\x00";
 
+        // Make sure encrypting then decrypting doesn't change the message.
         $ciphertext = Crypto::Encrypt($data, $key);
-        echo "Ciphertext: " . bin2hex($ciphertext) . "\n";
-
         $decrypted = Crypto::Decrypt($ciphertext, $key);
-        echo "Decrypted: " . $decrypted . "\n";
-
-        if($decrypted != $data)
+        if($decrypted !== $data)
         {
-            echo "FAIL: Decrypted data is not the same as the original.";
-            return false;
+            throw new CryptoTestFailedException();
         }
 
+        // Modifying the ciphertext: Appending a string.
         try {
             Crypto::Decrypt($ciphertext . "a", $key);
-            echo "FAIL: Ciphertext tampering not detected.";
-            return false;
-        } catch (InvalidCiphertextException $e) {
-            // expected
-        }
+            throw new CryptoTestFailedException();
+        } catch (InvalidCiphertextException $e) { /* expected */ }
 
+        // Modifying the ciphertext: Changing an IV byte.
         try {
             $ciphertext[0] = chr((ord($ciphertext[0]) + 1) % 256);
             Crypto::Decrypt($ciphertext, $key);
-            echo "FAIL: Ciphertext tampering not detected.";
-            return false;
-        } catch (InvalidCiphertextException $e) {
-            // expected
-        }
+            throw new CryptoTestFailedException();
+        } catch (InvalidCiphertextException $e) { /* expected */ }
 
-        $key = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+        // Decrypting with the wrong key.
+        $key = Crypto::CreateNewRandomKey();
         $data = "abcdef";
         $ciphertext = Crypto::Encrypt($data, $key);
-        $wrong_key = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+        $wrong_key = Crypto::CreateNewRandomKey();
         try {
             Crypto::Decrypt($ciphertext, $wrong_key);
-            echo "FAIL: Ciphertext decrypts with an incorrect key.";
-            return false;
-        } catch (InvalidCiphertextException $e) {
-            // expected
+            throw new CryptoTestFailedException();
+        } catch (InvalidCiphertextException $e) { /* expected */ }
+    }
+
+    private static function HKDFTestVector()
+    {
+        // HKDF test vectors from RFC 5869
+
+        // Test Case 1
+        $ikm = str_repeat("\x0b", 22);
+        $salt = self::hexToBytes("000102030405060708090a0b0c");
+        $info = self::hexToBytes("f0f1f2f3f4f5f6f7f8f9");
+        $length = 42;
+        $okm = self::hexToBytes(
+            "3cb25f25faacd57a90434f64d0362f2a" .
+            "2d2d0a90cf1a5a4c5db02d56ecc4c5bf" .
+            "34007208d5b887185865"
+        );
+        $computed_okm = self::HKDF("sha256", $ikm, $length, $info, $salt);
+        if ($computed_okm !== $okm) {
+            throw new CryptoTestFailedException();
         }
 
-        $hkdf_tests = array(
-            // Test Case 1
-            array(
-                "hash" => "sha256",
-                "ikm" => str_repeat("\x0b", 22),
-                "salt" => "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C",
-                "info" => "\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7\xF8\xF9",
-                "l" => 42,
-                "okm" => "\x3c\xb2\x5f\x25\xfa\xac\xd5\x7a\x90\x43\x4f" . 
-                         "\x64\xd0\x36\x2f\x2a\x2d\x2d\x0a\x90\xcf\x1a" .
-                         "\x5a\x4c\x5d\xb0\x2d\x56\xec\xc4\xc5\xbf\x34" .
-                         "\x00\x72\x08\xd5\xb8\x87\x18\x58\x65"
-            ),
-            // Test Case 2
-            array(
-                "hash" => "sha256",
-                "ikm" => "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b" .
-                         "\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17" . 
-                         "\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23" . 
-                         "\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f" . 
-                         "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b" .
-                         "\x3c\x3d\x3e\x3f\x40\x41\x42\x43\x44\x45\x46\x47" .
-                         "\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f",
+        // Test Case 7
+        $ikm = str_repeat("\x0c", 22);
+        $length = 42;
+        $okm = self::hexToBytes(
+            "2c91117204d745f3500d636a62f64f0a" .
+            "b3bae548aa53d423b0d1f27ebba6f5e5" .
+            "673a081d70cce7acfc48"
+        );
+        $computed_okm = self::HKDF("sha1", $ikm, $length);
+        if ($computed_okm !== $okm) {
+            throw new CryptoTestFailedException();
+        }
 
-                "salt" => "\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a" . 
-                          "\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75" .
-                          "\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f\x80" .
-                          "\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b" .
-                          "\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96" .
-                          "\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1" .
-                          "\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac" .
-                          "\xad\xae\xaf",
+    }
 
-                "info" => "\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba" .
-                          "\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5" .
-                          "\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0" .
-                          "\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb" .
-                          "\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6" .
-                          "\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1" .
-                          "\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc" .
-                          "\xfd\xfe\xff",
-                "l" => 82,
-                "okm" => "\xb1\x1e\x39\x8d\xc8\x03\x27\xa1\xc8\xe7\xf7" .
-                         "\x8c\x59\x6a\x49\x34\x4f\x01\x2e\xda\x2d\x4e" .
-                         "\xfa\xd8\xa0\x50\xcc\x4c\x19\xaf\xa9\x7c\x59" .
-                         "\x04\x5a\x99\xca\xc7\x82\x72\x71\xcb\x41\xc6" .
-                         "\x5e\x59\x0e\x09\xda\x32\x75\x60\x0c\x2f\x09" .
-                         "\xb8\x36\x77\x93\xa9\xac\xa3\xdb\x71\xcc\x30" .
-                         "\xc5\x81\x79\xec\x3e\x87\xc1\x4c\x01\xd5\xc1" .
-                         "\xf3\x43\x4f\x1d\x87"
-            ),
-            // Test Case 3
-            array(
-                "hash" => "sha256",
-                "ikm" => str_repeat("\x0b", 22),
-                "salt" => "",
-                "info" => "",
-                "l" => 42,
-                "okm" => "\x8d\xa4\xe7\x75\xa5\x63\xc1\x8f\x71\x5f" .
-                         "\x80\x2a\x06\x3c\x5a\x31\xb8\xa1\x1f\x5c" .
-                         "\x5e\xe1\x87\x9e\xc3\x45\x4e\x5f\x3c\x73" .
-                         "\x8d\x2d\x9d\x20\x13\x95\xfa\xa4\xb6\x1a" .
-                         "\x96\xc8"
-            ),
-            // Test Case 7
-            array(
-                "hash" => "sha1",
-                "ikm" => str_repeat("\x0c", 22),
-                "salt" => NULL,
-                "info" => '',
-                "l" => 42,
-                "okm" => "\x2c\x91\x11\x72\x04\xd7\x45\xf3\x50\x0d" .
-                         "\x63\x6a\x62\xf6\x4f\x0a\xb3\xba\xe5\x48" .
-                         "\xaa\x53\xd4\x23\xb0\xd1\xf2\x7e\xbb\xa6" .
-                         "\xf5\xe5\x67\x3a\x08\x1d\x70\xcc\xe7\xac" .
-                         "\xfc\x48"
-            ),
+    private static function HMACTestVector()
+    {
+        // HMAC test vector From RFC 4231 (Test Case 1)
+        $key = str_repeat("\x0b", 20);
+        $data = "Hi There";
+        $correct = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
+        if (hash_hmac(CRYPTO_HMAC_ALG, $data, $key) != $correct) {
+            throw new CryptoTestFailedException();
+        }
+    }
+
+    private static function AESTestVector()
+    {
+        // AES CBC mode test vector from NIST SP 800-38A
+        $key = self::hexToBytes("2b7e151628aed2a6abf7158809cf4f3c");
+        $iv = self::hexToBytes("000102030405060708090a0b0c0d0e0f");
+        $plaintext = self::hexToBytes(
+            "6bc1bee22e409f96e93d7e117393172a" . 
+            "ae2d8a571e03ac9c9eb76fac45af8e51" .
+            "30c81c46a35ce411e5fbc1191a0a52ef" .
+            "f69f2445df4f9b17ad2b417be66c3710"
+        );
+        $ciphertext = self::hexToBytes(
+            "7649abac8119b246cee98e9b12e9197d" .
+            "5086cb9b507219ee95db113a917678b2" .
+            "73bed6b8e3c1743b7116e69e22229516" .
+            "3ff1caa1681fac09120eca307586e1a7"
         );
 
-        foreach ($hkdf_tests as $test) {
-            $computed = self::HKDF($test['hash'], $test['ikm'], $test['l'], $test['info'], $test['salt']);
-            $correct = $test['okm'];
-            if ($computed !== $correct) {
-                echo "FAIL: HKDF test vector.\n";
-                echo "COMPUTED " . bin2hex($computed) . "\n";
-                echo "CORRECT " . bin2hex($correct) . "\n";
-                return FALSE;
-            }
+        $crypt = mcrypt_module_open(CRYPTO_CIPHER_ALG, "", CRYPTO_CIPHER_MODE, "");
+        $ivsize = mcrypt_enc_get_iv_size($crypt);
+        if ($ivsize !== strlen($iv)) {
+            throw new CryptoTestFailedException();
         }
+        $blocksize = mcrypt_enc_get_block_size($crypt);
+        if ($blocksize !== strlen($iv)) {
+            throw new CryptoTestFailedException();
+        }
+        mcrypt_generic_init($crypt, $key, $iv);
+        $computed_ciphertext = mcrypt_generic($crypt, $plaintext);
+        mcrypt_generic_deinit($crypt);
+        mcrypt_module_close($crypt);
+        if ($computed_ciphertext !== $ciphertext) {
+            throw new CryptoTestFailedException();
+        }
+    }
 
-        echo "PASS\n";
-        return true;
+    private static function hexToBytes($hex_string)
+    {
+        return pack("H*", $hex_string);
     }
 
 }
@@ -390,7 +395,7 @@ class Crypto
 // Run the test when and only when this script is executed on the command line.
 if(isset($argv) && realpath($argv[0]) == __FILE__)
 {
-    Crypto::Test();
+    Crypto::RuntimeTest();
 }
 
 ?>
