@@ -60,7 +60,7 @@ class Crypto
 
     public static function Encrypt($plaintext, $key)
     {
-        if (strlen($key) < CRYPTO_KEY_BYTE_SIZE)
+        if (strlen($key) !== CRYPTO_KEY_BYTE_SIZE)
         {
             throw new CannotPerformOperationException("Key too small.");
         }
