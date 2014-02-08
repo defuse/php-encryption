@@ -268,7 +268,7 @@ class Crypto
         } catch (CryptoTestFailedException $ex) {
             // Do this, otherwise it will stay in the "tests are running" state.
             $test_state = 3;
-            throw new CryptoTestFailedException();
+            throw $ex;
         }
 
         // Change this to '0' make the tests always re-run (for benchmarking).
