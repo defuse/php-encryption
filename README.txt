@@ -36,7 +36,7 @@ This library is developed around several core values:
 
     Rule #4: The library should consist of a single PHP file and nothing more.
 
-        Some PHP encryption libraries, like libsodium [1], are not
+        Some PHP encryption libraries, like libsodium-php [1], are not
         straightforward to install and cannot packaged with "just download and
         extract" applications. This library will always be one PHP file that you
         can place in your source tree and require().
