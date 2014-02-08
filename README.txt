@@ -14,7 +14,7 @@ This library is developed around several core values:
         security will be favored. For example, the library has mandatory runtime
         tests, which make it slower, but increase security.
 
-    Rule #2: It should be extremely difficult to use the library incorrectly.
+    Rule #2: It should be extremely difficult to misuse the library.
 
         We assume the developers using this library have no experience with
         cryptography. We only assume that they know that the "key" is something
@@ -25,23 +25,20 @@ This library is developed around several core values:
     Rule #3: The library aims only to be compatible with itself.
 
         Other PHP encryption libraries try to support every possible type of
-        encryption, even the insecure ones (e.g. ECB mode). The Mcrypt functions
-        are an example of such a library. Because there are so many options,
-        inexperienced developers are left responsible for deciding whether to
-        use "CBC" mode or "ECB" mode, of which they know nothing.
+        encryption, even the insecure ones (e.g. ECB mode). Because there are so
+        many options, inexperienced developers must decide to use "CBC" mode or
+        "ECB" mode, knowing nothing about either one.
 
-        This library will only support one mode. A developer using this library
-        will call "encrypt" and "decrypt" not caring about how they are
+        This library will only support one secure mode. A developer using this
+        library will call "encrypt" and "decrypt" not caring about how they are
         implemented.
 
     Rule #4: The library should consist of a single PHP file and nothing more.
 
         Some PHP encryption libraries, like libsodium [1], are not
-        straightforward to install and cannot packaged with existing "just
-        download and extract" applications, since they use native code.
-
-        This library will always be just one PHP file that you can place in your
-        source tree and require().
+        straightforward to install and cannot packaged with "just download and
+        extract" applications. This library will always be one PHP file that you
+        can place in your source tree and require().
 
 References:
 
