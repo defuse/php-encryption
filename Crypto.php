@@ -404,10 +404,4 @@ class Crypto
 
 }
 
-// Run the test when and only when this script is executed on the command line.
-if(isset($argv) && realpath($argv[0]) == __FILE__)
-{
-    Crypto::RuntimeTest();
-}
-
 ?>
