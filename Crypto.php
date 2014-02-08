@@ -237,11 +237,7 @@ class Crypto
             throw new CannotPerformOperationException();
         }
 
-        $blind = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
-        if ($blind === FALSE) {
-            throw new CannotPerformOperationException();
-        }
-
+        $blind = CreateNewRandomKey();
         $message_compare = hash_hmac(CRYPTO_HMAC_ALG, $message_hmac, $blind);
         $correct_compare = hash_hmac(CRYPTO_HMAC_ALG, $correct_hmac, $blind);
         return $correct_compare === $message_compare;
