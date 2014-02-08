@@ -45,6 +45,7 @@ define('ENCR_DISTINGUISHER', 'DefusePHP|KeyForEncryption');
 define('AUTH_DISTINGUISHER', 'DefusePHP|KeyForAuthentication');
 
 class CannotPerformOperationException extends Exception {}
+class InvalidCiphertextException extends Exception {}
 
 class Crypto
 {
@@ -137,8 +138,12 @@ class Crypto
         }
         else
         {
-            // If the ciphertext has been modified, refuse to decrypt it.
-            return false;
+            /*
+             * We throw an exception instead of returning FALSE because we want
+             * a script that doesn't handle this condition to CRASH, instead
+             * of thinking the ciphertext decrypted to the value FALSE.
+             */
+            throw new InvalidCiphertextException();
         }
     }
 
@@ -257,29 +262,34 @@ class Crypto
             return false;
         }
 
-        if(Crypto::Decrypt($ciphertext . "a", $key) !== false)
-        {
+        try {
+            Crypto::Decrypt($ciphertext . "a", $key);
             echo "FAIL: Ciphertext tampering not detected.";
             return false;
+        } catch (InvalidCiphertextException $e) {
+            // expected
         }
 
-        $ciphertext[0] = chr((ord($ciphertext[0]) + 1) % 256);
-        if(Crypto::Decrypt($ciphertext, $key) !== false)
-        {
+        try {
+            $ciphertext[0] = chr((ord($ciphertext[0]) + 1) % 256);
+            Crypto::Decrypt($ciphertext, $key);
             echo "FAIL: Ciphertext tampering not detected.";
             return false;
+        } catch (InvalidCiphertextException $e) {
+            // expected
         }
 
         $key = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
         $data = "abcdef";
         $ciphertext = Crypto::Encrypt($data, $key);
         $wrong_key = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
-        if (Crypto::Decrypt($ciphertext, $wrong_key))
-        {
+        try {
+            Crypto::Decrypt($ciphertext, $wrong_key);
             echo "FAIL: Ciphertext decrypts with an incorrect key.";
             return false;
+        } catch (InvalidCiphertextException $e) {
+            // expected
         }
-
 
         $hkdf_tests = array(
             // Test Case 1
