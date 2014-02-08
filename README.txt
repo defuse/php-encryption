@@ -26,8 +26,9 @@ This library is developed around several core values:
 
         Other PHP encryption libraries try to support every possible type of
         encryption, even the insecure ones (e.g. ECB mode). Because there are so
-        many options, inexperienced developers must decide to use "CBC" mode or
-        "ECB" mode, knowing nothing about either one.
+        many options, inexperienced developers must make decisions between
+        things like "CBC" mode and "ECB" mode, knowing nothing about either one,
+        which inevitably creates to vulnerabilities.
 
         This library will only support one secure mode. A developer using this
         library will call "encrypt" and "decrypt" not caring about how they are
