@@ -55,8 +55,8 @@ This library is developed around several core values:
 
         Some PHP encryption libraries, like libsodium-php [1], are not
         straightforward to install and cannot packaged with "just download and
-        extract" applications. This library will always be one PHP file that you
-        can place in your source tree and require().
+        extract" applications. This library will always be just one PHP file
+        that you can put in your source tree and require().
 
 References:
 
