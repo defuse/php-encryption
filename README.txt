@@ -45,7 +45,7 @@ This library is developed around several core values:
         encryption, even the insecure ones (e.g. ECB mode). Because there are so
         many options, inexperienced developers must make decisions between
         things like "CBC" mode and "ECB" mode, knowing nothing about either one,
-        which inevitably creates to vulnerabilities.
+        which inevitably creates vulnerabilities.
 
         This library will only support one secure mode. A developer using this
         library will call "encrypt" and "decrypt" not caring about how they are
