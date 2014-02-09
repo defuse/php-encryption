@@ -452,7 +452,7 @@ class Crypto
             "7649abac8119b246cee98e9b12e9197d" .
             "5086cb9b507219ee95db113a917678b2" .
             "73bed6b8e3c1743b7116e69e22229516" .
-            "3ff1caa1681fac09120eca307586e1a7" .
+            "4ff1caa1681fac09120eca307586e1a7" .
             /* Block due to padding. Not from NIST test vector. 
                 Padding Block: 10101010101010101010101010101010
                 Ciphertext:    3ff1caa1681fac09120eca307586e1a7
@@ -465,7 +465,6 @@ class Crypto
 
         $computed_ciphertext = self::PlainEncrypt($plaintext, $key, $iv);
         if ($computed_ciphertext !== $ciphertext) {
-            echo bin2hex($computed_ciphertext);
             throw new CryptoTestFailedException();
         }
 
@@ -480,6 +479,25 @@ class Crypto
         return pack("H*", $hex_string);
     }
 
+    public static function CatchException($ex)
+    {
+        if (
+            $ex instanceof InvalidCiphertextException ||
+            $ex instanceof CannotPerformOperationException ||
+            $ex instanceof CryptoTestFailedException
+        ) {
+            echo "FATAL ERROR: Uncaught crypto exception. Supresssing output.\n";
+        } else {
+            if (PHP_VERSION_ID >= 50411) {
+                throw $ex;
+            } else {
+                echo "FATAL ERROR: Uncaught exception.\n";
+            }
+        }
+    }
+
 }
+
+set_exception_handler("Crypto::CatchException");
 
 ?>
