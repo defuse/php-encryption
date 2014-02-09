@@ -27,8 +27,8 @@ This library is developed around several core values:
     Rule #1: Security is prioritized over everything else.
 
         Whenever there is a conflict between security and some other property,
-        security will be favored. For example, the library has mandatory runtime
-        tests, which make it slower, but increase security.
+        security will be favored. For example, the library has runtime tests,
+        which make it slower, but increase security.
 
     Rule #2: It should be extremely difficult to misuse the library.
 
