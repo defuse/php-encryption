@@ -64,19 +64,18 @@ class Crypto
             throw new CannotPerformOperationException("Bad key.");
         }
 
-        $keysize = self::KEY_BYTE_SIZE;
-        $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
-
         // Generate a sub-key for encryption.
+        $keysize = self::KEY_BYTE_SIZE;
         $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
+
         // Generate a random initialization vector.
+        $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
         $iv = self::SecureRandom($ivsize);
 
         $ciphertext = $iv . self::PlainEncrypt($plaintext, $ekey, $iv);
 
-        // Generate a sub-key for authentication.
+        // Generate a sub-key for authentication and apply the HMAC.
         $akey = self::HKDF(self::HASH_FUNCTION, $key, self::KEY_BYTE_SIZE, self::AUTHENTICATION_INFO);
-        // Apply the HMAC.
         $auth = hash_hmac(self::HASH_FUNCTION, $ciphertext, $akey, true);
         $ciphertext = $auth . $ciphertext;
 
@@ -94,21 +93,17 @@ class Crypto
         $hmac = substr($ciphertext, 0, self::MAC_BYTE_SIZE);
         $ciphertext = substr($ciphertext, self::MAC_BYTE_SIZE);
 
-        // Re-generate the same authentication sub-key.
+        // Regenerate the same authentication sub-key.
         $akey = self::HKDF(self::HASH_FUNCTION, $key, self::KEY_BYTE_SIZE, self::AUTHENTICATION_INFO);
 
-        // Make sure the HMAC is correct. If not, the ciphertext has been changed.
         if (self::VerifyHMAC($hmac, $ciphertext, $akey))
         {
-            // Open the encryption module and get some parameters.
-            $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+            // Regenerate the same encryption sub-key.
             $keysize = self::KEY_BYTE_SIZE;
-            $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
-
-            // Re-generate the same encryption sub-key.
             $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
             // Extract the initialization vector from the ciphertext.
+            $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
             if(strlen($ciphertext) <= $ivsize) {
                 throw new InvalidCiphertextException();
             }
