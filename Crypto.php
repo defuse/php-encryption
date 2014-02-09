@@ -34,7 +34,7 @@
  *  - The attacker modified the ciphertext.
  */
 class CryptoTestFailedException extends Exception {}
-/* If you see these, it means it is NOT safe to do encryption on your system. */
+/* If you see these, it means it is NOT SAFE to do encryption on your system. */
 class CannotPerformOperationException extends Exception {}
 class InvalidCiphertextException extends Exception {}
 
