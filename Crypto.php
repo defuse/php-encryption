@@ -28,9 +28,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* Raised by Decrypt() when one of the following conditions are met:
+ *  - The key is wrong.
+ *  - The ciphertext is invalid or not in the correct format.
+ *  - The attacker modified the ciphertext.
+ */
+class CryptoTestFailedException extends Exception {}
+/* If you see these, it means it is NOT safe to do encryption on your system. */
 class CannotPerformOperationException extends Exception {}
 class InvalidCiphertextException extends Exception {}
-class CryptoTestFailedException extends Exception {}
 
 class Crypto
 {
