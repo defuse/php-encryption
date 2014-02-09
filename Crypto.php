@@ -57,7 +57,6 @@ class Crypto
     public static function CreateNewRandomKey()
     {
         Crypto::RuntimeTest();
-
         return self::SecureRandom(self::KEY_BYTE_SIZE);
     }
 
@@ -137,16 +136,28 @@ class Crypto
     private static function PlainEncrypt($plaintext, $key, $iv)
     {
         $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+        if ($crypt === FALSE) {
+            throw new CannotPerformOperationException();
+        }
 
         // Pad the plaintext to a multiple of the block size.
         $block = mcrypt_enc_get_block_size($crypt);
         $pad = $block - (strlen($plaintext) % $block);
         $plaintext .= str_repeat(chr($pad), $pad);
 
-        mcrypt_generic_init($crypt, $key, $iv);
+        $ret = mcrypt_generic_init($crypt, $key, $iv);
+        if ($ret !== 0) {
+            throw new CannotPerformOperationException();
+        }
         $ciphertext = mcrypt_generic($crypt, $plaintext);
-        mcrypt_generic_deinit($crypt);
-        mcrypt_module_close($crypt);
+        $ret = mcrypt_generic_deinit($crypt);
+        if ($ret !== TRUE) {
+            throw new CannotPerformOperationException();
+        }
+        $ret = mcrypt_module_close($crypt);
+        if ($ret !== TRUE) {
+            throw new CannotPerformOperationException();
+        }
 
         return $ciphertext;
     }
@@ -157,11 +168,23 @@ class Crypto
     private static function PlainDecrypt($ciphertext, $key, $iv)
     {
         $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+        if ($crypt === FALSE) {
+            throw new CannotPerformOperationException();
+        }
 
-        mcrypt_generic_init($crypt, $key, $iv);
+        $ret = mcrypt_generic_init($crypt, $key, $iv);
+        if ($ret !== 0) {
+            throw new CannotPerformOperationException();
+        }
         $plaintext = mdecrypt_generic($crypt, $ciphertext);
-        mcrypt_generic_deinit($crypt);
-        mcrypt_module_close($crypt);
+        $ret = mcrypt_generic_deinit($crypt);
+        if ($ret !== TRUE) {
+            throw new CannotPerformOperationException();
+        }
+        $ret = mcrypt_module_close($crypt);
+        if ($ret !== TRUE) {
+            throw new CannotPerformOperationException();
+        }
 
         // Remove the padding.
         $pad = ord($plaintext[strlen($plaintext) - 1]);
