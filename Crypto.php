@@ -479,25 +479,51 @@ class Crypto
         return pack("H*", $hex_string);
     }
 
-    public static function CatchException($ex)
+}
+
+/*
+ * We want to catch all uncaught exceptions that come from the Crypto class,
+ * since by default, PHP will leak the key in the stack trace from an uncaught
+ * exception. This is a really ugly hack, but I think it's justified.
+ *
+ * Everything up to handler() getting called should be reliable, so this should
+ * reliably suppress the stack traces. The rest is just a bonus so that we don't
+ * make it impossible to debug other exceptions.
+ *
+ * This bit of code was adapted from: http://stackoverflow.com/a/7939492
+ */
+
+class CryptoExceptionHandler
+{
+    private $rethrow = NULL;
+
+    public function __construct()
+    {
+        set_exception_handler(array($this, "handler"));
+    }
+
+    public function handler($ex)
     {
         if (
             $ex instanceof InvalidCiphertextException ||
             $ex instanceof CannotPerformOperationException ||
             $ex instanceof CryptoTestFailedException
         ) {
-            echo "FATAL ERROR: Uncaught crypto exception. Supresssing output.\n";
+            echo "FATAL ERROR: Uncaught crypto exception. Suppresssing output.\n";
         } else {
-            if (PHP_VERSION_ID >= 50411) {
-                throw $ex;
-            } else {
-                echo "FATAL ERROR: Uncaught exception.\n";
-            }
+            /* Re-throw the exception in the destructor. */
+            $this->rethrow = $ex;
         }
     }
 
+    public function __destruct() {
+        if ($this->rethrow) {
+            throw $this->rethrow;
+        }
+    }
 }
 
-set_exception_handler("Crypto::CatchException");
+$crypto_exception_handler_object_dont_touch_me = new CryptoExceptionHandler();
+
 
 ?>
