@@ -36,12 +36,12 @@ class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
+    /* Do not change these constants! */
     const CIPHER = MCRYPT_RIJNDAEL_128;
     const KEY_BYTE_SIZE = 16;
     const CIPHER_MODE = 'cbc';
     const HASH_FUNCTION = 'sha256';
     const MAC_BYTE_SIZE = 32;
-
     const ENCRYPTION_INFO = 'DefusePHP|KeyForEncryption';
     const AUTHENTICATION_INFO = 'DefusePHP|KeyForAuthentication';
 
