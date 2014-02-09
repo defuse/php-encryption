@@ -33,10 +33,10 @@
  *  - The ciphertext is invalid or not in the correct format.
  *  - The attacker modified the ciphertext.
  */
-class CryptoTestFailedException extends Exception {}
+class InvalidCiphertextException extends Exception {}
 /* If you see these, it means it is NOT SAFE to do encryption on your system. */
 class CannotPerformOperationException extends Exception {}
-class InvalidCiphertextException extends Exception {}
+class CryptoTestFailedException extends Exception {}
 
 class Crypto
 {
