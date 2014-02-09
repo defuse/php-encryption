@@ -474,6 +474,7 @@ class Crypto
         }
     }
 
+    /* WARNING: Do not call this function on secrets. It creates side channels. */
     private static function hexToBytes($hex_string)
     {
         return pack("H*", $hex_string);
