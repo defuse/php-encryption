@@ -75,6 +75,9 @@ class Crypto
 
         // Generate a random initialization vector.
         $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
+        if ($ivsize === FALSE || $ivsize <= 0) {
+            throw new CannotPerformOperationException();
+        }
         $iv = self::SecureRandom($ivsize);
 
         $ciphertext = $iv . self::PlainEncrypt($plaintext, $ekey, $iv);
@@ -96,7 +99,13 @@ class Crypto
             throw new InvalidCiphertextException();
         }
         $hmac = substr($ciphertext, 0, self::MAC_BYTE_SIZE);
+        if ($hmac === FALSE) {
+            throw new CannotPerformOperationException();
+        }
         $ciphertext = substr($ciphertext, self::MAC_BYTE_SIZE);
+        if ($ciphertext === FALSE) {
+            throw new CannotPerformOperationException();
+        }
 
         // Regenerate the same authentication sub-key.
         $akey = self::HKDF(self::HASH_FUNCTION, $key, self::KEY_BYTE_SIZE, self::AUTHENTICATION_INFO);
@@ -109,11 +118,20 @@ class Crypto
 
             // Extract the initialization vector from the ciphertext.
             $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
+            if ($ivsize === FALSE || $ivsize <= 0) {
+                throw new CannotPerformOperationException();
+            }
             if(strlen($ciphertext) <= $ivsize) {
                 throw new InvalidCiphertextException();
             }
             $iv = substr($ciphertext, 0, $ivsize);
+            if ($iv === FALSE) {
+                throw new CannotPerformOperationException();
+            }
             $ciphertext = substr($ciphertext, $ivsize);
+            if ($ciphertext === FALSE) {
+                throw new CannotPerformOperationException();
+            }
             
             $plaintext = self::PlainDecrypt($ciphertext, $ekey, $iv);
 
@@ -168,6 +186,7 @@ class Crypto
     private static function PlainDecrypt($ciphertext, $key, $iv)
     {
         $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+        $block = mcrypt_enc_get_block_size($crypt);
         if ($crypt === FALSE) {
             throw new CannotPerformOperationException();
         }
@@ -188,7 +207,13 @@ class Crypto
 
         // Remove the padding.
         $pad = ord($plaintext[strlen($plaintext) - 1]);
+        if ($pad <= 0 || $pad > $block) {
+            throw new CannotPerformOperationException();
+        }
         $plaintext = substr($plaintext, 0, strlen($plaintext) - $pad);
+        if ($plaintext === FALSE) {
+            throw new CannotPerformOperationException();
+        }
 
         return $plaintext;
     }
@@ -257,7 +282,11 @@ class Crypto
         }
 
         // ORM = first L octets of T
-        return substr($t, 0, $length);
+        $orm = substr($t, 0, $length);
+        if ($orm === FALSE) {
+            throw new CannotPerformOperationException();
+        }
+        return $orm;
     }
 
     private static function VerifyHMAC($correct_hmac, $message, $key)
