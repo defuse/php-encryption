@@ -99,8 +99,9 @@ class Crypto
         Crypto::RuntimeTest();
 
         // Extract the HMAC from the front of the ciphertext.
-        if(strlen($ciphertext) <= self::MAC_BYTE_SIZE)
-            return false;
+        if(strlen($ciphertext) <= self::MAC_BYTE_SIZE) {
+            throw new InvalidCiphertextException();
+        }
         $hmac = substr($ciphertext, 0, self::MAC_BYTE_SIZE);
         $ciphertext = substr($ciphertext, self::MAC_BYTE_SIZE);
 
@@ -119,8 +120,9 @@ class Crypto
             $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
             // Extract the initialization vector from the ciphertext.
-            if(strlen($ciphertext) <= $ivsize)
-                return false;
+            if(strlen($ciphertext) <= $ivsize) {
+                throw new InvalidCiphertextException();
+            }
             $iv = substr($ciphertext, 0, $ivsize);
             $ciphertext = substr($ciphertext, $ivsize);
             
