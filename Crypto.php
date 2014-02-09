@@ -125,6 +125,9 @@ class Crypto
         }
     }
 
+    /*
+     * Never call this method directly!
+     */
     private static function PlainEncrypt($plaintext, $key, $iv)
     {
         $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
@@ -142,6 +145,9 @@ class Crypto
         return $ciphertext;
     }
 
+    /*
+     * Never call this method directly!
+     */
     private static function PlainDecrypt($ciphertext, $key, $iv)
     {
         $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
