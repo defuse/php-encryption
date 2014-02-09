@@ -309,6 +309,14 @@ class Crypto
             Crypto::Decrypt($ciphertext, $wrong_key);
             throw new CryptoTestFailedException();
         } catch (InvalidCiphertextException $e) { /* expected */ }
+
+        // Ciphertext too small (shorter than HMAC).
+        $key = Crypto::CreateNewRandomKey();
+        $ciphertext = str_repeat("A", self::MAC_BYTE_SIZE - 1);
+        try {
+            Crypto::Decrypt($ciphertext, $key);
+            throw new CryptoTestFailedException();
+        } catch (InvalidCiphertextException $e) { /* expected */ }
     }
 
     private static function HKDFTestVector()
