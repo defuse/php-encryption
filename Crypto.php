@@ -64,26 +64,15 @@ class Crypto
             throw new CannotPerformOperationException("Bad key.");
         }
 
-        // Open the encryption module and get some parameters.
-        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
         $keysize = self::KEY_BYTE_SIZE;
-        $ivsize = mcrypt_enc_get_iv_size($crypt);
+        $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
 
         // Generate a sub-key for encryption.
         $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
         // Generate a random initialization vector.
         $iv = self::SecureRandom($ivsize);
 
-        // Pad the plaintext to a multiple of the block size (PKCS #7)
-        $block = mcrypt_enc_get_block_size($crypt);
-        $pad = $block - (strlen($plaintext) % $block);
-        $plaintext .= str_repeat(chr($pad), $pad);
-
-        // Do the encryption.
-        mcrypt_generic_init($crypt, $ekey, $iv);
-        $ciphertext = $iv . mcrypt_generic($crypt, $plaintext); 
-        mcrypt_generic_deinit($crypt);
-        mcrypt_module_close($crypt);
+        $ciphertext = $iv . self::PlainEncrypt($plaintext, $ekey, $iv);
 
         // Generate a sub-key for authentication.
         $akey = self::HKDF(self::HASH_FUNCTION, $key, self::KEY_BYTE_SIZE, self::AUTHENTICATION_INFO);
@@ -114,7 +103,7 @@ class Crypto
             // Open the encryption module and get some parameters.
             $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
             $keysize = self::KEY_BYTE_SIZE;
-            $ivsize = mcrypt_enc_get_iv_size($crypt);
+            $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
 
             // Re-generate the same encryption sub-key.
             $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
@@ -126,15 +115,7 @@ class Crypto
             $iv = substr($ciphertext, 0, $ivsize);
             $ciphertext = substr($ciphertext, $ivsize);
             
-            // Do the decryption.
-            mcrypt_generic_init($crypt, $ekey, $iv);
-            $plaintext = mdecrypt_generic($crypt, $ciphertext);
-            mcrypt_generic_deinit($crypt);
-            mcrypt_module_close($crypt);
-
-            // Remove the padding.
-            $pad = ord($plaintext[strlen($plaintext) - 1]);
-            $plaintext = substr($plaintext, 0, strlen($plaintext) - $pad);
+            $plaintext = self::PlainDecrypt($ciphertext, $ekey, $iv);
 
             return $plaintext;
         }
@@ -147,6 +128,39 @@ class Crypto
              */
              throw new InvalidCiphertextException();
         }
+    }
+
+    private static function PlainEncrypt($plaintext, $key, $iv)
+    {
+        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+
+        // Pad the plaintext to a multiple of the block size.
+        $block = mcrypt_enc_get_block_size($crypt);
+        $pad = $block - (strlen($plaintext) % $block);
+        $plaintext .= str_repeat(chr($pad), $pad);
+
+        mcrypt_generic_init($crypt, $key, $iv);
+        $ciphertext = mcrypt_generic($crypt, $plaintext);
+        mcrypt_generic_deinit($crypt);
+        mcrypt_module_close($crypt);
+
+        return $ciphertext;
+    }
+
+    private static function PlainDecrypt($ciphertext, $key, $iv)
+    {
+        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+
+        mcrypt_generic_init($crypt, $key, $iv);
+        $plaintext = mdecrypt_generic($crypt, $ciphertext);
+        mcrypt_generic_deinit($crypt);
+        mcrypt_module_close($crypt);
+
+        // Remove the padding.
+        $pad = ord($plaintext[strlen($plaintext) - 1]);
+        $plaintext = substr($plaintext, 0, strlen($plaintext) - $pad);
+
+        return $plaintext;
     }
 
     /*
@@ -379,23 +393,25 @@ class Crypto
             "7649abac8119b246cee98e9b12e9197d" .
             "5086cb9b507219ee95db113a917678b2" .
             "73bed6b8e3c1743b7116e69e22229516" .
-            "3ff1caa1681fac09120eca307586e1a7"
+            "3ff1caa1681fac09120eca307586e1a7" .
+            /* Block due to padding. Not from NIST test vector. 
+                Padding Block: 10101010101010101010101010101010
+                Ciphertext:    3ff1caa1681fac09120eca307586e1a7
+                           (+) 2fe1dab1780fbc19021eda206596f1b7 
+                           AES 8cb82807230e1321d3fae00d18cc2012
+             
+             */
+            "8cb82807230e1321d3fae00d18cc2012"
         );
 
-        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
-        $ivsize = mcrypt_enc_get_iv_size($crypt);
-        if ($ivsize !== strlen($iv)) {
-            throw new CryptoTestFailedException();
-        }
-        $blocksize = mcrypt_enc_get_block_size($crypt);
-        if ($blocksize !== strlen($iv)) {
-            throw new CryptoTestFailedException();
-        }
-        mcrypt_generic_init($crypt, $key, $iv);
-        $computed_ciphertext = mcrypt_generic($crypt, $plaintext);
-        mcrypt_generic_deinit($crypt);
-        mcrypt_module_close($crypt);
+        $computed_ciphertext = self::PlainEncrypt($plaintext, $key, $iv);
         if ($computed_ciphertext !== $ciphertext) {
+            echo bin2hex($computed_ciphertext);
+            throw new CryptoTestFailedException();
+        }
+
+        $computed_plaintext = self::PlainDecrypt($ciphertext, $key, $iv);
+        if ($computed_plaintext !== $plaintext) {
             throw new CryptoTestFailedException();
         }
     }
