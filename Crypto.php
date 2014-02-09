@@ -28,22 +28,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Configuration constants. Don't change unless you know what you're doing.
-// The block cipher to use for encryption.
-define('CRYPTO_CIPHER_ALG', MCRYPT_RIJNDAEL_128);
-// The hash function to use for HMAC.
-define('CRYPTO_HMAC_ALG', 'sha256');
-// The byte length of the encryption and HMAC keys.
-define('CRYPTO_KEY_BYTE_SIZE', 16);
-// The block cipher mode of operation to use.
-define('CRYPTO_CIPHER_MODE', 'cbc');
-// The length of an HMAC, so it can be extracted from the ciphertext.
-define('CRYPTO_HMAC_BYTES', strlen(hash_hmac(CRYPTO_HMAC_ALG, '', '', true)));
-
-// Distinguisher strings for the KDF.
-define('ENCR_DISTINGUISHER', 'DefusePHP|KeyForEncryption');
-define('AUTH_DISTINGUISHER', 'DefusePHP|KeyForAuthentication');
-
 class CannotPerformOperationException extends Exception {}
 class InvalidCiphertextException extends Exception {}
 class CryptoTestFailedException extends Exception {}
@@ -52,6 +36,15 @@ class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
+    const CIPHER = MCRYPT_RIJNDAEL_128;
+    const KEY_BYTE_SIZE = 16;
+    const CIPHER_MODE = 'cbc';
+    const HASH_FUNCTION = 'sha256';
+    const MAC_BYTE_SIZE = 32;
+
+    const ENCRYPTION_INFO = 'DefusePHP|KeyForEncryption';
+    const AUTHENTICATION_INFO = 'DefusePHP|KeyForAuthentication';
+
     /*
      * Use this to generate the encryption key.
      */
@@ -59,25 +52,25 @@ class Crypto
     {
         Crypto::RuntimeTest();
 
-        return self::SecureRandom(CRYPTO_KEY_BYTE_SIZE);
+        return self::SecureRandom(self::KEY_BYTE_SIZE);
     }
 
     public static function Encrypt($plaintext, $key)
     {
         Crypto::RuntimeTest();
 
-        if (strlen($key) !== CRYPTO_KEY_BYTE_SIZE)
+        if (strlen($key) !== self::KEY_BYTE_SIZE)
         {
             throw new CannotPerformOperationException("Bad key.");
         }
 
         // Open the encryption module and get some parameters.
-        $crypt = mcrypt_module_open(CRYPTO_CIPHER_ALG, "", CRYPTO_CIPHER_MODE, "");
-        $keysize = CRYPTO_KEY_BYTE_SIZE;
+        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+        $keysize = self::KEY_BYTE_SIZE;
         $ivsize = mcrypt_enc_get_iv_size($crypt);
 
         // Generate a sub-key for encryption.
-        $ekey = self::HKDF(CRYPTO_HMAC_ALG, $key, $keysize, ENCR_DISTINGUISHER);
+        $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
         // Generate a random initialization vector.
         $iv = self::SecureRandom($ivsize);
 
@@ -93,9 +86,9 @@ class Crypto
         mcrypt_module_close($crypt);
 
         // Generate a sub-key for authentication.
-        $akey = self::HKDF(CRYPTO_HMAC_ALG, $key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
+        $akey = self::HKDF(self::HASH_FUNCTION, $key, self::KEY_BYTE_SIZE, self::AUTHENTICATION_INFO);
         // Apply the HMAC.
-        $auth = hash_hmac(CRYPTO_HMAC_ALG, $ciphertext, $akey, true);
+        $auth = hash_hmac(self::HASH_FUNCTION, $ciphertext, $akey, true);
         $ciphertext = $auth . $ciphertext;
 
         return $ciphertext;
@@ -106,24 +99,24 @@ class Crypto
         Crypto::RuntimeTest();
 
         // Extract the HMAC from the front of the ciphertext.
-        if(strlen($ciphertext) <= CRYPTO_HMAC_BYTES)
+        if(strlen($ciphertext) <= self::MAC_BYTE_SIZE)
             return false;
-        $hmac = substr($ciphertext, 0, CRYPTO_HMAC_BYTES);
-        $ciphertext = substr($ciphertext, CRYPTO_HMAC_BYTES);
+        $hmac = substr($ciphertext, 0, self::MAC_BYTE_SIZE);
+        $ciphertext = substr($ciphertext, self::MAC_BYTE_SIZE);
 
         // Re-generate the same authentication sub-key.
-        $akey = self::HKDF(CRYPTO_HMAC_ALG, $key, CRYPTO_KEY_BYTE_SIZE, AUTH_DISTINGUISHER);
+        $akey = self::HKDF(self::HASH_FUNCTION, $key, self::KEY_BYTE_SIZE, self::AUTHENTICATION_INFO);
 
         // Make sure the HMAC is correct. If not, the ciphertext has been changed.
         if (self::VerifyHMAC($hmac, $ciphertext, $akey))
         {
             // Open the encryption module and get some parameters.
-            $crypt = mcrypt_module_open(CRYPTO_CIPHER_ALG, "", CRYPTO_CIPHER_MODE, "");
-            $keysize = CRYPTO_KEY_BYTE_SIZE;
+            $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
+            $keysize = self::KEY_BYTE_SIZE;
             $ivsize = mcrypt_enc_get_iv_size($crypt);
 
             // Re-generate the same encryption sub-key.
-            $ekey = self::HKDF(CRYPTO_HMAC_ALG, $key, $keysize, ENCR_DISTINGUISHER);
+            $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
             // Extract the initialization vector from the ciphertext.
             if(strlen($ciphertext) <= $ivsize)
@@ -174,8 +167,8 @@ class Crypto
     private static function HKDF($hash, $ikm, $length, $info = '', $salt = NULL)
     {
         // Find the correct digest length as quickly as we can.
-        $digest_length = CRYPTO_HMAC_BYTES;
-        if ($hash != CRYPTO_HMAC_ALG) {
+        $digest_length = self::MAC_BYTE_SIZE;
+        if ($hash != self::HASH_FUNCTION) {
             $digest_length = strlen(hash_hmac($hash, '', '', true));
         }
 
@@ -223,7 +216,7 @@ class Crypto
 
     private static function VerifyHMAC($correct_hmac, $message, $key)
     {
-        $message_hmac = hash_hmac(CRYPTO_HMAC_ALG, $message, $key, true);
+        $message_hmac = hash_hmac(self::HASH_FUNCTION, $message, $key, true);
 
         // We can't just compare the strings with '==', since it would make
         // timing attacks possible. We could use the XOR-OR constant-time
@@ -238,8 +231,8 @@ class Crypto
         }
 
         $blind = self::CreateNewRandomKey();
-        $message_compare = hash_hmac(CRYPTO_HMAC_ALG, $message_hmac, $blind);
-        $correct_compare = hash_hmac(CRYPTO_HMAC_ALG, $correct_hmac, $blind);
+        $message_compare = hash_hmac(self::HASH_FUNCTION, $message_hmac, $blind);
+        $correct_compare = hash_hmac(self::HASH_FUNCTION, $correct_hmac, $blind);
         return $correct_compare === $message_compare;
     }
 
@@ -262,7 +255,11 @@ class Crypto
             self::HKDFTestVector();
 
             self::TestEncryptDecrypt();
-            if (strlen(Crypto::CreateNewRandomKey()) != CRYPTO_KEY_BYTE_SIZE) {
+            if (strlen(Crypto::CreateNewRandomKey()) != self::KEY_BYTE_SIZE) {
+                throw new CryptoTestFailedException();
+            }
+
+            if (self::ENCRYPTION_INFO == self::AUTHENTICATION_INFO) {
                 throw new CryptoTestFailedException();
             }
         } catch (CryptoTestFailedException $ex) {
@@ -352,7 +349,7 @@ class Crypto
         $key = str_repeat("\x0b", 20);
         $data = "Hi There";
         $correct = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
-        if (hash_hmac(CRYPTO_HMAC_ALG, $data, $key) != $correct) {
+        if (hash_hmac(self::HASH_FUNCTION, $data, $key) != $correct) {
             throw new CryptoTestFailedException();
         }
     }
@@ -375,7 +372,7 @@ class Crypto
             "3ff1caa1681fac09120eca307586e1a7"
         );
 
-        $crypt = mcrypt_module_open(CRYPTO_CIPHER_ALG, "", CRYPTO_CIPHER_MODE, "");
+        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
         $ivsize = mcrypt_enc_get_iv_size($crypt);
         if ($ivsize !== strlen($iv)) {
             throw new CryptoTestFailedException();
