@@ -452,7 +452,7 @@ class Crypto
             "7649abac8119b246cee98e9b12e9197d" .
             "5086cb9b507219ee95db113a917678b2" .
             "73bed6b8e3c1743b7116e69e22229516" .
-            "4ff1caa1681fac09120eca307586e1a7" .
+            "3ff1caa1681fac09120eca307586e1a7" .
             /* Block due to padding. Not from NIST test vector. 
                 Padding Block: 10101010101010101010101010101010
                 Ciphertext:    3ff1caa1681fac09120eca307586e1a7
