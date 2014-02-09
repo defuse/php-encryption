@@ -28,7 +28,8 @@ This library is developed around several core values:
 
         Whenever there is a conflict between security and some other property,
         security will be favored. For example, the library has runtime tests,
-        which make it slower, but increase security.
+        which make it slower, but will hopefully stop it from encrypting stuff
+        if the platform it's running on is broken.
 
     Rule #2: It should be extremely difficult to misuse the library.
 
