@@ -31,7 +31,7 @@ This library is developed around several core values:
         which make it slower, but will hopefully stop it from encrypting stuff
         if the platform it's running on is broken.
 
-    Rule #2: It should be extremely difficult to misuse the library.
+    Rule #2: It should be difficult to misuse the library.
 
         We assume the developers using this library have no experience with
         cryptography. We only assume that they know that the "key" is something
