@@ -354,7 +354,14 @@ class Crypto
 
         // Make sure encrypting then decrypting doesn't change the message.
         $ciphertext = Crypto::Encrypt($data, $key);
-        $decrypted = Crypto::Decrypt($ciphertext, $key);
+        try {
+            $decrypted = Crypto::Decrypt($ciphertext, $key);
+        } catch (InvalidCiphertextException $ex) {
+            // It's important to catch this and change it into a 
+            // CryptoTestFailedException, otherwise a test failure could trick
+            // the user into thinking it's just an invalid ciphertext!
+            throw new CryptoTestFailedException();
+        }
         if($decrypted !== $data)
         {
             throw new CryptoTestFailedException();
