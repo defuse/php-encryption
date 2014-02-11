@@ -38,6 +38,8 @@
  *     ----------------
  *       try {
  *           $key = Crypto::CreateNewRandomKey();
+ *           // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
+ *           // they may leak the key to the attacker through side channels.
  *       } catch (CryptoTestFailedException $ex) {
  *           die('Cannot safely create a key');
  *       } catch (CannotPerformOperationException $ex) {
