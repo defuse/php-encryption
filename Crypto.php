@@ -46,6 +46,7 @@
  *
  *     Encrypting a Message
  *     --------------------
+ *       $message = "ATTACK AT DAWN";
  *       try {
  *           $ciphertext = Crypto::Encrypt($message, $key);
  *       } catch (CryptoTestFailedException $ex) {
@@ -57,7 +58,7 @@
  *     Decrypting a Message
  *     --------------------
  *       try {
- *           $message = Crypto::Decrypt($ciphertext, $key);
+ *           $decrypted = Crypto::Decrypt($ciphertext, $key);
  *       } catch (InvalidCiphertextException $ex) { // VERY IMPORTANT
  *           // Either:
  *           //   1. The ciphertext was modified by the attacker,
