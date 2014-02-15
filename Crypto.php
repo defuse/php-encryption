@@ -39,6 +39,8 @@
  * encrypt something with a password, apply a password key derivation function
  * like PBKDF2 or scrypt with a random salt to generate a key.
  *
+ * WARNING: Error handling is very important, especially for crypto code! 
+ *
  * How to use this code:
  *
  *     Generating a Key
