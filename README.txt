@@ -2,7 +2,8 @@ Warning: This is new code, and it hasn't received much review by experts. I have
 spent many hours making it as secure as possible (extensive runtime tests,
 paranoid coding practices), and auditing it for problems, but I may have missed
 some issues. So be careful. Don't trust it with your life. Check out the open
-GitHub tickets for a list of known (possible) issues.
+GitHub issues for a list of known (possible) issues. If you find a problem with
+this library, please open a GitHub issue.
 
 This library was created after noticing how much insecure PHP encryption code
 there is. I once did a Google search for "php encryption" and found insecure
