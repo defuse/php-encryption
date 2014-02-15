@@ -128,6 +128,7 @@ class Crypto
         $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
         // Generate a random initialization vector.
+        self::EnsureFunctionExists("mcrypt_get_iv_size");
         $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
         if ($ivsize === FALSE || $ivsize <= 0) {
             throw new CannotPerformOperationException();
@@ -177,6 +178,7 @@ class Crypto
             $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
             // Extract the initialization vector from the ciphertext.
+            self::EnsureFunctionExists("mcrypt_get_iv_size");
             $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
             if ($ivsize === FALSE || $ivsize <= 0) {
                 throw new CannotPerformOperationException();
@@ -255,25 +257,31 @@ class Crypto
      */
     private static function PlainEncrypt($plaintext, $key, $iv)
     {
+        self::EnsureFunctionExists("mcrypt_module_open");
         $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
         if ($crypt === FALSE) {
             throw new CannotPerformOperationException();
         }
 
         // Pad the plaintext to a multiple of the block size.
+        self::EnsureFunctionExists("mcrypt_enc_get_block_size");
         $block = mcrypt_enc_get_block_size($crypt);
         $pad = $block - (strlen($plaintext) % $block);
         $plaintext .= str_repeat(chr($pad), $pad);
 
+        self::EnsureFunctionExists("mcrypt_generic_init");
         $ret = mcrypt_generic_init($crypt, $key, $iv);
         if ($ret !== 0) {
             throw new CannotPerformOperationException();
         }
+        self::EnsureFunctionExists("mcrypt_generic");
         $ciphertext = mcrypt_generic($crypt, $plaintext);
+        self::EnsureFunctionExists("mcrypt_generic_deinit");
         $ret = mcrypt_generic_deinit($crypt);
         if ($ret !== TRUE) {
             throw new CannotPerformOperationException();
         }
+        self::EnsureFunctionExists("mcrypt_module_close");
         $ret = mcrypt_module_close($crypt);
         if ($ret !== TRUE) {
             throw new CannotPerformOperationException();
@@ -287,21 +295,27 @@ class Crypto
      */
     private static function PlainDecrypt($ciphertext, $key, $iv)
     {
+        self::EnsureFunctionExists("mcrypt_module_open");
         $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
-        $block = mcrypt_enc_get_block_size($crypt);
         if ($crypt === FALSE) {
             throw new CannotPerformOperationException();
         }
 
+        self::EnsureFunctionExists("mcrypt_enc_get_block_size");
+        $block = mcrypt_enc_get_block_size($crypt);
+        self::EnsureFunctionExists("mcrypt_generic_init");
         $ret = mcrypt_generic_init($crypt, $key, $iv);
         if ($ret !== 0) {
             throw new CannotPerformOperationException();
         }
+        self::EnsureFunctionExists("mdecrypt_generic");
         $plaintext = mdecrypt_generic($crypt, $ciphertext);
+        self::EnsureFunctionExists("mcrypt_generic_deinit");
         $ret = mcrypt_generic_deinit($crypt);
         if ($ret !== TRUE) {
             throw new CannotPerformOperationException();
         }
+        self::EnsureFunctionExists("mcrypt_module_close");
         $ret = mcrypt_module_close($crypt);
         if ($ret !== TRUE) {
             throw new CannotPerformOperationException();
@@ -325,6 +339,7 @@ class Crypto
      */
     private static function SecureRandom($octets)
     {
+        self::EnsureFunctionExists("mcrypt_create_iv");
         $random = mcrypt_create_iv($octets, MCRYPT_DEV_URANDOM);
         if ($random === FALSE) {
             throw new CannotPerformOperationException();
@@ -551,6 +566,13 @@ class Crypto
     private static function hexToBytes($hex_string)
     {
         return pack("H*", $hex_string);
+    }
+
+    private static function EnsureFunctionExists($name)
+    {
+        if (!function_exists($name)) {
+            throw new CannotPerformOperationException();
+        }
     }
 
 }
