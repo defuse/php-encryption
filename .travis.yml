@@ -3,5 +3,12 @@ php:
     - "5.5"
     - "5.4"
     - "5.3"
-# TODO: Add more versions (this should work back to 4.x at least)
+    - "5.2"
+    - "5.1"
+    - "5.0"
+    - "4.4"
+    - "4.3"
+    - "4.2"
+    - "4.1"
+    - "4.0"
 script: php test.php
