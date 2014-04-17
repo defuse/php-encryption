@@ -24,6 +24,9 @@ issues. So be careful. Don't trust it with your life. Check out the open GitHub
 issues for a list of known issues. If you find a problem with this library,
 please report it by opening a GitHub issue.
 
+That said, you're probably much better off using this library than any other
+encryption library written in PHP. 
+
 Philosophy
 -----------
 
