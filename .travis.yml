@@ -1,0 +1,7 @@
+language: php
+php:
+    - "5.5"
+    - "5.4"
+    - "5.3"
+# TODO: Add more versions (this should work back to 4.x at least)
+script: php test.php
