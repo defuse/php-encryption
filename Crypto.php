@@ -372,7 +372,7 @@ class Crypto
         // Sanity-check the desired output length.
         if (empty($length) || !is_int($length) ||
             $length < 0 || $length > 255 * $digest_length) {
-            return CannotPerformOperationException();
+            throw new CannotPerformOperationException();
         }
 
         // "if [salt] not provided, is set to a string of HashLen zeroes."
