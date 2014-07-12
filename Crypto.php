@@ -595,7 +595,9 @@ class Crypto
     {
         if (function_exists('mb_substr'))
         {
-            return mb_substr($str, $start, $length = NULL, '8bit');
+            // mb_substr($str, 0, null, '8bit') returns an empty string on PHP 5.3
+            isset($length) OR $length = ($start >= 0 ? self::strlen($str) - $start : -$start);
+            return mb_substr($str, $start, $length, '8bit');
         }
 
         // Unlike mb_substr(), substr() doesn't accept NULL for length
