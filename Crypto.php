@@ -584,6 +584,12 @@ class Crypto
         }
     }
 
+    /*
+     * We need these strlen() and substr() functions because when
+     * 'mbstring.func_overload' is set in php.ini, the standard strlen() and
+     * substr() are replaced by mb_strlen() and mb_substr().
+     */
+
     private static function strlen($str)
     {
         if (function_exists('mb_strlen')) {
