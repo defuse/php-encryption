@@ -2,7 +2,7 @@
 
 echo "Normal"
 echo "--------------------------------------------------"
-php tests/runtime.php
+php -d mbstring.func_overload=0 tests/runtime.php
 if [ $? -ne 0 ]; then
     echo "FAIL."
     exit 1
