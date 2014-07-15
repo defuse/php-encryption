@@ -127,7 +127,7 @@ class Crypto
     {
         Crypto::RuntimeTest();
 
-        if (self::strlen($key) !== self::KEY_BYTE_SIZE)
+        if (self::our_strlen($key) !== self::KEY_BYTE_SIZE)
         {
             throw new CannotPerformOperationException("Bad key.");
         }
@@ -165,14 +165,14 @@ class Crypto
         Crypto::RuntimeTest();
 
         // Extract the HMAC from the front of the ciphertext.
-        if (self::strlen($ciphertext) <= self::MAC_BYTE_SIZE) {
+        if (self::our_strlen($ciphertext) <= self::MAC_BYTE_SIZE) {
             throw new InvalidCiphertextException();
         }
-        $hmac = self::substr($ciphertext, 0, self::MAC_BYTE_SIZE);
+        $hmac = self::our_substr($ciphertext, 0, self::MAC_BYTE_SIZE);
         if ($hmac === FALSE) {
             throw new CannotPerformOperationException();
         }
-        $ciphertext = self::substr($ciphertext, self::MAC_BYTE_SIZE);
+        $ciphertext = self::our_substr($ciphertext, self::MAC_BYTE_SIZE);
         if ($ciphertext === FALSE) {
             throw new CannotPerformOperationException();
         }
@@ -192,14 +192,14 @@ class Crypto
             if ($ivsize === FALSE || $ivsize <= 0) {
                 throw new CannotPerformOperationException();
             }
-            if (self::strlen($ciphertext) <= $ivsize) {
+            if (self::our_strlen($ciphertext) <= $ivsize) {
                 throw new InvalidCiphertextException();
             }
-            $iv = self::substr($ciphertext, 0, $ivsize);
+            $iv = self::our_substr($ciphertext, 0, $ivsize);
             if ($iv === FALSE) {
                 throw new CannotPerformOperationException();
             }
-            $ciphertext = self::substr($ciphertext, $ivsize);
+            $ciphertext = self::our_substr($ciphertext, $ivsize);
             if ($ciphertext === FALSE) {
                 throw new CannotPerformOperationException();
             }
@@ -244,7 +244,7 @@ class Crypto
             self::HKDFTestVector();
 
             self::TestEncryptDecrypt();
-            if (self::strlen(Crypto::CreateNewRandomKey()) != self::KEY_BYTE_SIZE) {
+            if (self::our_strlen(Crypto::CreateNewRandomKey()) != self::KEY_BYTE_SIZE) {
                 throw new CryptoTestFailedException();
             }
 
@@ -275,7 +275,7 @@ class Crypto
         // Pad the plaintext to a multiple of the block size.
         self::EnsureFunctionExists("mcrypt_enc_get_block_size");
         $block = mcrypt_enc_get_block_size($crypt);
-        $pad = $block - (self::strlen($plaintext) % $block);
+        $pad = $block - (self::our_strlen($plaintext) % $block);
         $plaintext .= str_repeat(chr($pad), $pad);
 
         self::EnsureFunctionExists("mcrypt_generic_init");
@@ -331,11 +331,11 @@ class Crypto
         }
 
         // Remove the padding.
-        $pad = ord($plaintext[self::strlen($plaintext) - 1]);
+        $pad = ord($plaintext[self::our_strlen($plaintext) - 1]);
         if ($pad <= 0 || $pad > $block) {
             throw new CannotPerformOperationException();
         }
-        $plaintext = self::substr($plaintext, 0, self::strlen($plaintext) - $pad);
+        $plaintext = self::our_substr($plaintext, 0, self::our_strlen($plaintext) - $pad);
         if ($plaintext === FALSE) {
             throw new CannotPerformOperationException();
         }
@@ -366,7 +366,7 @@ class Crypto
         // Find the correct digest length as quickly as we can.
         $digest_length = self::MAC_BYTE_SIZE;
         if ($hash != self::HASH_FUNCTION) {
-            $digest_length = self::strlen(hash_hmac($hash, '', '', true));
+            $digest_length = self::our_strlen(hash_hmac($hash, '', '', true));
         }
 
         // Sanity-check the desired output length.
@@ -388,14 +388,14 @@ class Crypto
         // HKDF-Expand:
 
         // This check is useless, but it serves as a reminder to the spec.
-        if (self::strlen($prk) < $digest_length) {
+        if (self::our_strlen($prk) < $digest_length) {
             throw new CannotPerformOperationException();
         }
 
         // T(0) = ''
         $t = '';
         $last_block = '';
-        for ($block_index = 1; self::strlen($t) < $length; $block_index++) {
+        for ($block_index = 1; self::our_strlen($t) < $length; $block_index++) {
             // T(i) = HMAC-Hash(PRK, T(i-1) | info | 0x??)
             $last_block = hash_hmac(
                 $hash,
@@ -408,7 +408,7 @@ class Crypto
         }
 
         // ORM = first L octets of T
-        $orm = self::substr($t, 0, $length);
+        $orm = self::our_substr($t, 0, $length);
         if ($orm === FALSE) {
             throw new CannotPerformOperationException();
         }
@@ -427,7 +427,7 @@ class Crypto
 
         // NOTE: This leaks information when the strings are not the same
         // length, but they should always be the same length here. Enforce it:
-        if (self::strlen($correct_hmac) !== self::strlen($message_hmac)) {
+        if (self::our_strlen($correct_hmac) !== self::our_strlen($message_hmac)) {
             throw new CannotPerformOperationException();
         }
 
@@ -590,7 +590,7 @@ class Crypto
      * substr() are replaced by mb_strlen() and mb_substr().
      */
 
-    private static function strlen($str)
+    private static function our_strlen($str)
     {
         if (function_exists('mb_strlen')) {
             $length = mb_strlen($str, '8bit');
@@ -603,7 +603,7 @@ class Crypto
         }
     }
 
-    private static function substr($str, $start, $length = NULL)
+    private static function our_substr($str, $start, $length = NULL)
     {
         if (function_exists('mb_substr'))
         {
@@ -611,7 +611,7 @@ class Crypto
             // 5.3, so we have to find the length ourselves.
             if (!isset($length)) {
                 if ($start >= 0) {
-                    $length = self::strlen($str) - $start;
+                    $length = self::our_strlen($str) - $start;
                 } else {
                     $length = -$start;
                 }
