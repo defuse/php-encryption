@@ -12,4 +12,4 @@ php:
 #    - "4.2"
 #    - "4.1"
 #    - "4.0"
-script: php test.php
+script: ./test.sh
