@@ -593,7 +593,11 @@ class Crypto
     private static function strlen($str)
     {
         if (function_exists('mb_strlen')) {
-            return mb_strlen($str, '8bit');
+            $length = mb_strlen($str, '8bit');
+            if ($length === FALSE) {
+                throw new CannotPerformOperationException();
+            }
+            return $length;
         } else {
             return strlen($str);
         }
