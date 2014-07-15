@@ -586,24 +586,36 @@ class Crypto
 
     private static function strlen($str)
     {
-        return function_exists('mb_strlen')
-            ? mb_strlen($str, '8bit')
-            : strlen($str);
+        if (function_exists('mb_strlen')) {
+            return mb_strlen($str, '8bit');
+        } else {
+            return strlen($str);
+        }
     }
 
     private static function substr($str, $start, $length = NULL)
     {
         if (function_exists('mb_substr'))
         {
-            // mb_substr($str, 0, null, '8bit') returns an empty string on PHP 5.3
-            isset($length) OR $length = ($start >= 0 ? self::strlen($str) - $start : -$start);
+            // mb_substr($str, 0, NULL, '8bit') returns an empty string on PHP
+            // 5.3, so we have to find the length ourselves.
+            if (!isset($length)) {
+                if ($start >= 0) {
+                    $length = self::strlen($str) - $start;
+                } else {
+                    $length = -$start;
+                }
+            }
+
             return mb_substr($str, $start, $length, '8bit');
         }
 
         // Unlike mb_substr(), substr() doesn't accept NULL for length
-        return isset($length)
-            ? substr($str, $start, $length)
-            : substr($str, $start);
+        if (isset($length)) {
+            return substr($str, $start, $length);
+        } else {
+            return substr($str, $start);
+        }
     }
 
 }
