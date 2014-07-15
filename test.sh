@@ -19,3 +19,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "--------------------------------------------------"
+
+echo ""
+
+if [ -z "$(php Crypto.php)" ]; then
+    echo "PASS: Crypto.php output is empty."
+else
+    echo "FAIL: Crypto.php output is not empty."
+    exit 1
+fi
