@@ -418,7 +418,12 @@ class Crypto
     private static function VerifyHMAC($correct_hmac, $message, $key)
     {
         $message_hmac = hash_hmac(self::HASH_FUNCTION, $message, $key, true);
-
+        
+        // PHP 5 >= 5.6.0 offers a time attack safe string comparison
+        if (function_exists('hash_equals')) {
+            return hash_equals($correct_hmac, $message_hmac);
+        }
+        
         // We can't just compare the strings with '==', since it would make
         // timing attacks possible. We could use the XOR-OR constant-time
         // comparison algorithm, but I'm not sure if that's good enough way up
