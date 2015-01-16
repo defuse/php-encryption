@@ -100,7 +100,7 @@ final class Crypto
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
     /* Do not change these constants! */
-    const CIPHER = 'aes';
+    const CIPHER = 'aes-128';
     const KEY_BYTE_SIZE = 16;
     const CIPHER_MODE = 'cbc';
     const HASH_FUNCTION = 'sha256';
@@ -132,8 +132,7 @@ final class Crypto
             throw new CannotPerformOperationException("Bad key.");
         }
 
-        $bits = 8 * self::KEY_BYTE_SIZE;
-        $method = self::CIPHER.'-'.$bits.'-'.self::CIPHER_MODE;
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
         
         self::EnsureFunctionExists('openssl_get_cipher_methods');
         if (in_array($method, openssl_get_cipher_methods()) === FALSE) {
@@ -171,9 +170,8 @@ final class Crypto
     public static function Decrypt($ciphertext, $key)
     {
         self::RuntimeTest();
-
-        $bits = 8 * self::KEY_BYTE_SIZE;
-        $method = self::CIPHER.'-'.$bits.'-'.self::CIPHER_MODE;
+        
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
         
         self::EnsureFunctionExists('openssl_get_cipher_methods');
         if (in_array($method, openssl_get_cipher_methods()) === FALSE) {
@@ -283,8 +281,7 @@ final class Crypto
     private static function PlainEncrypt($plaintext, $key, $iv)
     {
         
-        $bits = 8 * self::KEY_BYTE_SIZE;
-        $method = self::CIPHER.'-'.$bits.'-'.self::CIPHER_MODE;
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
         
         self::EnsureFunctionExists("openssl_encrypt");
         $ciphertext = openssl_encrypt(
@@ -308,8 +305,7 @@ final class Crypto
     private static function PlainDecrypt($ciphertext, $key, $iv)
     {
         
-        $bits = 8 * self::KEY_BYTE_SIZE;
-        $method = self::CIPHER.'-'.$bits.'-'.self::CIPHER_MODE;
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
         
         self::EnsureFunctionExists("openssl_encrypt");
         $plaintext = openssl_decrypt(
