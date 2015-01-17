@@ -283,6 +283,7 @@ final class Crypto
         
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
         
+        self::EnsureConstantExists("OPENSSL_RAW_DATA");
         self::EnsureFunctionExists("openssl_encrypt");
         $ciphertext = openssl_encrypt(
             $plaintext,
@@ -307,6 +308,7 @@ final class Crypto
         
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
         
+        self::EnsureConstantExists("OPENSSL_RAW_DATA");
         self::EnsureFunctionExists("openssl_encrypt");
         $plaintext = openssl_decrypt(
             $ciphertext,
@@ -556,6 +558,13 @@ final class Crypto
         return pack("H*", $hex_string);
     }
 
+    private static function EnsureConstantExists($name)
+    {
+        if (!defined($name)) {
+            throw new CannotPerformOperationException();
+        }
+    }
+    
     private static function EnsureFunctionExists($name)
     {
         if (!function_exists($name)) {
