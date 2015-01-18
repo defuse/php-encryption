@@ -23,6 +23,10 @@ try {
     echo "TEST FAILED!\n";
     var_dump($ex);
     exit(1);
+} catch (CannotPerformOperationException $ex) {
+    echo "TEST FAILED\n";
+    var_dump($ex);
+    exit(1);
 }
 
 ?>
