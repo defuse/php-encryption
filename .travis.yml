@@ -1,5 +1,6 @@
 language: php
 php:
+    - "5.6"
     - "5.5"
     - "5.4"
     - "5.3"
@@ -12,4 +13,10 @@ php:
 #    - "4.2"
 #    - "4.1"
 #    - "4.0"
+    
+matrix:
+  allow_failures:
+    - php: 5.3
+    - php: 5.2
+
 script: ./test.sh
