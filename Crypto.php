@@ -46,7 +46,7 @@
  *     Generating a Key
  *     ----------------
  *       try {
- *           $key = Crypto::CreateNewRandomKey();
+ *           $key = self::CreateNewRandomKey();
  *           // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
  *           // they may leak the key to the attacker through side channels.
  *       } catch (CryptoTestFailedException $ex) {
@@ -59,7 +59,7 @@
  *     --------------------
  *       $message = "ATTACK AT DAWN";
  *       try {
- *           $ciphertext = Crypto::Encrypt($message, $key);
+ *           $ciphertext = self::Encrypt($message, $key);
  *       } catch (CryptoTestFailedException $ex) {
  *           die('Cannot safely perform encryption');
  *       } catch (CannotPerformOperationException $ex) {
@@ -69,7 +69,7 @@
  *     Decrypting a Message
  *     --------------------
  *       try {
- *           $decrypted = Crypto::Decrypt($ciphertext, $key);
+ *           $decrypted = self::Decrypt($ciphertext, $key);
  *       } catch (InvalidCiphertextException $ex) { // VERY IMPORTANT
  *           // Either:
  *           //   1. The ciphertext was modified by the attacker,
@@ -95,12 +95,12 @@ class InvalidCiphertextException extends Exception {}
 class CannotPerformOperationException extends Exception {}
 class CryptoTestFailedException extends Exception {}
 
-class Crypto
+final class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
     /* Do not change these constants! */
-    const CIPHER = MCRYPT_RIJNDAEL_128;
+    const CIPHER = 'aes-128';
     const KEY_BYTE_SIZE = 16;
     const CIPHER_MODE = 'cbc';
     const HASH_FUNCTION = 'sha256';
@@ -113,7 +113,7 @@ class Crypto
      */
     public static function CreateNewRandomKey()
     {
-        Crypto::RuntimeTest();
+        self::RuntimeTest();
         return self::SecureRandom(self::KEY_BYTE_SIZE);
     }
 
@@ -125,20 +125,27 @@ class Crypto
      */
     public static function Encrypt($plaintext, $key)
     {
-        Crypto::RuntimeTest();
+        self::RuntimeTest();
 
         if (self::our_strlen($key) !== self::KEY_BYTE_SIZE)
         {
             throw new CannotPerformOperationException("Bad key.");
         }
 
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
+        
+        self::EnsureFunctionExists('openssl_get_cipher_methods');
+        if (in_array($method, openssl_get_cipher_methods()) === FALSE) {
+            throw new CannotPerformOperationException("Cipher method not supported.");
+        }
+        
         // Generate a sub-key for encryption.
         $keysize = self::KEY_BYTE_SIZE;
         $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
         // Generate a random initialization vector.
-        self::EnsureFunctionExists("mcrypt_get_iv_size");
-        $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
+        self::EnsureFunctionExists("openssl_cipher_iv_length");
+        $ivsize = openssl_cipher_iv_length($method);
         if ($ivsize === FALSE || $ivsize <= 0) {
             throw new CannotPerformOperationException();
         }
@@ -162,7 +169,14 @@ class Crypto
      */
     public static function Decrypt($ciphertext, $key)
     {
-        Crypto::RuntimeTest();
+        self::RuntimeTest();
+        
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
+        
+        self::EnsureFunctionExists('openssl_get_cipher_methods');
+        if (in_array($method, openssl_get_cipher_methods()) === FALSE) {
+            throw new CannotPerformOperationException("Cipher method not supported.");
+        }
 
         // Extract the HMAC from the front of the ciphertext.
         if (self::our_strlen($ciphertext) <= self::MAC_BYTE_SIZE) {
@@ -187,8 +201,8 @@ class Crypto
             $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
             // Extract the initialization vector from the ciphertext.
-            self::EnsureFunctionExists("mcrypt_get_iv_size");
-            $ivsize = mcrypt_get_iv_size(self::CIPHER, self::CIPHER_MODE);
+            self::EnsureFunctionExists("openssl_cipher_iv_length");
+            $ivsize = openssl_cipher_iv_length($method);
             if ($ivsize === FALSE || $ivsize <= 0) {
                 throw new CannotPerformOperationException();
             }
@@ -244,7 +258,7 @@ class Crypto
             self::HKDFTestVector();
 
             self::TestEncryptDecrypt();
-            if (self::our_strlen(Crypto::CreateNewRandomKey()) != self::KEY_BYTE_SIZE) {
+            if (self::our_strlen(self::CreateNewRandomKey()) != self::KEY_BYTE_SIZE) {
                 throw new CryptoTestFailedException();
             }
 
@@ -266,33 +280,20 @@ class Crypto
      */
     private static function PlainEncrypt($plaintext, $key, $iv)
     {
-        self::EnsureFunctionExists("mcrypt_module_open");
-        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
-        if ($crypt === FALSE) {
-            throw new CannotPerformOperationException();
-        }
-
-        // Pad the plaintext to a multiple of the block size.
-        self::EnsureFunctionExists("mcrypt_enc_get_block_size");
-        $block = mcrypt_enc_get_block_size($crypt);
-        $pad = $block - (self::our_strlen($plaintext) % $block);
-        $plaintext .= str_repeat(chr($pad), $pad);
-
-        self::EnsureFunctionExists("mcrypt_generic_init");
-        $ret = mcrypt_generic_init($crypt, $key, $iv);
-        if ($ret !== 0) {
-            throw new CannotPerformOperationException();
-        }
-        self::EnsureFunctionExists("mcrypt_generic");
-        $ciphertext = mcrypt_generic($crypt, $plaintext);
-        self::EnsureFunctionExists("mcrypt_generic_deinit");
-        $ret = mcrypt_generic_deinit($crypt);
-        if ($ret !== TRUE) {
-            throw new CannotPerformOperationException();
-        }
-        self::EnsureFunctionExists("mcrypt_module_close");
-        $ret = mcrypt_module_close($crypt);
-        if ($ret !== TRUE) {
+        
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
+        
+        self::EnsureConstantExists("OPENSSL_RAW_DATA");
+        self::EnsureFunctionExists("openssl_encrypt");
+        $ciphertext = openssl_encrypt(
+            $plaintext,
+            $method,
+            $key,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
+        
+        if ($ciphertext === false) {
             throw new CannotPerformOperationException();
         }
 
@@ -304,42 +305,22 @@ class Crypto
      */
     private static function PlainDecrypt($ciphertext, $key, $iv)
     {
-        self::EnsureFunctionExists("mcrypt_module_open");
-        $crypt = mcrypt_module_open(self::CIPHER, "", self::CIPHER_MODE, "");
-        if ($crypt === FALSE) {
-            throw new CannotPerformOperationException();
-        }
-
-        self::EnsureFunctionExists("mcrypt_enc_get_block_size");
-        $block = mcrypt_enc_get_block_size($crypt);
-        self::EnsureFunctionExists("mcrypt_generic_init");
-        $ret = mcrypt_generic_init($crypt, $key, $iv);
-        if ($ret !== 0) {
-            throw new CannotPerformOperationException();
-        }
-        self::EnsureFunctionExists("mdecrypt_generic");
-        $plaintext = mdecrypt_generic($crypt, $ciphertext);
-        self::EnsureFunctionExists("mcrypt_generic_deinit");
-        $ret = mcrypt_generic_deinit($crypt);
-        if ($ret !== TRUE) {
-            throw new CannotPerformOperationException();
-        }
-        self::EnsureFunctionExists("mcrypt_module_close");
-        $ret = mcrypt_module_close($crypt);
-        if ($ret !== TRUE) {
-            throw new CannotPerformOperationException();
-        }
-
-        // Remove the padding.
-        $pad = ord($plaintext[self::our_strlen($plaintext) - 1]);
-        if ($pad <= 0 || $pad > $block) {
-            throw new CannotPerformOperationException();
-        }
-        $plaintext = self::our_substr($plaintext, 0, self::our_strlen($plaintext) - $pad);
+        
+        $method = self::CIPHER.'-'.self::CIPHER_MODE;
+        
+        self::EnsureConstantExists("OPENSSL_RAW_DATA");
+        self::EnsureFunctionExists("openssl_encrypt");
+        $plaintext = openssl_decrypt(
+            $ciphertext,
+            $method,
+            $key,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
         if ($plaintext === FALSE) {
             throw new CannotPerformOperationException();
         }
-
+        
         return $plaintext;
     }
 
@@ -439,13 +420,13 @@ class Crypto
 
     private static function TestEncryptDecrypt()
     {
-        $key = Crypto::CreateNewRandomKey();
+        $key = self::CreateNewRandomKey();
         $data = "EnCrYpT EvErYThInG\x00\x00";
 
         // Make sure encrypting then decrypting doesn't change the message.
-        $ciphertext = Crypto::Encrypt($data, $key);
+        $ciphertext = self::Encrypt($data, $key);
         try {
-            $decrypted = Crypto::Decrypt($ciphertext, $key);
+            $decrypted = self::Decrypt($ciphertext, $key);
         } catch (InvalidCiphertextException $ex) {
             // It's important to catch this and change it into a 
             // CryptoTestFailedException, otherwise a test failure could trick
@@ -459,32 +440,32 @@ class Crypto
 
         // Modifying the ciphertext: Appending a string.
         try {
-            Crypto::Decrypt($ciphertext . "a", $key);
+            self::Decrypt($ciphertext . "a", $key);
             throw new CryptoTestFailedException();
         } catch (InvalidCiphertextException $e) { /* expected */ }
 
         // Modifying the ciphertext: Changing an IV byte.
         try {
             $ciphertext[0] = chr((ord($ciphertext[0]) + 1) % 256);
-            Crypto::Decrypt($ciphertext, $key);
+            self::Decrypt($ciphertext, $key);
             throw new CryptoTestFailedException();
         } catch (InvalidCiphertextException $e) { /* expected */ }
 
         // Decrypting with the wrong key.
-        $key = Crypto::CreateNewRandomKey();
+        $key = self::CreateNewRandomKey();
         $data = "abcdef";
-        $ciphertext = Crypto::Encrypt($data, $key);
-        $wrong_key = Crypto::CreateNewRandomKey();
+        $ciphertext = self::Encrypt($data, $key);
+        $wrong_key = self::CreateNewRandomKey();
         try {
-            Crypto::Decrypt($ciphertext, $wrong_key);
+            self::Decrypt($ciphertext, $wrong_key);
             throw new CryptoTestFailedException();
         } catch (InvalidCiphertextException $e) { /* expected */ }
 
         // Ciphertext too small (shorter than HMAC).
-        $key = Crypto::CreateNewRandomKey();
+        $key = self::CreateNewRandomKey();
         $ciphertext = str_repeat("A", self::MAC_BYTE_SIZE - 1);
         try {
-            Crypto::Decrypt($ciphertext, $key);
+            self::Decrypt($ciphertext, $key);
             throw new CryptoTestFailedException();
         } catch (InvalidCiphertextException $e) { /* expected */ }
     }
@@ -577,6 +558,13 @@ class Crypto
         return pack("H*", $hex_string);
     }
 
+    private static function EnsureConstantExists($name)
+    {
+        if (!defined($name)) {
+            throw new CannotPerformOperationException();
+        }
+    }
+    
     private static function EnsureFunctionExists($name)
     {
         if (!function_exists($name)) {
