@@ -99,7 +99,20 @@ final class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
-    /* Do not change these constants! */
+    /* DO NOT CHANGE THESE CONSTANTS! 
+     *
+     * We spent *weeks* testing this code, making sure it is as perfect and
+     * correct as possible. Are you going to do the same after making your
+     * changes? Probably not. Besides, any change to these constants will break
+     * the runtime tests, which are extremely important for your security.
+     * You're literally millions of times more likely to screw up your own
+     * security by changing something here than you are to fall victim to an
+     * 128-bit key brute-force attack. You're also breaking your own
+     * compatibility with future updates to this library, so you'll be left
+     * vulnerable if we ever find a security bug and release a fix.
+     *
+     * So, PLEASE, do not change these constants.
+     */
     const CIPHER = 'aes-128';
     const KEY_BYTE_SIZE = 16;
     const CIPHER_MODE = 'cbc';
