@@ -357,7 +357,6 @@ final class Crypto
             throw new CannotPerformOperationException();
         } else {
             return $random;
-        }    
         }
     }
 
