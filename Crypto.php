@@ -90,10 +90,17 @@
  *  - The ciphertext is invalid or not in the correct format.
  *  - The attacker modified the ciphertext.
  */
-class InvalidCiphertextException extends Exception {}
+class CryptoException extends Exception {
+    public function __construct($message = NULL, $code = 0, Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+        restore_exception_handler();
+    }
+}
+
+class InvalidCiphertextException extends CryptoException {}
 /* If you see these, it means it is NOT SAFE to do encryption on your system. */
-class CannotPerformOperationException extends Exception {}
-class CryptoTestFailedException extends Exception {}
+class CannotPerformOperationException extends CryptoException {}
+class CryptoTestFailedException extends CryptoException {}
 
 final class Crypto
 {
@@ -138,6 +145,7 @@ final class Crypto
      */
     public static function Encrypt($plaintext, $key)
     {
+        self::RegisterExceptionHandler();
         self::RuntimeTest();
 
         if (self::our_strlen($key) !== self::KEY_BYTE_SIZE)
@@ -171,6 +179,8 @@ final class Crypto
         $auth = hash_hmac(self::HASH_FUNCTION, $ciphertext, $akey, true);
         $ciphertext = $auth . $ciphertext;
 
+	self::RestoreExceptionHandler();
+
         return $ciphertext;
     }
 
@@ -182,6 +192,7 @@ final class Crypto
      */
     public static function Decrypt($ciphertext, $key)
     {
+        self::RegisterExceptionHandler();
         self::RuntimeTest();
         
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
@@ -231,9 +242,8 @@ final class Crypto
                 throw new CannotPerformOperationException();
             }
             
-            $plaintext = self::PlainDecrypt($ciphertext, $ekey, $iv);
 
-            return $plaintext;
+            $plaintext = self::PlainDecrypt($ciphertext, $ekey, $iv);
         }
         else
         {
@@ -244,6 +254,10 @@ final class Crypto
              */
              throw new InvalidCiphertextException();
         }
+
+        self::RestoreExceptionHandler();
+
+        return $plaintext;
     }
 
     /*
@@ -286,6 +300,25 @@ final class Crypto
 
         // Change this to '0' make the tests always re-run (for benchmarking).
         $test_state = 1;
+    }
+
+
+    /*
+     * Register exception handler to prevent secret data leaking
+     */
+    private static function RegisterExceptionHandler()
+    {
+        set_exception_handler(function(\Exception $e) {
+            echo 'FATAL ERROR: Uncaught crypto exception. Suppresssing output' . PHP_EOL;
+        });
+    }
+
+    /*
+     * Restores the original exception handler
+     */
+    private static function RestoreExceptionHandler()
+    {
+        restore_exception_handler();
     }
 
     /*
@@ -630,48 +663,3 @@ final class Crypto
     }
 
 }
-
-/*
- * We want to catch all uncaught exceptions that come from the Crypto class,
- * since by default, PHP will leak the key in the stack trace from an uncaught
- * exception. This is a really ugly hack, but I think it's justified.
- *
- * Everything up to handler() getting called should be reliable, so this should
- * reliably suppress the stack traces. The rest is just a bonus so that we don't
- * make it impossible to debug other exceptions.
- *
- * This bit of code was adapted from: http://stackoverflow.com/a/7939492
- */
-
-class CryptoExceptionHandler
-{
-    private $rethrow = NULL;
-
-    public function __construct()
-    {
-        set_exception_handler(array($this, "handler"));
-    }
-
-    public function handler($ex)
-    {
-        if (
-            $ex instanceof InvalidCiphertextException ||
-            $ex instanceof CannotPerformOperationException ||
-            $ex instanceof CryptoTestFailedException
-        ) {
-            echo "FATAL ERROR: Uncaught crypto exception. Suppresssing output.\n";
-        } else {
-            /* Re-throw the exception in the destructor. */
-            $this->rethrow = $ex;
-        }
-    }
-
-    public function __destruct() {
-        if ($this->rethrow) {
-            throw $this->rethrow;
-        }
-    }
-}
-
-$crypto_exception_handler_object_dont_touch_me = new CryptoExceptionHandler();
-
