@@ -1,0 +1,7 @@
+{
+    "name": "defuse/php-encryption",
+    "description": "Secure PHP Encryption Library",
+    "autoload": {
+        "files": ["Crypto.php"]
+    }
+}
