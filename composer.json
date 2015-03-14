@@ -1,0 +1,12 @@
+{
+    "name": "defuse/php-encryption",
+    "description": "Secure PHP Encryption Library",
+    "autoload": {
+        "files": ["Crypto.php"]
+    },
+    "require": {
+        "php":  ">=5.4.0",
+        "ext-openssl": "*",
+        "ext-mcrypt":  "*"
+    }
+}
