@@ -22,7 +22,9 @@ has received some informal review from members of the PHP security community.
 
 As the author of this library, I take security very seriously and always opt to
 not implement a feature unless I am confident that I can do so without
-introducing security bugs.
+introducing security bugs. I take particular care to ensure the library is hard
+to use in an insecure way, even by someone who is not experienced in
+cryptography.
 
 This library considers many edge cases that most PHP encryption libraries do not
 handle correctly. In all likelihood, you are safer using this library than
