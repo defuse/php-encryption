@@ -1,7 +1,7 @@
 <?php
 require_once('Crypto.php');
   try {
-      $key = Crypto::CreateNewRandomKey();
+      $key = \Defuse\Crypto\Crypto::CreateNewRandomKey();
       // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
       // they may leak the key to the attacker through side channels.
   } catch (CryptoTestFailedException $ex) {
@@ -12,7 +12,7 @@ require_once('Crypto.php');
 
   $message = "ATTACK AT DAWN";
   try {
-      $ciphertext = Crypto::Encrypt($message, $key);
+      $ciphertext = \Defuse\Crypto\Crypto::Encrypt($message, $key);
   } catch (CryptoTestFailedException $ex) {
       die('Cannot safely perform encryption');
   } catch (CannotPerformOperationException $ex) {
@@ -20,7 +20,7 @@ require_once('Crypto.php');
   }
 
   try {
-      $decrypted = Crypto::Decrypt($ciphertext, $key);
+      $decrypted = \Defuse\Crypto\Crypto::Decrypt($ciphertext, $key);
   } catch (InvalidCiphertextException $ex) { // VERY IMPORTANT
       // Either:
       //   1. The ciphertext was modified by the attacker,
