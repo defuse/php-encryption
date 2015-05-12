@@ -5,32 +5,32 @@
  * Copyright (c) 2014, Taylor Hornby
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without 
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, 
+ * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation 
+ * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
 /*
  * Web: https://defuse.ca/secure-php-encryption.htm
- * GitHub: https://github.com/defuse/php-encryption 
+ * GitHub: https://github.com/defuse/php-encryption
  *
  * WARNING: This encryption library is not a silver bullet. It only provides
  * symmetric encryption given a uniformly random key. This means you MUST NOT
@@ -39,7 +39,7 @@
  * encrypt something with a password, apply a password key derivation function
  * like PBKDF2 or scrypt with a random salt to generate a key.
  *
- * WARNING: Error handling is very important, especially for crypto code! 
+ * WARNING: Error handling is very important, especially for crypto code!
  *
  * How to use this code:
  *
@@ -84,7 +84,7 @@
  *       }
  */
 
-/* 
+/*
  * Raised by Decrypt() when one of the following conditions are met:
  *  - The key is wrong.
  *  - The ciphertext is invalid or not in the correct format.
@@ -99,7 +99,7 @@ final class Crypto
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
-    /* DO NOT CHANGE THESE CONSTANTS! 
+    /* DO NOT CHANGE THESE CONSTANTS!
      *
      * We spent *weeks* testing this code, making sure it is as perfect and
      * correct as possible. Are you going to do the same after making your
@@ -146,12 +146,12 @@ final class Crypto
         }
 
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
-        
+
         self::EnsureFunctionExists('openssl_get_cipher_methods');
         if (in_array($method, openssl_get_cipher_methods()) === FALSE) {
             throw new CannotPerformOperationException("Cipher method not supported.");
         }
-        
+
         // Generate a sub-key for encryption.
         $keysize = self::KEY_BYTE_SIZE;
         $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
@@ -183,9 +183,9 @@ final class Crypto
     public static function Decrypt($ciphertext, $key)
     {
         self::RuntimeTest();
-        
+
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
-        
+
         self::EnsureFunctionExists('openssl_get_cipher_methods');
         if (in_array($method, openssl_get_cipher_methods()) === FALSE) {
             throw new CannotPerformOperationException("Cipher method not supported.");
@@ -230,7 +230,7 @@ final class Crypto
             if ($ciphertext === FALSE) {
                 throw new CannotPerformOperationException();
             }
-            
+
             $plaintext = self::PlainDecrypt($ciphertext, $ekey, $iv);
 
             return $plaintext;
@@ -293,9 +293,9 @@ final class Crypto
      */
     private static function PlainEncrypt($plaintext, $key, $iv)
     {
-        
+
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
-        
+
         self::EnsureConstantExists("OPENSSL_RAW_DATA");
         self::EnsureFunctionExists("openssl_encrypt");
         $ciphertext = openssl_encrypt(
@@ -305,7 +305,7 @@ final class Crypto
             OPENSSL_RAW_DATA,
             $iv
         );
-        
+
         if ($ciphertext === false) {
             throw new CannotPerformOperationException();
         }
@@ -318,9 +318,9 @@ final class Crypto
      */
     private static function PlainDecrypt($ciphertext, $key, $iv)
     {
-        
+
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
-        
+
         self::EnsureConstantExists("OPENSSL_RAW_DATA");
         self::EnsureFunctionExists("openssl_encrypt");
         $plaintext = openssl_decrypt(
@@ -333,7 +333,7 @@ final class Crypto
         if ($plaintext === FALSE) {
             throw new CannotPerformOperationException();
         }
-        
+
         return $plaintext;
     }
 
@@ -417,7 +417,7 @@ final class Crypto
         // We can't just compare the strings with '==', since it would make
         // timing attacks possible. We could use the XOR-OR constant-time
         // comparison algorithm, but I'm not sure if that's good enough way up
-        // here in an interpreted language. So we use the method of HMACing the 
+        // here in an interpreted language. So we use the method of HMACing the
         // strings we want to compare with a random key, then comparing those.
 
         // NOTE: This leaks information when the strings are not the same
@@ -442,7 +442,7 @@ final class Crypto
         try {
             $decrypted = self::Decrypt($ciphertext, $key);
         } catch (InvalidCiphertextException $ex) {
-            // It's important to catch this and change it into a 
+            // It's important to catch this and change it into a
             // CryptoTestFailedException, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
             throw new CryptoTestFailedException();
@@ -535,7 +535,7 @@ final class Crypto
         $key = self::hexToBytes("2b7e151628aed2a6abf7158809cf4f3c");
         $iv = self::hexToBytes("000102030405060708090a0b0c0d0e0f");
         $plaintext = self::hexToBytes(
-            "6bc1bee22e409f96e93d7e117393172a" . 
+            "6bc1bee22e409f96e93d7e117393172a" .
             "ae2d8a571e03ac9c9eb76fac45af8e51" .
             "30c81c46a35ce411e5fbc1191a0a52ef" .
             "f69f2445df4f9b17ad2b417be66c3710"
@@ -545,12 +545,12 @@ final class Crypto
             "5086cb9b507219ee95db113a917678b2" .
             "73bed6b8e3c1743b7116e69e22229516" .
             "3ff1caa1681fac09120eca307586e1a7" .
-            /* Block due to padding. Not from NIST test vector. 
+            /* Block due to padding. Not from NIST test vector.
                 Padding Block: 10101010101010101010101010101010
                 Ciphertext:    3ff1caa1681fac09120eca307586e1a7
-                           (+) 2fe1dab1780fbc19021eda206596f1b7 
+                           (+) 2fe1dab1780fbc19021eda206596f1b7
                            AES 8cb82807230e1321d3fae00d18cc2012
-             
+
              */
             "8cb82807230e1321d3fae00d18cc2012"
         );
@@ -578,7 +578,7 @@ final class Crypto
             throw new CannotPerformOperationException();
         }
     }
-    
+
     private static function EnsureFunctionExists($name)
     {
         if (!function_exists($name)) {
