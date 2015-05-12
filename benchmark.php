@@ -15,7 +15,7 @@ showResults("CreateNewRandomKey()", $start, $end, 1000);
 $start = microtime(true);
 for ($i = 0; $i < 100; $i++) {
     $ciphertext = Crypto::Encrypt(
-        str_repeat("A", 1024*1024), 
+        str_repeat("A", 1024*1024),
         str_repeat("B", 16)
     );
 }
@@ -25,7 +25,7 @@ showResults("Encrypt(1MB)", $start, $end, 100);
 $start = microtime(true);
 for ($i = 0; $i < 1000; $i++) {
     $ciphertext = Crypto::Encrypt(
-        str_repeat("A", 1024), 
+        str_repeat("A", 1024),
         str_repeat("B", 16)
     );
 }
