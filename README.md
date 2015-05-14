@@ -18,7 +18,7 @@ Audit Status
 -------------
 
 This code has not been subjected to a formal, paid, security audit. However, it
-has received some informal review from members of the PHP security community. 
+has received some informal review from members of the PHP security community.
 
 As the author of this library, I take security very seriously and always opt to
 not implement a feature unless I am confident that I can do so without
@@ -73,12 +73,12 @@ This library is developed around several core values:
     > library will call "encrypt" and "decrypt" not caring about how they are
     > implemented.
 
-- Rule #4: The library should consist of a single PHP file and nothing more.
+- Rule #4: The library should require no special installation.
 
     > Some PHP encryption libraries, like libsodium-php [1], are not
     > straightforward to install and cannot packaged with "just download and
-    > extract" applications. This library will always be just one PHP file
-    > that you can put in your source tree and require().
+    > extract" applications. This library will always be just a handful of PHP
+    > files that you can copy to your source tree and require().
 
 References:
 
