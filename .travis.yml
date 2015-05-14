@@ -13,7 +13,7 @@ php:
 #    - "4.2"
 #    - "4.1"
 #    - "4.0"
-    
+
 matrix:
   allow_failures:
     - php: "5.3"

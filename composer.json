@@ -2,7 +2,7 @@
     "name": "defuse/php-encryption",
     "description": "Secure PHP Encryption Library",
     "license": "MIT",
-    "keywords": ["security", "encryption", "AES", "mcrypt", "cipher"],
+    "keywords": ["security", "encryption", "AES", "openssl", "cipher", "cryptography", "symmetric key cryptography", "crypto", "encrypt", "authenticated encryption"],
     "authors": [
         {
             "name": "Taylor Hornby",
@@ -14,7 +14,6 @@
     },
     "require": {
         "php":  ">=5.4.0",
-        "ext-openssl": "*",
-        "ext-mcrypt":  "*"
+        "ext-openssl": "*"
     }
 }
