@@ -188,7 +188,7 @@ final class Crypto extends Core
 
     /*
      * Runs tests.
-     * Raises CannotPerformOperationException or Ex\CryptoTestFailed if
+     * Raises Exception\CannotPerformOperation or Exception\CryptoTestFailed if
      * one of the tests fail. If any tests fails, your system is not capable of
      * performing encryption, so make sure you fail safe in that case.
      */
@@ -304,7 +304,7 @@ final class Crypto extends Core
             $decrypted = self::decrypt($ciphertext, $key);
         } catch (Ex\InvalidCiphertext $ex) {
             // It's important to catch this and change it into a
-            // CryptoTestFailedException, otherwise a test failure could trick
+            // Exception\CryptoTestFailed, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
             throw new Ex\CryptoTestFailed();
         }
