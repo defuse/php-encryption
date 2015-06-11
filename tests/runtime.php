@@ -14,16 +14,16 @@ echo "    func_overload: " . $val . "\n";
 echo "    mb_internal_encoding(): " . mb_internal_encoding() . "\n";
 
 // Perform the tests.
-require_once('Crypto.php');
+require_once(\dirname(__DIR__).'/autoload.php');
 try {
-    Crypto::RuntimeTest();
+    \Defuse\Crypto\Crypto::RuntimeTest();
     echo "TEST PASSED!\n";
     exit(0);
-} catch (CryptoTestFailedException $ex) {
+} catch (\Defuse\Crypto\Exception\CryptoTestFailed $ex) {
     echo "TEST FAILED!\n";
     var_dump($ex);
     exit(1);
-} catch (CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\CannotPerformOperation $ex) {
     echo "TEST FAILED\n";
     var_dump($ex);
     exit(1);
