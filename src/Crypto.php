@@ -30,7 +30,7 @@ use \Defuse\Crypto\Exception as Ex;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-final class Crypto
+final class Crypto extends Core
 {
     // Ciphertext format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
@@ -48,13 +48,7 @@ final class Crypto
      *
      * So, PLEASE, do not change these constants.
      */
-    const CIPHER = 'aes-128';
-    const KEY_BYTE_SIZE = 16;
     const CIPHER_MODE = 'cbc';
-    const HASH_FUNCTION = 'sha256';
-    const MAC_BYTE_SIZE = 32;
-    const ENCRYPTION_INFO = 'DefusePHP|KeyForEncryption';
-    const AUTHENTICATION_INFO = 'DefusePHP|KeyForAuthentication';
 
     /**
      * Use this to generate a random encryption key.
@@ -194,7 +188,7 @@ final class Crypto
 
     /*
      * Runs tests.
-     * Raises CannotPerformOperationException or CryptoTestFailedException if
+     * Raises CannotPerformOperationException or Ex\CryptoTestFailed if
      * one of the tests fail. If any tests fails, your system is not capable of
      * performing encryption, so make sure you fail safe in that case.
      */
@@ -299,130 +293,6 @@ final class Crypto
         return $plaintext;
     }
 
-    /**
-     * Returns a random binary string of length $octets bytes.
-     * 
-     * @param int $octets
-     * @return string (raw binary)
-     * @throws Ex\CannotPerformOperation
-     */
-    private static function secureRandom($octets)
-    {
-        self::ensureFunctionExists('openssl_random_pseudo_bytes');
-        $secure = false;
-        $random = \openssl_random_pseudo_bytes($octets, $secure);
-        if ($random === FALSE || $secure === FALSE) {
-            throw new Ex\CannotPerformOperation();
-        }
-        return $random;
-    }
-
-    /**
-     * Use HKDF to derive multiple keys from one.
-     * http://tools.ietf.org/html/rfc5869
-     * 
-     * @param string $hash Hash Function
-     * @param string $ikm Initial Keying Material
-     * @param int $length How many bytes?
-     * @param string $info What sort of key are we deriving?
-     * @param string $salt
-     * @return string
-     * @throws Ex\CannotPerformOperation
-     */
-    private static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
-    {
-        // Find the correct digest length as quickly as we can.
-        $digest_length = self::MAC_BYTE_SIZE;
-        if ($hash != self::HASH_FUNCTION) {
-            $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
-        }
-
-        // Sanity-check the desired output length.
-        if (empty($length) || !\is_int($length) ||
-            $length < 0 || $length > 255 * $digest_length) {
-            throw new Ex\CannotPerformOperation();
-        }
-
-        // "if [salt] not provided, is set to a string of HashLen zeroes."
-        if (\is_null($salt)) {
-            $salt = \str_repeat("\x00", $digest_length);
-        }
-
-        // HKDF-Extract:
-        // PRK = HMAC-Hash(salt, IKM)
-        // The salt is the HMAC key.
-        $prk = \hash_hmac($hash, $ikm, $salt, true);
-
-        // HKDF-Expand:
-
-        // This check is useless, but it serves as a reminder to the spec.
-        if (self::ourStrlen($prk) < $digest_length) {
-            throw new Ex\CannotPerformOperation();
-        }
-
-        // T(0) = ''
-        $t = '';
-        $last_block = '';
-        for ($block_index = 1; self::ourStrlen($t) < $length; ++$block_index) {
-            // T(i) = HMAC-Hash(PRK, T(i-1) | info | 0x??)
-            $last_block = \hash_hmac(
-                $hash,
-                $last_block . $info . \chr($block_index),
-                $prk,
-                true
-            );
-            // T = T(1) | T(2) | T(3) | ... | T(N)
-            $t .= $last_block;
-        }
-
-        // ORM = first L octets of T
-        $orm = self::ourSubstr($t, 0, $length);
-        if ($orm === FALSE) {
-            throw new Ex\CannotPerformOperation();
-        }
-        return $orm;
-    }
-
-    /**
-     * Verify a HMAC without crypto side-channels
-     * 
-     * @staticvar boolean $native Use native hash_equals()?
-     * @param string $correct_hmac HMAC string (raw binary)
-     * @param string $message Ciphertext (raw binary)
-     * @param string $key Authentication key (raw binary)
-     * @return boolean
-     * @throws Ex\CannotPerformOperation
-     */
-    private static function verifyHMAC($correct_hmac, $message, $key)
-    {
-        static $native = null;
-        $message_hmac = \hash_hmac(self::HASH_FUNCTION, $message, $key, true);
-        
-        if ($native === null) {
-            $native = \function_exists('hash_equals');
-        }
-        if ($native) {
-            return \hash_equals($correct_hmac, $message_hmac);
-        }
-
-        // We can't just compare the strings with '==', since it would make
-        // timing attacks possible. We could use the XOR-OR constant-time
-        // comparison algorithm, but I'm not sure if that's good enough way up
-        // here in an interpreted language. So we use the method of HMACing the
-        // strings we want to compare with a random key, then comparing those.
-
-        // NOTE: This leaks information when the strings are not the same
-        // length, but they should always be the same length here. Enforce it:
-        if (self::ourStrlen($correct_hmac) !== self::ourStrlen($message_hmac)) {
-            throw new Ex\CannotPerformOperation();
-        }
-
-        $blind = self::createNewRandomKey();
-        $message_compare = \hash_hmac(self::HASH_FUNCTION, $message_hmac, $blind);
-        $correct_compare = \hash_hmac(self::HASH_FUNCTION, $correct_hmac, $blind);
-        return $correct_compare === $message_compare;
-    }
-
     private static function testEncryptDecrypt()
     {
         $key = self::createNewRandomKey();
@@ -485,10 +355,10 @@ final class Crypto
 
         // Test Case 1
         $ikm = \str_repeat("\x0b", 22);
-        $salt = self::hexToBytes("000102030405060708090a0b0c");
-        $info = self::hexToBytes("f0f1f2f3f4f5f6f7f8f9");
+        $salt = self::hexToBin("000102030405060708090a0b0c");
+        $info = self::hexToBin("f0f1f2f3f4f5f6f7f8f9");
         $length = 42;
-        $okm = self::hexToBytes(
+        $okm = self::hexToBin(
             "3cb25f25faacd57a90434f64d0362f2a" .
             "2d2d0a90cf1a5a4c5db02d56ecc4c5bf" .
             "34007208d5b887185865"
@@ -501,7 +371,7 @@ final class Crypto
         // Test Case 7
         $ikm = \str_repeat("\x0c", 22);
         $length = 42;
-        $okm = self::hexToBytes(
+        $okm = self::hexToBin(
             "2c91117204d745f3500d636a62f64f0a" .
             "b3bae548aa53d423b0d1f27ebba6f5e5" .
             "673a081d70cce7acfc48"
@@ -537,15 +407,15 @@ final class Crypto
     private static function AESTestVector()
     {
         // AES CBC mode test vector from NIST SP 800-38A
-        $key = self::hexToBytes("2b7e151628aed2a6abf7158809cf4f3c");
-        $iv = self::hexToBytes("000102030405060708090a0b0c0d0e0f");
-        $plaintext = self::hexToBytes(
+        $key = self::hexToBin("2b7e151628aed2a6abf7158809cf4f3c");
+        $iv = self::hexToBin("000102030405060708090a0b0c0d0e0f");
+        $plaintext = self::hexToBin(
             "6bc1bee22e409f96e93d7e117393172a" .
             "ae2d8a571e03ac9c9eb76fac45af8e51" .
             "30c81c46a35ce411e5fbc1191a0a52ef" .
             "f69f2445df4f9b17ad2b417be66c3710"
         );
-        $ciphertext = self::hexToBytes(
+        $ciphertext = self::hexToBin(
             "7649abac8119b246cee98e9b12e9197d" .
             "5086cb9b507219ee95db113a917678b2" .
             "73bed6b8e3c1743b7116e69e22229516" .
@@ -569,162 +439,5 @@ final class Crypto
         if ($computed_plaintext !== $plaintext) {
             throw new Ex\CryptoTestFailed();
         }
-    }
-
-    /* WARNING: Do not call this function on secrets. It creates side channels. */
-    private static function hexToBytes($hex_string)
-    {
-        return \pack("H*", $hex_string);
-    }
-
-    
-    /**
-     * If the constant doesn't exist, throw an exception
-     * 
-     * @param string $name
-     * @throws Ex\CannotPerformOperation
-     */
-    private static function ensureConstantExists($name)
-    {
-        if (!\defined($name)) {
-            throw new Ex\CannotPerformOperation();
-        }
-    }
-
-    /**
-     * If the functon doesn't exist, throw an exception
-     * 
-     * @param string $name Function name
-     * @throws Ex\CannotPerformOperation
-     */
-    private static function ensureFunctionExists($name)
-    {
-        if (!\function_exists($name)) {
-            throw new Ex\CannotPerformOperation();
-        }
-    }
-
-    /*
-     * We need these strlen() and substr() functions because when
-     * 'mbstring.func_overload' is set in php.ini, the standard strlen() and
-     * substr() are replaced by mb_strlen() and mb_substr().
-     */
-
-    /**
-     * Safe string length
-     * 
-     * @staticvar boolean $exists
-     * @param string $str
-     * @return int
-     */
-    private static function ourStrlen($str)
-    {
-        static $exists = null;
-        if ($exists === null) {
-            $exists = \function_exists('mb_strlen');
-        }
-        if ($exists) {
-            $length = \mb_strlen($str, '8bit');
-            if ($length === FALSE) {
-                throw new Ex\CannotPerformOperation();
-            }
-            return $length;
-        } else {
-            return \strlen($str);
-        }
-    }
-    
-    /**
-     * Safe substring
-     * 
-     * @staticvar boolean $exists
-     * @param string $str
-     * @param int $start
-     * @param int $length
-     * @return string
-     */
-    private static function ourSubstr($str, $start, $length = null)
-    {
-        static $exists = null;
-        if ($exists === null) {
-            $exists = \function_exists('mb_substr');
-        }
-        if ($exists)
-        {
-            // mb_substr($str, 0, NULL, '8bit') returns an empty string on PHP
-            // 5.3, so we have to find the length ourselves.
-            if (!isset($length)) {
-                if ($start >= 0) {
-                    $length = self::ourStrlen($str) - $start;
-                } else {
-                    $length = -$start;
-                }
-            }
-
-            return \mb_substr($str, $start, $length, '8bit');
-        }
-
-        // Unlike mb_substr(), substr() doesn't accept NULL for length
-        if (isset($length)) {
-            return \substr($str, $start, $length);
-        } else {
-            return \substr($str, $start);
-        }
-    }
-    /**
-     * Convert a binary string into a hexadecimal string without cache-timing 
-     * leaks
-     * 
-     * @param string $bin_string (raw binary)
-     * @return string
-     */
-    public static function binToHex($bin_string)
-    {
-        $hex = '';
-        $len = self::ourStrlen($bin_string);
-        for ($i = 0; $i < $len; ++$i) {
-            $c = \ord($bin_string[$i]) & 0xf;
-            $b = \ord($bin_string[$i]) >> 4;
-            $hex .= \chr(87 + $b + ((($b - 10) >> 8) & ~38));
-            $hex .= \chr(87 + $c + ((($c - 10) >> 8) & ~38));
-        }
-        return $hex;
-    }
-    
-    /**
-     * Convert a hexadecimal string into a binary string without cache-timing 
-     * leaks
-     * 
-     * @param string $hex_string
-     * @return string (raw binary)
-     */
-    public static function hexToBin($hex_string)
-    {
-        $hex_pos = 0;
-        $bin = '';
-        $hex_len = self::ourStrlen($hex_string);
-        $state = 0;
-        
-        while ($hex_pos < $hex_len) {
-            $c = \ord($hex_string[$hex_pos]);
-            $c_num = $c ^ 48;
-            $c_num0 = ($c_num - 10) >> 8;
-            $c_alpha = ($c & ~32) - 55;
-            $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
-            if (($c_num0 | $c_alpha0) === 0) {
-                throw new \DomainException(
-                    'Crypto::hexToBin() only expects hexadecimal characters'
-                );
-            }
-            $c_val = ($c_num0 & $c_num) | ($c_alpha & $c_alpha0);
-            if ($state === 0) {
-                $c_acc = $c_val * 16;
-            } else {
-                $bin .= \chr($c_acc | $c_val);
-            }
-            $state = $state ? 0 : 1;
-            ++$hex_pos;
-        }
-        return $bin;
     }
 }
