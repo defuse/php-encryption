@@ -83,3 +83,8 @@ This library is developed around several core values:
 References:
 
     [1] https://github.com/jedisct1/libsodium-php
+
+Authors
+---------
+
+This library is authored by Taylor Hornby and Scott Arciszewski.
