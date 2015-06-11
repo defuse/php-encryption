@@ -712,7 +712,9 @@ final class Crypto
             $c_alpha = ($c & ~32) - 55;
             $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
             if (($c_num0 | $c_alpha0) === 0) {
-                break;
+                throw new \DomainException(
+                    'Crypto::hexToBin() only expects hexadecimal characters'
+                );
             }
             $c_val = ($c_num0 & $c_num) | ($c_alpha & $c_alpha0);
             if ($state === 0) {
