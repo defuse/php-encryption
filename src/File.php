@@ -590,7 +590,6 @@ final class File extends Core implements StreamInterface
                         'Could not write to output file durind decryption.'
                     );
                 }
-                ++$block;
             }
         return $result;
     }
