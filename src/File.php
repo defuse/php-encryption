@@ -5,7 +5,7 @@ use \Defuse\Crypto\Exception as Ex;
 
 final class File extends Core implements StreamInterface
 {
-    const BUFFER = 8192;
+    const BUFFER = 1048576;
     const CIPHER_MODE = 'ctr';
     
     /**
@@ -337,6 +337,8 @@ final class File extends Core implements StreamInterface
                 'Invalid key length. Keys should be '.self::KEY_BYTE_SIZE.' bytes long.'
             );
         }
+        // For storing MACs of each buffer chunk
+        $macs = [];
         
         /**
          * 1. We need to decode some values from our files
@@ -440,6 +442,7 @@ final class File extends Core implements StreamInterface
              * Let's initialize our $hmac hasher with our IV
              */
             \hash_update($hmac, $iv);
+            $hmac2 = \hash_copy($hmac);
             
             $break = false;
             while (!$break) {
@@ -472,6 +475,12 @@ final class File extends Core implements StreamInterface
                  * We're updating our HMAC and nothing else
                  */
                 \hash_update($hmac, $read);
+                
+                /**
+                 * Store a MAC of each chunk
+                 */
+                $chunkMAC = \hash_copy($hmac);
+                $macs []= \hash_final($chunkMAC);
             }
             /**
              * We should now have enough data to generate an identical HMAC
@@ -531,6 +540,21 @@ final class File extends Core implements StreamInterface
                     );
                 }
                 
+                /**
+                 * Recalculate the MAC, compare with the one stored in the $macs
+                 * array to ensure attackers couldn't tamper with the file
+                 * after MAC verification
+                 */
+                \hash_update($hmac2, $read);
+                $calcMAC = \hash_copy($hmac2);
+                $calc = \hash_final($calcMAC);
+                
+                if (!self::hashEquals(\array_shift($macs), $calc)) {
+                    throw new Ex\InvalidCiphertext(
+                        'File was modified after MAC verification'
+                    );
+                }
+                
                 $thisIv = self::incrementCounter($thisIv, $inc);
                 
                 /**
@@ -566,6 +590,7 @@ final class File extends Core implements StreamInterface
                         'Could not write to output file durind decryption.'
                     );
                 }
+                ++$block;
             }
         return $result;
     }
