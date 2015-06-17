@@ -229,6 +229,11 @@ final class File extends Core implements StreamInterface
          * and update it with each ciphertext chunk
          */
         $hmac = \hash_init(self::HASH_FUNCTION, HASH_HMAC, $akey);
+        if ($hmac === false) {
+            throw new Ex\CannotPerformOperation(
+                'Cannot initialize a hash context'
+            );
+        }
         
         /**
          * We operate on $thisIv using a hash-based PRF derived from the initial
@@ -269,6 +274,9 @@ final class File extends Core implements StreamInterface
                 OPENSSL_RAW_DATA,
                 $thisIv
             );
+            /**
+             * Check that the encryption was performed successfully
+             */
             if ($encrypted === false) {
                 throw new Ex\CannotPerformOperation(
                     'OpenSSL encryption error'
@@ -280,7 +288,7 @@ final class File extends Core implements StreamInterface
              */
             if (\fwrite($outputHandle, $encrypted, self::ourStrlen($encrypted)) === false) {
                 throw new Ex\CannotPerformOperation(
-                    'Cannot write to output file'
+                    'Cannot write to output file during encryption'
                 );
             }
             
@@ -417,6 +425,11 @@ final class File extends Core implements StreamInterface
              * We begin recalculating the HMAC for the entire file...
              */
             $hmac = \hash_init(self::HASH_FUNCTION, HASH_HMAC, $akey);
+            if ($hmac === false) {
+                throw new Ex\CannotPerformOperation(
+                    'Cannot initialize a hash context'
+                );
+            }
             
             /**
              * Reset file pointer to the beginning of the file.
@@ -480,6 +493,11 @@ final class File extends Core implements StreamInterface
                  * Store a MAC of each chunk
                  */
                 $chunkMAC = \hash_copy($hmac);
+                if ($chunkMAC === false) {
+                    throw new Ex\CannotPerformOperation(
+                        'Cannot duplicate a hash context'
+                    );
+                }
                 $macs []= \hash_final($chunkMAC);
             }
             /**
@@ -490,7 +508,9 @@ final class File extends Core implements StreamInterface
          * 3. Did we match?
          */
             if (!self::hashEquals($finalHMAC, $stored_mac)) {
-                throw new Ex\InvalidCiphertext();
+                throw new Ex\InvalidCiphertext(
+                    'Message Authentication failure; tampering detected.'
+                );
             }
         /**
          * 4. Okay, let's begin decrypting
@@ -547,9 +567,18 @@ final class File extends Core implements StreamInterface
                  */
                 \hash_update($hmac2, $read);
                 $calcMAC = \hash_copy($hmac2);
+                if ($calcMAC === false) {
+                    throw new Ex\CannotPerformOperation(
+                        'Cannot duplicate a hash context'
+                    );
+                }
                 $calc = \hash_final($calcMAC);
                 
-                if (!self::hashEquals(\array_shift($macs), $calc)) {
+                if (empty($macs)) {
+                    throw new Ex\InvalidCiphertext(
+                        'File was modified after MAC verification'
+                    );
+                } elseif (!self::hashEquals(\array_shift($macs), $calc)) {
                     throw new Ex\InvalidCiphertext(
                         'File was modified after MAC verification'
                     );
@@ -567,6 +596,10 @@ final class File extends Core implements StreamInterface
                     OPENSSL_RAW_DATA,
                     $thisIv
                 );
+                
+                /**
+                 * Test for decryption faulure
+                 */
                 if ($decrypted === false) {
                     throw new Ex\CannotPerformOperation(
                         'OpenSSL decryption error'
@@ -587,10 +620,11 @@ final class File extends Core implements StreamInterface
                  */
                 if ($result === false) {
                     throw new Ex\CannotPerformOperation(
-                        'Could not write to output file durind decryption.'
+                        'Could not write to output file during decryption.'
                     );
                 }
             }
+        // This should be an integer
         return $result;
     }
     
@@ -602,7 +636,7 @@ final class File extends Core implements StreamInterface
      * 
      * @return string (raw binary)
      */
-    protected static function incrementCounter($ctr, $inc = 1)
+    protected static function incrementCounter($ctr, $inc)
     {
         static $ivsize = null;
         if ($ivsize === null) {
