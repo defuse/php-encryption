@@ -278,7 +278,7 @@ final class Crypto extends Core
         $method = self::CIPHER.'-'.self::CIPHER_MODE;
 
         self::ensureConstantExists("OPENSSL_RAW_DATA");
-        self::ensureFunctionExists("openssl_encrypt");
+        self::ensureFunctionExists("openssl_decrypt");
         $plaintext = \openssl_decrypt(
             $ciphertext,
             $method,
