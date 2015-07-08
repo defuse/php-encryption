@@ -40,3 +40,13 @@ if [ $? -ne 0 ]; then
 else
     echo "PASS: Hex encoding is working correctly"
 fi
+
+echo "--------------------------------------------------"
+
+echo ""
+ORIGDIR=`pwd`
+cd tests/stream
+php keygen.php
+php encrypt.php
+php decrypt.php
+cd $ORIGDIR
