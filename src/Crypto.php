@@ -48,9 +48,8 @@ final class Crypto
      *
      * So, PLEASE, do not change these constants.
      */
-    const CIPHER = 'aes-128';
+    const CIPHER_METHOD = 'aes-128-cbc';
     const KEY_BYTE_SIZE = 16;
-    const CIPHER_MODE = 'cbc';
     const HASH_FUNCTION = 'sha256';
     const MAC_BYTE_SIZE = 32;
     const ENCRYPTION_INFO = 'DefusePHP|KeyForEncryption';
@@ -88,20 +87,13 @@ final class Crypto
             throw new Ex\CannotPerformOperation("Bad key.");
         }
 
-        $method = self::CIPHER.'-'.self::CIPHER_MODE;
-
-        self::ensureFunctionExists('openssl_get_cipher_methods');
-        if (\in_array($method, \openssl_get_cipher_methods()) === FALSE) {
-            throw new Ex\CannotPerformOperation("Cipher method not supported.");
-        }
-
         // Generate a sub-key for encryption.
         $keysize = self::KEY_BYTE_SIZE;
         $ekey = self::HKDF(self::HASH_FUNCTION, $key, $keysize, self::ENCRYPTION_INFO);
 
         // Generate a random initialization vector.
         self::ensureFunctionExists("openssl_cipher_iv_length");
-        $ivsize = \openssl_cipher_iv_length($method);
+        $ivsize = \openssl_cipher_iv_length(self::CIPHER_METHOD);
         if ($ivsize === FALSE || $ivsize <= 0) {
             throw new Ex\CannotPerformOperation();
         }
@@ -133,10 +125,8 @@ final class Crypto
     {
         self::runtimeTest();
 
-        $method = self::CIPHER.'-'.self::CIPHER_MODE;
-
         self::ensureFunctionExists('openssl_get_cipher_methods');
-        if (\in_array($method, \openssl_get_cipher_methods()) === FALSE) {
+        if (\in_array(self::CIPHER_METHOD, \openssl_get_cipher_methods()) === FALSE) {
             throw new Ex\CannotPerformOperation("Cipher method not supported.");
         }
 
@@ -163,7 +153,7 @@ final class Crypto
 
             // Extract the initialization vector from the ciphertext.
             self::EnsureFunctionExists("openssl_cipher_iv_length");
-            $ivsize = \openssl_cipher_iv_length($method);
+            $ivsize = \openssl_cipher_iv_length(self::CIPHER_METHOD);
             if ($ivsize === FALSE || $ivsize <= 0) {
                 throw new Ex\CannotPerformOperation();
             }
@@ -212,6 +202,12 @@ final class Crypto
 
         try {
             $test_state = 2;
+
+            self::ensureFunctionExists('openssl_get_cipher_methods');
+            if (\in_array(self::CIPHER_METHOD, \openssl_get_cipher_methods()) === FALSE) {
+                throw new Ex\CryptoTestFailed("Cipher method not supported.");
+            }
+
             self::AESTestVector();
             self::HMACTestVector();
             self::HKDFTestVector();
@@ -247,14 +243,11 @@ final class Crypto
      */
     private static function plainEncrypt($plaintext, $key, $iv)
     {
-
-        $method = self::CIPHER.'-'.self::CIPHER_MODE;
-
         self::ensureConstantExists("OPENSSL_RAW_DATA");
         self::ensureFunctionExists("openssl_encrypt");
         $ciphertext = \openssl_encrypt(
             $plaintext,
-            $method,
+            self::CIPHER_METHOD,
             $key,
             OPENSSL_RAW_DATA,
             $iv
@@ -280,14 +273,11 @@ final class Crypto
      */
     private static function plainDecrypt($ciphertext, $key, $iv)
     {
-
-        $method = self::CIPHER.'-'.self::CIPHER_MODE;
-
         self::ensureConstantExists("OPENSSL_RAW_DATA");
         self::ensureFunctionExists("openssl_encrypt");
         $plaintext = \openssl_decrypt(
             $ciphertext,
-            $method,
+            self::CIPHER_METHOD,
             $key,
             OPENSSL_RAW_DATA,
             $iv
