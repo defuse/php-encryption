@@ -200,6 +200,16 @@ final class Crypto
             return;
         }
 
+        if ($test_state === 3) {
+            /* If an intermittent problem caused a test to fail previously, we
+             * want that to be indicated to the user with every call to this
+             * library. This way, if the user first does something they really
+             * don't care about, and just ignores all exceptions, they won't get 
+             * screwed when they then start to use the library for something
+             * they do care about. */
+            throw new Ex\CryptoTestFailed("Tests failed previously.");
+        }
+
         try {
             $test_state = 2;
 
