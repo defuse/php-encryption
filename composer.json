@@ -11,7 +11,7 @@
         }
     ],
     "autoload": {
-        "files": ["src/autoload.php"]
+        "files": ["autoload.php"]
     },
     "require": {
         "php":  ">=5.4.0",
