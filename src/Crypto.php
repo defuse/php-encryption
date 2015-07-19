@@ -84,7 +84,7 @@ final class Crypto
 
         if (self::ourStrlen($key) !== self::KEY_BYTE_SIZE)
         {
-            throw new Ex\CannotPerformOperationException("Bad key.");
+            throw new Ex\CannotPerformOperationException("Key is the wrong size.");
         }
 
         // Generate a sub-key for encryption.
@@ -95,7 +95,9 @@ final class Crypto
         self::ensureFunctionExists("openssl_cipher_iv_length");
         $ivsize = \openssl_cipher_iv_length(self::CIPHER_METHOD);
         if ($ivsize === FALSE || $ivsize <= 0) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\CannotPerformOperationException(
+                "Could not get the IV length from OpenSSL"
+            );
         }
         $iv = self::secureRandom($ivsize);
 
@@ -127,7 +129,9 @@ final class Crypto
 
         // Extract the HMAC from the front of the ciphertext.
         if (self::ourStrlen($ciphertext) <= self::MAC_BYTE_SIZE) {
-            throw new Ex\InvalidCiphertextException();
+            throw new Ex\InvalidCiphertextException(
+                "Ciphertext is too short."
+            );
         }
         $hmac = self::ourSubstr($ciphertext, 0, self::MAC_BYTE_SIZE);
         if ($hmac === FALSE) {
@@ -150,10 +154,14 @@ final class Crypto
             self::EnsureFunctionExists("openssl_cipher_iv_length");
             $ivsize = \openssl_cipher_iv_length(self::CIPHER_METHOD);
             if ($ivsize === FALSE || $ivsize <= 0) {
-                throw new Ex\CannotPerformOperationException();
+                throw new Ex\CannotPerformOperationException(
+                    "Could not get the IV length from OpenSSL"
+                );
             }
             if (self::ourStrlen($ciphertext) <= $ivsize) {
-                throw new Ex\InvalidCiphertextException();
+                throw new Ex\InvalidCiphertextException(
+                    "Ciphertext is too short."
+                );
             }
             $iv = self::ourSubstr($ciphertext, 0, $ivsize);
             if ($iv === FALSE) {
@@ -173,7 +181,9 @@ final class Crypto
              * a script that doesn't handle this condition to CRASH, instead
              * of thinking the ciphertext decrypted to the value FALSE.
              */
-             throw new Ex\InvalidCiphertextException();
+            throw new Ex\InvalidCiphertextException(
+                "Integrity check failed."
+            );
         }
     }
 
@@ -259,7 +269,9 @@ final class Crypto
         );
 
         if ($ciphertext === false) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\CannotPerformOperationException(
+                "openssl_encrypt() failed."
+            );
         }
 
         return $ciphertext;
@@ -288,7 +300,9 @@ final class Crypto
             $iv
         );
         if ($plaintext === FALSE) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\CannotPerformOperationException(
+                "openssl_decrypt() failed."
+            );
         }
 
         return $plaintext;
@@ -307,7 +321,9 @@ final class Crypto
         $secure = false;
         $random = \openssl_random_pseudo_bytes($octets, $secure);
         if ($random === FALSE || $secure === FALSE) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\CannotPerformOperationException(
+                "openssl_random_pseudo_bytes() failed."
+            );
         }
         return $random;
     }
@@ -335,7 +351,9 @@ final class Crypto
         // Sanity-check the desired output length.
         if (empty($length) || !\is_int($length) ||
             $length < 0 || $length > 255 * $digest_length) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\CannotPerformOperationException(
+                "Bad output length requested of HKDF."
+            );
         }
 
         // "if [salt] not provided, is set to a string of HashLen zeroes."
@@ -409,7 +427,9 @@ final class Crypto
         // NOTE: This leaks information when the strings are not the same
         // length, but they should always be the same length here. Enforce it:
         if (self::ourStrlen($correct_hmac) !== self::ourStrlen($message_hmac)) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\CannotPerformOperationException(
+                "Computed and included HMACs are not the same length."
+            );
         }
 
         $blind = self::createNewRandomKey();
@@ -621,7 +641,9 @@ final class Crypto
         if ($exists) {
             $length = \mb_strlen($str, '8bit');
             if ($length === FALSE) {
-                throw new Ex\CannotPerformOperationException();
+                throw new Ex\CannotPerformOperationException(
+                    "mb_strlen() failed."
+                );
             }
             return $length;
         } else {
@@ -707,7 +729,7 @@ final class Crypto
             $c_alpha = ($c & ~32) - 55;
             $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
             if (($c_num0 | $c_alpha0) === 0) {
-                throw new \DomainException(
+                throw new \RangeException(
                     'Crypto::hexToBin() only expects hexadecimal characters'
                 );
             }
