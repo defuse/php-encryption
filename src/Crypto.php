@@ -76,7 +76,7 @@ final class Crypto
      * @param string $plaintext
      * @param string $key
      * @return string
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     public static function encrypt($plaintext, $key)
     {
@@ -84,7 +84,7 @@ final class Crypto
 
         if (self::ourStrlen($key) !== self::KEY_BYTE_SIZE)
         {
-            throw new Ex\CannotPerformOperation("Bad key.");
+            throw new Ex\CannotPerformOperationException("Bad key.");
         }
 
         // Generate a sub-key for encryption.
@@ -95,7 +95,7 @@ final class Crypto
         self::ensureFunctionExists("openssl_cipher_iv_length");
         $ivsize = \openssl_cipher_iv_length(self::CIPHER_METHOD);
         if ($ivsize === FALSE || $ivsize <= 0) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
         $iv = self::secureRandom($ivsize);
 
@@ -118,8 +118,8 @@ final class Crypto
      * @param string $ciphertext
      * @param string $key
      * @return type
-     * @throws Ex\CannotPerformOperation
-     * @throws Ex\InvalidCiphertext
+     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\InvalidCiphertextException
      */
     public static function decrypt($ciphertext, $key)
     {
@@ -127,15 +127,15 @@ final class Crypto
 
         // Extract the HMAC from the front of the ciphertext.
         if (self::ourStrlen($ciphertext) <= self::MAC_BYTE_SIZE) {
-            throw new Ex\InvalidCiphertext();
+            throw new Ex\InvalidCiphertextException();
         }
         $hmac = self::ourSubstr($ciphertext, 0, self::MAC_BYTE_SIZE);
         if ($hmac === FALSE) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
         $ciphertext = self::ourSubstr($ciphertext, self::MAC_BYTE_SIZE);
         if ($ciphertext === FALSE) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
 
         // Regenerate the same authentication sub-key.
@@ -150,18 +150,18 @@ final class Crypto
             self::EnsureFunctionExists("openssl_cipher_iv_length");
             $ivsize = \openssl_cipher_iv_length(self::CIPHER_METHOD);
             if ($ivsize === FALSE || $ivsize <= 0) {
-                throw new Ex\CannotPerformOperation();
+                throw new Ex\CannotPerformOperationException();
             }
             if (self::ourStrlen($ciphertext) <= $ivsize) {
-                throw new Ex\InvalidCiphertext();
+                throw new Ex\InvalidCiphertextException();
             }
             $iv = self::ourSubstr($ciphertext, 0, $ivsize);
             if ($iv === FALSE) {
-                throw new Ex\CannotPerformOperation();
+                throw new Ex\CannotPerformOperationException();
             }
             $ciphertext = self::ourSubstr($ciphertext, $ivsize);
             if ($ciphertext === FALSE) {
-                throw new Ex\CannotPerformOperation();
+                throw new Ex\CannotPerformOperationException();
             }
 
             $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv);
@@ -173,13 +173,13 @@ final class Crypto
              * a script that doesn't handle this condition to CRASH, instead
              * of thinking the ciphertext decrypted to the value FALSE.
              */
-             throw new Ex\InvalidCiphertext();
+             throw new Ex\InvalidCiphertextException();
         }
     }
 
     /*
      * Runs tests.
-     * Raises CannotPerformOperationException or CryptoTestFailedException if
+     * Raises CannotPerformOperationExceptionException or CryptoTestFailedExceptionException if
      * one of the tests fail. If any tests fails, your system is not capable of
      * performing encryption, so make sure you fail safe in that case.
      */
@@ -202,7 +202,7 @@ final class Crypto
              * don't care about, and just ignores all exceptions, they won't get 
              * screwed when they then start to use the library for something
              * they do care about. */
-            throw new Ex\CryptoTestFailed("Tests failed previously.");
+            throw new Ex\CryptoTestFailedException("Tests failed previously.");
         }
 
         try {
@@ -210,7 +210,7 @@ final class Crypto
 
             self::ensureFunctionExists('openssl_get_cipher_methods');
             if (\in_array(self::CIPHER_METHOD, \openssl_get_cipher_methods()) === FALSE) {
-                throw new Ex\CryptoTestFailed("Cipher method not supported.");
+                throw new Ex\CryptoTestFailedException("Cipher method not supported.");
             }
 
             self::AESTestVector();
@@ -219,13 +219,13 @@ final class Crypto
 
             self::testEncryptDecrypt();
             if (self::ourStrlen(self::createNewRandomKey()) != self::KEY_BYTE_SIZE) {
-                throw new Ex\CryptoTestFailed();
+                throw new Ex\CryptoTestFailedException();
             }
 
             if (self::ENCRYPTION_INFO == self::AUTHENTICATION_INFO) {
-                throw new Ex\CryptoTestFailed();
+                throw new Ex\CryptoTestFailedException();
             }
-        } catch (Ex\CryptoTestFailed $ex) {
+        } catch (Ex\CryptoTestFailedException $ex) {
             // Do this, otherwise it will stay in the "tests are running" state.
             $test_state = 3;
             throw $ex;
@@ -244,7 +244,7 @@ final class Crypto
      * @param string $key
      * @param string $iv
      * @return string
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     private static function plainEncrypt($plaintext, $key, $iv)
     {
@@ -259,7 +259,7 @@ final class Crypto
         );
 
         if ($ciphertext === false) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
 
         return $ciphertext;
@@ -274,7 +274,7 @@ final class Crypto
      * @param string $key
      * @param string $iv
      * @return string
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     private static function plainDecrypt($ciphertext, $key, $iv)
     {
@@ -288,7 +288,7 @@ final class Crypto
             $iv
         );
         if ($plaintext === FALSE) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
 
         return $plaintext;
@@ -299,7 +299,7 @@ final class Crypto
      * 
      * @param int $octets
      * @return string (raw binary)
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     private static function secureRandom($octets)
     {
@@ -307,7 +307,7 @@ final class Crypto
         $secure = false;
         $random = \openssl_random_pseudo_bytes($octets, $secure);
         if ($random === FALSE || $secure === FALSE) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
         return $random;
     }
@@ -322,7 +322,7 @@ final class Crypto
      * @param string $info What sort of key are we deriving?
      * @param string $salt
      * @return string
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     private static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
     {
@@ -335,7 +335,7 @@ final class Crypto
         // Sanity-check the desired output length.
         if (empty($length) || !\is_int($length) ||
             $length < 0 || $length > 255 * $digest_length) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
 
         // "if [salt] not provided, is set to a string of HashLen zeroes."
@@ -352,7 +352,7 @@ final class Crypto
 
         // This check is useless, but it serves as a reminder to the spec.
         if (self::ourStrlen($prk) < $digest_length) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
 
         // T(0) = ''
@@ -373,7 +373,7 @@ final class Crypto
         // ORM = first L octets of T
         $orm = self::ourSubstr($t, 0, $length);
         if ($orm === FALSE) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
         return $orm;
     }
@@ -386,7 +386,7 @@ final class Crypto
      * @param string $message Ciphertext (raw binary)
      * @param string $key Authentication key (raw binary)
      * @return boolean
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     private static function verifyHMAC($correct_hmac, $message, $key)
     {
@@ -409,7 +409,7 @@ final class Crypto
         // NOTE: This leaks information when the strings are not the same
         // length, but they should always be the same length here. Enforce it:
         if (self::ourStrlen($correct_hmac) !== self::ourStrlen($message_hmac)) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
 
         $blind = self::createNewRandomKey();
@@ -427,28 +427,28 @@ final class Crypto
         $ciphertext = self::encrypt($data, $key);
         try {
             $decrypted = self::decrypt($ciphertext, $key);
-        } catch (Ex\InvalidCiphertext $ex) {
+        } catch (Ex\InvalidCiphertextException $ex) {
             // It's important to catch this and change it into a
-            // CryptoTestFailedException, otherwise a test failure could trick
+            // CryptoTestFailedExceptionException, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
-            throw new Ex\CryptoTestFailed();
+            throw new Ex\CryptoTestFailedException();
         }
         if($decrypted !== $data) {
-            throw new Ex\CryptoTestFailed();
+            throw new Ex\CryptoTestFailedException();
         }
 
         // Modifying the ciphertext: Appending a string.
         try {
             self::decrypt($ciphertext . "a", $key);
-            throw new Ex\CryptoTestFailed();
-        } catch (Ex\InvalidCiphertext $e) { /* expected */ }
+            throw new Ex\CryptoTestFailedException();
+        } catch (Ex\InvalidCiphertextException $e) { /* expected */ }
 
         // Modifying the ciphertext: Changing an IV byte.
         try {
             $ciphertext[0] = chr((ord($ciphertext[0]) + 1) % 256);
             self::decrypt($ciphertext, $key);
-            throw new Ex\CryptoTestFailed();
-        } catch (Ex\InvalidCiphertext $e) { /* expected */ }
+            throw new Ex\CryptoTestFailedException();
+        } catch (Ex\InvalidCiphertextException $e) { /* expected */ }
 
         // Decrypting with the wrong key.
         $key = self::createNewRandomKey();
@@ -457,22 +457,22 @@ final class Crypto
         $wrong_key = self::createNewRandomKey();
         try {
             self::decrypt($ciphertext, $wrong_key);
-            throw new Ex\CryptoTestFailed();
-        } catch (Ex\InvalidCiphertext $e) { /* expected */ }
+            throw new Ex\CryptoTestFailedException();
+        } catch (Ex\InvalidCiphertextException $e) { /* expected */ }
 
         // Ciphertext too small (shorter than HMAC).
         $key = self::createNewRandomKey();
         $ciphertext = \str_repeat("A", self::MAC_BYTE_SIZE - 1);
         try {
             self::decrypt($ciphertext, $key);
-            throw new Ex\CryptoTestFailed();
-        } catch (Ex\InvalidCiphertext $e) { /* expected */ }
+            throw new Ex\CryptoTestFailedException();
+        } catch (Ex\InvalidCiphertextException $e) { /* expected */ }
     }
 
     /**
      * Run-time testing
      * 
-     * @throws Ex\CryptoTestFailed
+     * @throws Ex\CryptoTestFailedException
      */
     private static function HKDFTestVector()
     {
@@ -490,7 +490,7 @@ final class Crypto
         );
         $computed_okm = self::HKDF("sha256", $ikm, $length, $info, $salt);
         if ($computed_okm !== $okm) {
-            throw new Ex\CryptoTestFailed();
+            throw new Ex\CryptoTestFailedException();
         }
 
         // Test Case 7
@@ -503,7 +503,7 @@ final class Crypto
         );
         $computed_okm = self::HKDF("sha1", $ikm, $length);
         if ($computed_okm !== $okm) {
-            throw new Ex\CryptoTestFailed();
+            throw new Ex\CryptoTestFailedException();
         }
 
     }
@@ -511,7 +511,7 @@ final class Crypto
     /**
      * Run-Time tests
      * 
-     * @throws Ex\CryptoTestFailed
+     * @throws Ex\CryptoTestFailedException
      */
     private static function HMACTestVector()
     {
@@ -520,14 +520,14 @@ final class Crypto
         $data = "Hi There";
         $correct = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
         if (\hash_hmac(self::HASH_FUNCTION, $data, $key) !== $correct) {
-            throw new Ex\CryptoTestFailed();
+            throw new Ex\CryptoTestFailedException();
         }
     }
 
     /**
      * Run-time tests
      * 
-     * @throws Ex\CryptoTestFailed
+     * @throws Ex\CryptoTestFailedException
      */
     private static function AESTestVector()
     {
@@ -557,12 +557,12 @@ final class Crypto
 
         $computed_ciphertext = self::plainEncrypt($plaintext, $key, $iv);
         if ($computed_ciphertext !== $ciphertext) {
-            throw new Ex\CryptoTestFailed();
+            throw new Ex\CryptoTestFailedException();
         }
 
         $computed_plaintext = self::plainDecrypt($ciphertext, $key, $iv);
         if ($computed_plaintext !== $plaintext) {
-            throw new Ex\CryptoTestFailed();
+            throw new Ex\CryptoTestFailedException();
         }
     }
 
@@ -577,12 +577,12 @@ final class Crypto
      * If the constant doesn't exist, throw an exception
      * 
      * @param string $name
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     private static function ensureConstantExists($name)
     {
         if (!\defined($name)) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
     }
 
@@ -590,12 +590,12 @@ final class Crypto
      * If the functon doesn't exist, throw an exception
      * 
      * @param string $name Function name
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     private static function ensureFunctionExists($name)
     {
         if (!\function_exists($name)) {
-            throw new Ex\CannotPerformOperation();
+            throw new Ex\CannotPerformOperationException();
         }
     }
 
@@ -621,7 +621,7 @@ final class Crypto
         if ($exists) {
             $length = \mb_strlen($str, '8bit');
             if ($length === FALSE) {
-                throw new Ex\CannotPerformOperation();
+                throw new Ex\CannotPerformOperationException();
             }
             return $length;
         } else {
