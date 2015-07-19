@@ -291,7 +291,7 @@ final class Crypto
     private static function plainDecrypt($ciphertext, $key, $iv)
     {
         self::ensureConstantExists("OPENSSL_RAW_DATA");
-        self::ensureFunctionExists("openssl_encrypt");
+        self::ensureFunctionExists("openssl_decrypt");
         $plaintext = \openssl_decrypt(
             $ciphertext,
             self::CIPHER_METHOD,
