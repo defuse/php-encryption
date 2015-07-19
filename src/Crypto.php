@@ -125,11 +125,6 @@ final class Crypto
     {
         self::runtimeTest();
 
-        self::ensureFunctionExists('openssl_get_cipher_methods');
-        if (\in_array(self::CIPHER_METHOD, \openssl_get_cipher_methods()) === FALSE) {
-            throw new Ex\CannotPerformOperation("Cipher method not supported.");
-        }
-
         // Extract the HMAC from the front of the ciphertext.
         if (self::ourStrlen($ciphertext) <= self::MAC_BYTE_SIZE) {
             throw new Ex\InvalidCiphertext();
