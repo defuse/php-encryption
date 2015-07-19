@@ -31,7 +31,7 @@ class ExceptionHandler
             $ex instanceof Ex\CannotPerformOperationException ||
             $ex instanceof Ex\CryptoTestFailedException
         ) {
-            echo "FATAL ERROR: Uncaught crypto exception. Suppresssing output.\n";
+            echo "FATAL ERROR: Uncaught crypto exception. Suppressing output.\n";
         } else {
             /* Re-throw the exception in the destructor. */
             $this->rethrow = $ex;
