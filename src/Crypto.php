@@ -721,6 +721,7 @@ final class Crypto
         $bin = '';
         $hex_len = self::ourStrlen($hex_string);
         $state = 0;
+        $c_acc = 0;
         
         while ($hex_pos < $hex_len) {
             $c = \ord($hex_string[$hex_pos]);
