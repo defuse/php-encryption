@@ -27,6 +27,4 @@ try {
     echo "TEST FAILED\n";
     var_dump($ex);
     exit(1);
-}
-
-?>
+} 

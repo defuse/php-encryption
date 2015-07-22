@@ -1,5 +1,6 @@
 <?php
 use \Defuse\Crypto\Crypto;
+
 require_once'autoload.php';
 
 function showResults($type, $start, $end, $count)
@@ -8,7 +9,6 @@ function showResults($type, $start, $end, $count)
     $rate = $count / $time;
     echo $type, ': ', $rate, ' calls/s', "\n";
 }
-
 
 // Note: By default, the runtime tests are "cached" and not re-executed for
 // every call. To disable this, look at the RuntimeTest() function.

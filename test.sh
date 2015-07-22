@@ -33,6 +33,8 @@ echo "--------------------------------------------------"
 
 echo ""
 
+echo "Hex Encoding"
+echo "--------------------------------------------------"
 php tests/encode.php
 if [ $? -ne 0 ]; then
     echo "FAIL."
@@ -40,3 +42,41 @@ if [ $? -ne 0 ]; then
 else
     echo "PASS: Hex encoding is working correctly"
 fi
+
+echo "--------------------------------------------------"
+
+echo ""
+
+echo "Legacy Decryption"
+echo "--------------------------------------------------"
+php tests/legacy.php
+if [ $? -ne 0 ]; then
+    echo "FAIL."
+    exit 1
+else
+    echo "PASS: Legacy decryption is working correctly"
+fi
+
+echo "--------------------------------------------------"
+
+echo ""
+
+echo "AES COUNTER MODE"
+echo "--------------------------------------------------"
+php tests/ctr.php
+if [ $? -ne 0 ]; then
+    echo "FAIL."
+    exit 1
+else
+    echo "PASS: Counter incrementing is working correctly"
+fi
+
+echo "--------------------------------------------------"
+
+echo ""
+ORIGDIR=`pwd`
+cd tests/stream
+php keygen.php
+php encrypt.php
+php decrypt.php
+cd $ORIGDIR
