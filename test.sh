@@ -40,3 +40,15 @@ if [ $? -ne 0 ]; then
 else
     echo "PASS: Hex encoding is working correctly"
 fi
+
+echo "--------------------------------------------------"
+
+echo ""
+
+php tests/delegate.php
+if [ $? -ne 0 ]; then
+    echo "FAIL."
+    exit 1
+else
+    echo "PASS: DelegateCrypto"
+fi
