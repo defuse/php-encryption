@@ -19,11 +19,11 @@ try {
     \Defuse\Crypto\Crypto::RuntimeTest();
     echo "TEST PASSED!\n";
     exit(0);
-} catch (\Defuse\Crypto\Exception\CryptoTestFailed $ex) {
+} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
     echo "TEST FAILED!\n";
     var_dump($ex);
     exit(1);
-} catch (\Defuse\Crypto\Exception\CannotPerformOperation $ex) {
+} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
     echo "TEST FAILED\n";
     var_dump($ex);
     exit(1);
