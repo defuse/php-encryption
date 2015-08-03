@@ -17,7 +17,7 @@ use \Defuse\Crypto\Exception as Ex;
 
 class ExceptionHandler
 {
-    private $rethrow = NULL;
+    private $rethrow = null;
 
     public function __construct()
     {
@@ -26,8 +26,7 @@ class ExceptionHandler
 
     public function handler($ex)
     {
-        if (
-            $ex instanceof Ex\InvalidCiphertextException ||
+        if ($ex instanceof Ex\InvalidCiphertextException ||
             $ex instanceof Ex\CannotPerformOperationException ||
             $ex instanceof Ex\CryptoTestFailedException
         ) {
@@ -38,7 +37,8 @@ class ExceptionHandler
         }
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         if ($this->rethrow) {
             throw $this->rethrow;
         }
