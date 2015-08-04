@@ -8,16 +8,16 @@ for ($i = 0; $i < 100; ++$i) {
     $random = \openssl_random_pseudo_bytes(32);
     $encode_a = Crypto::binToHex($random);
     $encode_b = \bin2hex($random);
-    
+
     if ($encode_a !== $encode_b) {
         $status = 1;
         \var_dump([$encode_a, $encode_b]);
     }
     // echo "\t", $encode_a, "\t", $encode_b, "\n";
-    
+
     $decode_a = Crypto::hexToBin($encode_b);
     $decode_b = \hex2bin($encode_a);
-    
+
     if ($decode_a !== $decode_b) {
         $status = 1;
         \var_dump([\base64_encode($decode_a), \base64_decode($decode_b)]);
