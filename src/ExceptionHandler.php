@@ -17,6 +17,7 @@ use \Defuse\Crypto\Exception as Ex;
 
 class ExceptionHandler
 {
+    /* @var \Exception */
     private $rethrow = NULL;
 
     public function __construct()
