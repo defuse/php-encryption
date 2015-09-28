@@ -17,6 +17,7 @@ use \Defuse\Crypto\Exception as Ex;
 
 class ExceptionHandler
 {
+    /* @var \Exception */
     private $rethrow = NULL;
 
     public function __construct()
@@ -39,7 +40,7 @@ class ExceptionHandler
     }
 
     public function __destruct() {
-        if ($this->rethrow instanceof \Exception) {
+        if ($this->rethrow) {
             throw $this->rethrow;
         }
     }
