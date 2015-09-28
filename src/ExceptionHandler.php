@@ -39,7 +39,7 @@ class ExceptionHandler
     }
 
     public function __destruct() {
-        if ($this->rethrow) {
+        if ($this->rethrow instanceof \Exception) {
             throw $this->rethrow;
         }
     }
