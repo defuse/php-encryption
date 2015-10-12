@@ -575,9 +575,9 @@ final class Crypto extends Core
      */
     private static function AESTestVector($config)
     {
-        // AES CBC mode test vector from NIST SP 800-38A
+        // AES CTR mode test vector from NIST SP 800-38A
         $key = self::hexToBin("2b7e151628aed2a6abf7158809cf4f3c");
-        $iv = self::hexToBin("000102030405060708090a0b0c0d0e0f");
+        $iv = self::hexToBin("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
         $plaintext = self::hexToBin(
             "6bc1bee22e409f96e93d7e117393172a" .
             "ae2d8a571e03ac9c9eb76fac45af8e51" .
@@ -585,18 +585,10 @@ final class Crypto extends Core
             "f69f2445df4f9b17ad2b417be66c3710"
         );
         $ciphertext = self::hexToBin(
-            "7649abac8119b246cee98e9b12e9197d" .
-            "5086cb9b507219ee95db113a917678b2" .
-            "73bed6b8e3c1743b7116e69e22229516" .
-            "3ff1caa1681fac09120eca307586e1a7" .
-            /* Block due to padding. Not from NIST test vector.
-                Padding Block: 10101010101010101010101010101010
-                Ciphertext:    3ff1caa1681fac09120eca307586e1a7
-                           (+) 2fe1dab1780fbc19021eda206596f1b7
-                           AES 8cb82807230e1321d3fae00d18cc2012
-
-             */
-            "8cb82807230e1321d3fae00d18cc2012"
+            "874d6191b620e3261bef6864990db6ce" .
+            "9806f66b7970fdff8617187bb9fffdff" .
+            "5ae4df3edbd5d35e5b4f09020db03eab" .
+            "1e031dda2fbe03d1792170a0f3009cee"
         );
 
         $config = self::getVersionConfig(parent::VERSION);
