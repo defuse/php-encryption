@@ -641,7 +641,7 @@ final class Crypto extends Core
         if ($major === 2) {
             switch ($minor) {
                 case 0:
-                    $config['CIPHER_METHOD'] = 'aes-128-cbc';
+                    $config['CIPHER_METHOD'] = 'aes-128-ctr';
                     break;
             }
         }
