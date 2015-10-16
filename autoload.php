@@ -18,6 +18,26 @@
 
     // Get the relative class name
     $relative_class = \substr($class, $len);
+    
+    /**
+     * unserialize() -> autoloader -> LFI hardening
+     */
+    // Since we're on PHP 5.4+ we can use the [] syntax:
+    $whitelist = [
+        'Core',
+        'Crypto', 
+        'File',
+        'ExceptionHandler',
+        'StreamInterface',
+        'Exception\CannotPerformOperationException',
+        'Exception\CryptoException',
+        'Exception\CryptoTestFailedException',
+        'Exception\InvalidCiphertextException',
+    ];
+    if (!\in_array($relative_class, $whitelist)) {
+        // Skip it.
+        return;
+    }
 
     // Replace the namespace prefix with the base directory, replace namespace
     // separators with directory separators in the relative class name, append
