@@ -28,21 +28,16 @@ final class Core
             $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
         }
 
+        // XXX: check the range and type of $ctr, $inc
+
         /**
          * We start at the rightmost byte (big-endian)
          * So, too, does OpenSSL: http://stackoverflow.com/a/3146214/2224584
          */
-
         for ($i = $ivsize - 1; $i >= 0; --$i) {
-            $c = \ord($ctr[$i]);
-
-            $ctr[$i] = \chr(($c + $inc) & 0xFF);
-            if (($c + $inc) <= 255) {
-                // We don't need to keep incrementing to the left unless we exceed 255
-                break;
-            }
-            $inc = ($inc >> 8) & ~0;
-            ++$inc;
+            $sum = \ord($ctr[$i]) + $inc;
+            $ctr[$i] = \chr($sum & 0xFF);
+            $inc = $sum >> 8;
         }
         return $ctr;
     }
