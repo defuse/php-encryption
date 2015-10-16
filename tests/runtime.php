@@ -16,7 +16,7 @@ echo "    mb_internal_encoding(): " . mb_internal_encoding() . "\n";
 // Perform the tests.
 require_once(\dirname(__DIR__).'/autoload.php');
 try {
-    \Defuse\Crypto\Crypto::RuntimeTest();
+    \Defuse\Crypto\RuntimeTests::RuntimeTest();
     echo "TEST PASSED!\n";
     exit(0);
 } catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
