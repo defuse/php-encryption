@@ -3,6 +3,9 @@ namespace Defuse\Crypto;
 
 use \Defuse\Crypto\Exception as Ex;
 
+use \Defuse\Crypto\Core;
+use \Defuse\Crypto\Encoding;
+
 /*
  * PHP Encryption Library
  * Copyright (c) 2014-2015, Taylor Hornby <https://defuse.ca>
@@ -30,13 +33,10 @@ use \Defuse\Crypto\Exception as Ex;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-final class Crypto extends Core
+final class Crypto
 {
     // Ciphertext format: [____VERSION____][____HMAC____][____IV____][____CIPHERTEXT____].
     // Legacy format: [____HMAC____][____IV____][____CIPHERTEXT____].
-    const CIPHER_METHOD = 'aes-128-cbc';
-
-    const LEGACY_VERSION = "\xD3\xF5\x01\x00";
 
     /**
      * Use this to generate a random encryption key.
@@ -45,8 +45,8 @@ final class Crypto extends Core
      */
     public static function createNewRandomKey()
     {
-        $config = self::getVersionConfig(self::VERSION);
-        return self::secureRandom($config['KEY_BYTE_SIZE']);
+        $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
+        return Core::secureRandom($config['KEY_BYTE_SIZE']);
     }
 
     /**
@@ -65,15 +65,15 @@ final class Crypto extends Core
     public static function encrypt($plaintext, $key, $raw_binary = false)
     {
         self::runtimeTest();
-        $config = self::getVersionConfig(parent::VERSION);
+        $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
 
-        if (self::ourStrlen($key) !== $config['KEY_BYTE_SIZE']) {
+        if (Core::ourStrlen($key) !== $config['KEY_BYTE_SIZE']) {
             throw new Ex\CannotPerformOperationException("Key is the wrong size.");
         }
-        $salt = self::secureRandom($config['SALT_SIZE']);
+        $salt = Core::secureRandom($config['SALT_SIZE']);
 
         // Generate a sub-key for encryption.
-        $ekey = self::HKDF(
+        $ekey = Core::HKDF(
             $config['HASH_FUNCTION'],
             $key,
             $config['KEY_BYTE_SIZE'],
@@ -83,7 +83,7 @@ final class Crypto extends Core
         );
 
         // Generate a sub-key for authentication and apply the HMAC.
-        $akey = self::HKDF(
+        $akey = Core::HKDF(
             $config['HASH_FUNCTION'],
             $key,
             $config['KEY_BYTE_SIZE'],
@@ -93,25 +93,25 @@ final class Crypto extends Core
         );
 
         // Generate a random initialization vector.
-        self::ensureFunctionExists("openssl_cipher_iv_length");
+        Core::ensureFunctionExists("openssl_cipher_iv_length");
         $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
         if ($ivsize === false || $ivsize <= 0) {
             throw new Ex\CannotPerformOperationException(
                 "Could not get the IV length from OpenSSL"
             );
         }
-        $iv = self::secureRandom($ivsize);
+        $iv = Core::secureRandom($ivsize);
 
         $ciphertext = $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv, $config);
-        $auth = \hash_hmac($config['HASH_FUNCTION'], parent::VERSION . $ciphertext, $akey, true);
+        $auth = \hash_hmac($config['HASH_FUNCTION'], Core::CURRENT_VERSION . $ciphertext, $akey, true);
 
         // We're now appending the header as of 2.00
-        $ciphertext = parent::VERSION . $auth . $ciphertext;
+        $ciphertext = Core::CURRENT_VERSION . $auth . $ciphertext;
 
         if ($raw_binary) {
             return $ciphertext;
         }
-        return self::binToHex($ciphertext);
+        return Encoding::binToHex($ciphertext);
     }
 
     /**
@@ -131,25 +131,25 @@ final class Crypto extends Core
     {
         self::runtimeTest();
         if (!$raw_binary) {
-            $ciphertext = self::hexToBin($ciphertext);
+            $ciphertext = Encoding::hexToBin($ciphertext);
         }
 
         // Grab the header tag
-        $version = self::ourSubstr($ciphertext, 0, parent::HEADER_VERSION_SIZE);
+        $version = Core::ourSubstr($ciphertext, 0, Core::HEADER_VERSION_SIZE);
 
         // Load the configuration for this version
-        $config = self::getVersionConfig($version);
+        $config = self::getVersionConfigFromHeader($version, Core::CURRENT_VERSION);
 
         // Now let's operate on the remainder of the ciphertext as normal
-        $ciphertext = self::ourSubstr($ciphertext, parent::HEADER_VERSION_SIZE, null);
+        $ciphertext = Core::ourSubstr($ciphertext, Core::HEADER_VERSION_SIZE, null);
 
         // Extract the HMAC from the front of the ciphertext.
-        if (self::ourStrlen($ciphertext) <= $config['MAC_BYTE_SIZE']) {
+        if (Core::ourStrlen($ciphertext) <= $config['MAC_BYTE_SIZE']) {
             throw new Ex\InvalidCiphertextException(
                 "Ciphertext is too short."
             );
         }
-        $hmac = self::ourSubstr(
+        $hmac = Core::ourSubstr(
             $ciphertext, 
             0,
             $config['MAC_BYTE_SIZE']
@@ -157,7 +157,7 @@ final class Crypto extends Core
         if ($hmac === false) {
             throw new Ex\CannotPerformOperationException();
         }
-        $salt = self::ourSubstr(
+        $salt = Core::ourSubstr(
             $ciphertext,
             $config['MAC_BYTE_SIZE'], 
             $config['SALT_SIZE']
@@ -166,7 +166,7 @@ final class Crypto extends Core
             throw new Ex\CannotPerformOperationException();
         }
         
-        $ciphertext = self::ourSubstr(
+        $ciphertext = Core::ourSubstr(
             $ciphertext,
             $config['MAC_BYTE_SIZE'] + $config['SALT_SIZE']
         );
@@ -175,30 +175,30 @@ final class Crypto extends Core
         }
 
         // Regenerate the same authentication sub-key.
-        $akey = self::HKDF($config['HASH_FUNCTION'], $key, $config['KEY_BYTE_SIZE'], $config['AUTHENTICATION_INFO'], $salt, $config);
+        $akey = Core::HKDF($config['HASH_FUNCTION'], $key, $config['KEY_BYTE_SIZE'], $config['AUTHENTICATION_INFO'], $salt, $config);
 
-        if (self::verifyHMAC($hmac, $version . $salt . $ciphertext, $akey)) {
+        if (self::verifyHMAC($hmac, $version . $salt . $ciphertext, $akey, $config)) {
             // Regenerate the same encryption sub-key.
-            $ekey = self::HKDF($config['HASH_FUNCTION'], $key, $config['KEY_BYTE_SIZE'], $config['ENCRYPTION_INFO'], $salt, $config);
+            $ekey = Core::HKDF($config['HASH_FUNCTION'], $key, $config['KEY_BYTE_SIZE'], $config['ENCRYPTION_INFO'], $salt, $config);
 
             // Extract the initialization vector from the ciphertext.
-            self::EnsureFunctionExists("openssl_cipher_iv_length");
+            Core::EnsureFunctionExists("openssl_cipher_iv_length");
             $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
             if ($ivsize === false || $ivsize <= 0) {
                 throw new Ex\CannotPerformOperationException(
                     "Could not get the IV length from OpenSSL"
                 );
             }
-            if (self::ourStrlen($ciphertext) <= $ivsize) {
+            if (Core::ourStrlen($ciphertext) <= $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."
                 );
             }
-            $iv = self::ourSubstr($ciphertext, 0, $ivsize);
+            $iv = Core::ourSubstr($ciphertext, 0, $ivsize);
             if ($iv === false) {
                 throw new Ex\CannotPerformOperationException();
             }
-            $ciphertext = self::ourSubstr($ciphertext, $ivsize);
+            $ciphertext = Core::ourSubstr($ciphertext, $ivsize);
             if ($ciphertext === false) {
                 throw new Ex\CannotPerformOperationException();
             }
@@ -234,25 +234,25 @@ final class Crypto extends Core
     public static function legacyDecrypt($ciphertext, $key)
     {
         self::runtimeTest();
-        $config = self::getVersionConfig(self::LEGACY_VERSION);
+        $config = self::getVersionConfigFromHeader(Core::LEGACY_VERSION, Core::LEGACY_VERSION);
 
         // Extract the HMAC from the front of the ciphertext.
-        if (self::ourStrlen($ciphertext) <= $config['MAC_BYTE_SIZE']) {
+        if (Core::ourStrlen($ciphertext) <= $config['MAC_BYTE_SIZE']) {
             throw new Ex\InvalidCiphertextException(
                 "Ciphertext is too short."
             );
         }
-        $hmac = self::ourSubstr($ciphertext, 0, $config['MAC_BYTE_SIZE']);
+        $hmac = Core::ourSubstr($ciphertext, 0, $config['MAC_BYTE_SIZE']);
         if ($hmac === false) {
             throw new Ex\CannotPerformOperationException();
         }
-        $ciphertext = self::ourSubstr($ciphertext, $config['MAC_BYTE_SIZE']);
+        $ciphertext = Core::ourSubstr($ciphertext, $config['MAC_BYTE_SIZE']);
         if ($ciphertext === false) {
             throw new Ex\CannotPerformOperationException();
         }
 
         // Regenerate the same authentication sub-key.
-        $akey = self::HKDF(
+        $akey = Core::HKDF(
             $config['HASH_FUNCTION'],
             $key,
             $config['KEY_BYTE_SIZE'],
@@ -261,9 +261,9 @@ final class Crypto extends Core
             $config
         );
 
-        if (self::verifyHMAC($hmac, $ciphertext, $akey)) {
+        if (self::verifyHMAC($hmac, $ciphertext, $akey, $config)) {
             // Regenerate the same encryption sub-key.
-            $ekey = self::HKDF(
+            $ekey = Core::HKDF(
                 $config['HASH_FUNCTION'],
                 $key,
                 $config['KEY_BYTE_SIZE'],
@@ -273,23 +273,23 @@ final class Crypto extends Core
             );
 
             // Extract the initialization vector from the ciphertext.
-            self::EnsureFunctionExists("openssl_cipher_iv_length");
+            Core::EnsureFunctionExists("openssl_cipher_iv_length");
             $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
             if ($ivsize === false || $ivsize <= 0) {
                 throw new Ex\CannotPerformOperationException(
                     "Could not get the IV length from OpenSSL"
                 );
             }
-            if (self::ourStrlen($ciphertext) <= $ivsize) {
+            if (Core::ourStrlen($ciphertext) <= $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."
                 );
             }
-            $iv = self::ourSubstr($ciphertext, 0, $ivsize);
+            $iv = Core::ourSubstr($ciphertext, 0, $ivsize);
             if ($iv === false) {
                 throw new Ex\CannotPerformOperationException();
             }
-            $ciphertext = self::ourSubstr($ciphertext, $ivsize);
+            $ciphertext = Core::ourSubstr($ciphertext, $ivsize);
             if ($ciphertext === false) {
                 throw new Ex\CannotPerformOperationException();
             }
@@ -323,7 +323,7 @@ final class Crypto extends Core
         // 3: Tests have failed.
         static $test_state = 0;
 
-        $config = self::getVersionConfig(parent::VERSION);
+        $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
 
         if ($test_state === 1 || $test_state === 2) {
             return;
@@ -342,7 +342,7 @@ final class Crypto extends Core
         try {
             $test_state = 2;
 
-            self::ensureFunctionExists('openssl_get_cipher_methods');
+            Core::ensureFunctionExists('openssl_get_cipher_methods');
             if (\in_array($config['CIPHER_METHOD'], \openssl_get_cipher_methods()) === false) {
                 throw new Ex\CryptoTestFailedException("Cipher method not supported.");
             }
@@ -352,7 +352,7 @@ final class Crypto extends Core
             self::HKDFTestVector($config);
 
             self::testEncryptDecrypt($config);
-            if (self::ourStrlen(self::createNewRandomKey()) != $config['KEY_BYTE_SIZE']) {
+            if (Core::ourStrlen(self::createNewRandomKey()) != $config['KEY_BYTE_SIZE']) {
                 throw new Ex\CryptoTestFailedException();
             }
 
@@ -383,8 +383,8 @@ final class Crypto extends Core
      */
     private static function plainEncrypt($plaintext, $key, $iv, $config)
     {
-        self::ensureConstantExists("OPENSSL_RAW_DATA");
-        self::ensureFunctionExists("openssl_encrypt");
+        Core::ensureConstantExists("OPENSSL_RAW_DATA");
+        Core::ensureFunctionExists("openssl_encrypt");
         $ciphertext = \openssl_encrypt(
             $plaintext,
             $config['CIPHER_METHOD'],
@@ -415,8 +415,8 @@ final class Crypto extends Core
      */
     private static function plainDecrypt($ciphertext, $key, $iv, $config)
     {
-        self::ensureConstantExists("OPENSSL_RAW_DATA");
-        self::ensureFunctionExists("openssl_decrypt");
+        Core::ensureConstantExists("OPENSSL_RAW_DATA");
+        Core::ensureFunctionExists("openssl_decrypt");
         $plaintext = \openssl_decrypt(
             $ciphertext,
             $config['CIPHER_METHOD'],
@@ -443,14 +443,10 @@ final class Crypto extends Core
      * @return boolean
      * @throws Ex\CannotPerformOperationException
      */
-    private static function verifyHMAC($correct_hmac, $message, $key)
+    private static function verifyHMAC($correct_hmac, $message, $key, $config)
     {
-        static $config = null;
-        if ($config === null) {
-            $config = self::getVersionConfig(parent::VERSION);
-        }
         $message_hmac = \hash_hmac($config['HASH_FUNCTION'], $message, $key, true);
-        return self::hashEquals($correct_hmac, $message_hmac);
+        return Core::hashEquals($correct_hmac, $message_hmac);
     }
 
     private static function testEncryptDecrypt($config)
@@ -458,7 +454,7 @@ final class Crypto extends Core
         $key = self::createNewRandomKey();
         $data = "EnCrYpT EvErYThInG\x00\x00";
         if (empty($config)) {
-            $config = self::getVersionConfig(parent::VERSION);
+            $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
         }
 
         // Make sure encrypting then decrypting doesn't change the message.
@@ -516,20 +512,20 @@ final class Crypto extends Core
     {
         // HKDF test vectors from RFC 5869
         if (empty($config)) {
-            $config = self::getVersionConfig(parent::VERSION);
+            $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
         }
 
         // Test Case 1
         $ikm = \str_repeat("\x0b", 22);
-        $salt = self::hexToBin("000102030405060708090a0b0c");
-        $info = self::hexToBin("f0f1f2f3f4f5f6f7f8f9");
+        $salt = Encoding::hexToBin("000102030405060708090a0b0c");
+        $info = Encoding::hexToBin("f0f1f2f3f4f5f6f7f8f9");
         $length = 42;
-        $okm = self::hexToBin(
+        $okm = Encoding::hexToBin(
             "3cb25f25faacd57a90434f64d0362f2a" .
             "2d2d0a90cf1a5a4c5db02d56ecc4c5bf" .
             "34007208d5b887185865"
         );
-        $computed_okm = self::HKDF("sha256", $ikm, $length, $info, $salt, $config);
+        $computed_okm = Core::HKDF("sha256", $ikm, $length, $info, $salt, $config);
         if ($computed_okm !== $okm) {
             throw new Ex\CryptoTestFailedException();
         }
@@ -537,12 +533,12 @@ final class Crypto extends Core
         // Test Case 7
         $ikm = \str_repeat("\x0c", 22);
         $length = 42;
-        $okm = self::hexToBin(
+        $okm = Encoding::hexToBin(
             "2c91117204d745f3500d636a62f64f0a" .
             "b3bae548aa53d423b0d1f27ebba6f5e5" .
             "673a081d70cce7acfc48"
         );
-        $computed_okm = self::HKDF("sha1", $ikm, $length, '', null, $config);
+        $computed_okm = Core::HKDF("sha1", $ikm, $length, '', null, $config);
         if ($computed_okm !== $okm) {
             throw new Ex\CryptoTestFailedException();
         }
@@ -557,7 +553,7 @@ final class Crypto extends Core
     private static function HMACTestVector($config)
     {
         if (empty($config)) {
-            $config = self::getVersionConfig(parent::VERSION);
+            $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
         }
         // HMAC test vector From RFC 4231 (Test Case 1)
         $key = \str_repeat("\x0b", 20);
@@ -576,22 +572,22 @@ final class Crypto extends Core
     private static function AESTestVector($config)
     {
         // AES CTR mode test vector from NIST SP 800-38A
-        $key = self::hexToBin("2b7e151628aed2a6abf7158809cf4f3c");
-        $iv = self::hexToBin("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
-        $plaintext = self::hexToBin(
+        $key = Encoding::hexToBin("2b7e151628aed2a6abf7158809cf4f3c");
+        $iv = Encoding::hexToBin("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
+        $plaintext = Encoding::hexToBin(
             "6bc1bee22e409f96e93d7e117393172a" .
             "ae2d8a571e03ac9c9eb76fac45af8e51" .
             "30c81c46a35ce411e5fbc1191a0a52ef" .
             "f69f2445df4f9b17ad2b417be66c3710"
         );
-        $ciphertext = self::hexToBin(
+        $ciphertext = Encoding::hexToBin(
             "874d6191b620e3261bef6864990db6ce" .
             "9806f66b7970fdff8617187bb9fffdff" .
             "5ae4df3edbd5d35e5b4f09020db03eab" .
             "1e031dda2fbe03d1792170a0f3009cee"
         );
 
-        $config = self::getVersionConfig(parent::VERSION);
+        $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
 
         $computed_ciphertext = self::plainEncrypt($plaintext, $key, $iv, $config);
         if ($computed_ciphertext !== $ciphertext) {
@@ -604,43 +600,69 @@ final class Crypto extends Core
         }
     }
 
-    /**
-     * Take a 4-byte header and get meaningful version information out of it.
-     * Common configuration options should go in Core.php
-     *
-     * @param string $header
-     */
-    protected static function getVersionConfig($header)
+    private static function getVersionConfigFromHeader($header, $min_ver_header)
     {
-        $valid = 0;
-        $valid |= $header[0] ^ "\xDE";
-        $valid |= $header[1] ^ "\xF5";
+        if ($header[0] !== Core::HEADER_MAGIC[0] || $header[1] !== Core::HEADER_MAGIC[1]) {
+            throw new Ex\InvalidCiphertextException(
+                "Ciphertext has a bad magic number."
+            );
+        }
+
         $major = \ord($header[2]);
         $minor = \ord($header[3]);
 
-        if ($major === 1) {
-            return [
-                'CIPHER_METHOD' => 'aes-128-cbc',
-                'KEY_BYTE_SIZE' => 16,
-                'HASH_FUNCTION' => 'sha256',
-                'MAC_BYTE_SIZE' => 32,
-                'ENCRYPTION_INFO' => 'DefusePHP|KeyForEncryption',
-                'AUTHENTICATION_INFO' => 'DefusePHP|KeyForAuthentication'
-            ];
-        }
-        $config = parent::getCoreVersionConfig($major, $minor, $valid);
+        $min_major = \ord($min_ver_header[2]);
+        $min_minor = \ord($min_ver_header[3]);
 
+        if ($major < $min_major || ($major === $min_major && $minor < $min_minor) ) {
+            throw new Ex\InvalidCiphertextException(
+                "Ciphertext is requesting an insecure fallback."
+            );
+        }
+
+        $config = self::getVersionConfigFromMajorMinor($major, $minor);
+
+        return $config;
+    }
+
+    private static function getVersionConfigFromMajorMinor($major, $minor)
+    {
         if ($major === 2) {
             switch ($minor) {
                 case 0:
-                    $config['CIPHER_METHOD'] = 'aes-128-ctr';
-                    break;
+                    return [
+                        'CIPHER_METHOD' => 'aes-128-ctr',
+                        'BLOCK_SIZE' => 16,
+                        'KEY_BYTE_SIZE' => 16,
+                        'SALT_SIZE' => 16,
+                        'HASH_FUNCTION' => 'sha256',
+                        'MAC_BYTE_SIZE' => 32,
+                        'ENCRYPTION_INFO' => 'DefusePHP|V2|KeyForEncryption',
+                        'AUTHENTICATION_INFO' => 'DefusePHP|V2|KeyForAuthentication'
+                    ];
+                default:
+                    throw new Ex\InvalidCiphertextException(
+                        "Unsupported ciphertext version."
+                    );
+            }
+        } elseif ($major === 1) {
+            switch ($minor) {
+                case 0:
+                    return [
+                        'CIPHER_METHOD' => 'aes-128-cbc',
+                        'BLOCK_SIZE' => 16,
+                        'KEY_BYTE_SIZE' => 16,
+                        'HASH_FUNCTION' => 'sha256',
+                        'MAC_BYTE_SIZE' => 32,
+                        'ENCRYPTION_INFO' => 'DefusePHP|KeyForEncryption',
+                        'AUTHENTICATION_INFO' => 'DefusePHP|KeyForAuthentication'
+                    ];
+                default:
+                    throw new Ex\InvalidCiphertextException(
+                        "Unsupported ciphertext version."
+                    );
             }
         }
-
-        if ($valid !== 0) {
-            throw new Ex\InvalidCiphertextException('Unknown ciphertext version');
-        }
-        return $config;
     }
+
 }
