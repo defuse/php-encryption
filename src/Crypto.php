@@ -390,6 +390,14 @@ class Crypto
         return Core::hashEquals($correct_hmac, $message_hmac);
     }
 
+    /**
+     * Get the encryption configuration based on the version in a header.
+     *
+     * @param string $header The header to read the version number from.
+     * @param string $min_ver_header The header of the minimum version number allowed.
+     * @return array
+     * @throws Ex\InvalidCiphertextException
+     */
     protected static function getVersionConfigFromHeader($header, $min_ver_header)
     {
         if ($header[0] !== Core::HEADER_MAGIC[0] || $header[1] !== Core::HEADER_MAGIC[1]) {
@@ -415,6 +423,13 @@ class Crypto
         return $config;
     }
 
+    /**
+     *
+     * @param int $major The major version number.
+     * @param int $minor The minor version number.
+     * @return array
+     * @throws Ex\InvalidCiphertextException
+     */
     protected static function getVersionConfigFromMajorMinor($major, $minor)
     {
         if ($major === 2) {

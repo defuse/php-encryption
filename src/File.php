@@ -718,9 +718,12 @@ final class File implements StreamInterface
     }
 
     /**
-     * Take a 4-byte header and get meaningful version information out of it
+     * Get the encryption configuration based on the version in a header.
      *
-     * @param string $header
+     * @param string $header The header to read the version number from.
+     * @param string $min_ver_header The header of the minimum version number allowed.
+     * @return array
+     * @throws Ex\InvalidCiphertextException
      */
     private static function getFileVersionConfigFromHeader($header, $min_ver_header)
     {
@@ -747,6 +750,13 @@ final class File implements StreamInterface
         return $config;
     }
 
+    /**
+     *
+     * @param int $major The major version number.
+     * @param int $minor The minor version number.
+     * @return array
+     * @throws Ex\InvalidCiphertextException
+     */
     private static function getFileVersionConfigFromMajorMinor($major, $minor)
     {
         if ($major === 2) {
