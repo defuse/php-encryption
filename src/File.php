@@ -45,7 +45,10 @@ final class File implements StreamInterface
      */
     public static function createNewRandomKey()
     {
-        $config = self::getFileVersionConfigFromHeader(Core::CURRENT_FILE_VERSION);
+        $config = self::getFileVersionConfigFromHeader(
+            Core::CURRENT_FILE_VERSION,
+            Core::CURRENT_FILE_VERSION
+        );
         return Core::secureRandom($config['KEY_BYTE_SIZE']);
     }
 
@@ -213,7 +216,10 @@ final class File implements StreamInterface
                 'Output handle must be a resource!'
             );
         }
-        $config = self::getFileVersionConfigFromHeader(Core::CURRENT_FILE_VERSION);
+        $config = self::getFileVersionConfigFromHeader(
+            Core::CURRENT_FILE_VERSION,
+            Core::CURRENT_FILE_VERSION
+        );
 
         // Let's add this check before anything
         if (!\in_array($config['HASH_FUNCTION'], \hash_algos())) {
@@ -398,7 +404,10 @@ final class File implements StreamInterface
             $remaining = 4 - Core::ourStrlen($header);
         } while ($remaining > 0);
 
-        $config = self::getFileVersionConfigFromHeader($header);
+        $config = self::getFileVersionConfigFromHeader(
+            $header,
+            Core::CURRENT_FILE_VERSION
+        );
 
         // Let's add this check before anything
         if (!\in_array($config['HASH_FUNCTION'], \hash_algos())) {
@@ -713,21 +722,32 @@ final class File implements StreamInterface
      *
      * @param string $header
      */
-    private static function getFileVersionConfigFromHeader($header)
+    private static function getFileVersionConfigFromHeader($header, $min_ver_header)
     {
-        $valid = 0;
-        $valid |= ord($header[0]) ^ ord(Core::CURRENT_FILE_VERSION[0]);
-        $valid |= ord($header[1]) ^ ord(Core::CURRENT_FILE_VERSION[1]);
+        if ($header[0] !== Core::CURRENT_FILE_VERSION[0] || $header[1] !== Core::CURRENT_FILE_VERSION[1]) {
+            throw new Ex\InvalidCiphertextException(
+                "Ciphertext file has a bad magic number."
+            );
+        }
+
         $major = \ord($header[2]);
         $minor = \ord($header[3]);
-        $config = self::getFileVersionConfigFromMajorMinor($major, $minor, $valid);
-        if ($valid !== 0) {
-            throw new Ex\InvalidCiphertextException('Unknown ciphertext version');
+
+        $min_major = \ord($min_ver_header[2]);
+        $min_minor = \ord($min_ver_header[3]);
+
+        if ($major < $min_major || ($major === $min_major && $minor < $min_minor)) {
+            throw new Ex\InvalidCiphertextException(
+                "Ciphertext is requesting an insecure fallback."
+            );
         }
+
+        $config = self::getFileVersionConfigFromMajorMinor($major, $minor);
+
         return $config;
     }
 
-    private static function getFileVersionConfigFromMajorMinor($major, $minor, &$valid)
+    private static function getFileVersionConfigFromMajorMinor($major, $minor)
     {
         if ($major === 2) {
             switch ($minor) {
@@ -744,10 +764,14 @@ final class File implements StreamInterface
                     'BUFFER' => 1048576
                 ];
             default:
-                $valid |= 0xFF;
+                throw new Ex\InvalidCiphertextException(
+                    "Unsupported file ciphertext version."
+                );
             }
         } else {
-            $valid |= 0xFF;
+            throw new Ex\InvalidCiphertextException(
+                "Unsupported file ciphertext version."
+            );
         }
     }
 }
