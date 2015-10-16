@@ -2,6 +2,7 @@
 namespace Defuse\Crypto;
 
 use \Defuse\Crypto\Exception as Ex;
+use \Defuse\Crypto\Core;
 
 final class Encoding {
 
@@ -15,7 +16,7 @@ final class Encoding {
     public static function binToHex($bin_string)
     {
         $hex = '';
-        $len = self::ourStrlen($bin_string);
+        $len = Core::ourStrlen($bin_string);
         for ($i = 0; $i < $len; ++$i) {
             $c = \ord($bin_string[$i]) & 0xf;
             $b = \ord($bin_string[$i]) >> 4;
@@ -36,7 +37,7 @@ final class Encoding {
     {
         $hex_pos = 0;
         $bin = '';
-        $hex_len = self::ourStrlen($hex_string);
+        $hex_len = Core::ourStrlen($hex_string);
         $state = 0;
         $c_acc = 0;
 

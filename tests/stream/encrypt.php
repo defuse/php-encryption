@@ -8,7 +8,7 @@ if (!\file_exists('key.txt')) {
 
 $mem = 0;
 $start_time = $end_time = \microtime(true);
-$key = \Defuse\Crypto\Core::hexToBin(\file_get_contents('key.txt'));
+$key = \Defuse\Crypto\Encoding::hexToBin(\file_get_contents('key.txt'));
 
 echo 'Encrypting', "\n", str_repeat('-', 50), "\n\n";
 echo "Load Key:\n\t";

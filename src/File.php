@@ -200,7 +200,7 @@ final class File implements StreamInterface
      * @param string $key
      * @return boolean
      */
-    private static function encryptResource($inputHandle, $outputHandle, $key)
+    public static function encryptResource($inputHandle, $outputHandle, $key)
     {
         // Because we don't have strict typing in PHP 5
         if (!\is_resource($inputHandle)) {
@@ -376,7 +376,7 @@ final class File implements StreamInterface
      * @param string $key
      * @return boolean
      */
-    private static function decryptResource($inputHandle, $outputHandle, $key)
+    public static function decryptResource($inputHandle, $outputHandle, $key)
     {
         // Because we don't have strict typing in PHP 5
         if (!\is_resource($inputHandle)) {
