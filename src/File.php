@@ -555,8 +555,6 @@ final class File implements StreamInterface
                  */
                 if ($pos + $config['BUFFER'] >= $cipher_end) {
                     $break = true;
-                    echo "C end: " . $cipher_end . "\n";
-                    echo $pos . "\n";
                     $read = \fread($inputHandle, $cipher_end - $pos + 1);
                 } else {
                     $read = \fread($inputHandle, $config['BUFFER']);
