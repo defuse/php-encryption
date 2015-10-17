@@ -4,6 +4,7 @@ namespace Defuse\Crypto;
 use \Defuse\Crypto\Exception as Ex;
 
 use \Defuse\Crypto\Core;
+use \Defuse\Crypto\Key;
 use \Defuse\Crypto\Encoding;
 use \Defuse\Crypto\RuntimeTests;
 
@@ -46,8 +47,7 @@ class Crypto
      */
     public static function createNewRandomKey()
     {
-        $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
-        return Core::secureRandom($config['KEY_BYTE_SIZE']);
+        return Key::CreateNewRandomKey(Core::CURRENT_VERSION);
     }
 
     /**
@@ -67,6 +67,15 @@ class Crypto
     public static function encrypt($plaintext, $key, $raw_binary = false)
     {
         RuntimeTests::runtimeTest();
+
+        /* Attempt to validate that the key was generated safely. */
+        if (!is_a($key, "\Defuse\Crypto\Key")) {
+            throw new Ex\CannotPerformOperationException(
+                "The given key is not a valid Key object."
+            );
+        }
+        $key = $key->getRawBytes();
+
         $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
 
         if (Core::ourStrlen($key) !== $config['KEY_BYTE_SIZE']) {
@@ -133,6 +142,15 @@ class Crypto
     public static function decrypt($ciphertext, $key, $raw_binary = false)
     {
         RuntimeTests::runtimeTest();
+
+        /* Attempt to validate that the key was generated safely. */
+        if (!is_a($key, "\Defuse\Crypto\Key")) {
+            throw new Ex\CannotPerformOperationException(
+                "The given key is not a valid Key object."
+            );
+        }
+        $key = $key->getRawBytes();
+
         if (!$raw_binary) {
             $ciphertext = Encoding::hexToBin($ciphertext);
         }
