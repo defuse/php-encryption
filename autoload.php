@@ -24,17 +24,18 @@
      */
     // Since we're on PHP 5.4+ we can use the [] syntax:
     $whitelist = [
-        'Core',
-        'Crypto', 
-        'File',
-        'ExceptionHandler',
-        'StreamInterface',
-        'Exception\CannotPerformOperationException',
-        'Exception\CryptoException',
-        'Exception\CryptoTestFailedException',
-        'Exception\InvalidCiphertextException',
+        '\\Core',
+        '\\Crypto', 
+        '\\File',
+        '\\ExceptionHandler',
+        '\\StreamInterface',
+        '\\Exception\\CannotPerformOperationException',
+        '\\Exception\\CryptoException',
+        '\\Exception\\CryptoTestFailedException',
+        '\\Exception\\InvalidCiphertextException',
     ];
     if (!\in_array($relative_class, $whitelist)) {
+        var_dump($relative_class);
         // Skip it.
         return;
     }
