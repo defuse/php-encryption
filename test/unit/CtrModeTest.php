@@ -227,4 +227,50 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
             $config
         );
     }
+
+    public function testCompatibilityWithOpenSSL()
+    {
+        $config = [
+            'CIPHER_METHOD' => 'aes-128-ctr',
+        ];
+
+        /* Plaintext is 0x300 blocks. */
+        $plaintext = str_repeat('a', 0x300 * 16);
+
+        /* Start at zero. */
+        $starting_nonce = str_repeat("\x00", 16);
+
+        $ciphertext = openssl_encrypt(
+            $plaintext,
+            $config['CIPHER_METHOD'],
+            'YELLOW SUBMARINE',
+            OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
+            $starting_nonce
+        );
+
+        /* Take the second half, the last 0x150 blocks. */
+        $cipher_lasthalf = mb_substr($ciphertext, 0x150 * 16, 0x150 * 16, '8bit');
+
+        /* Compute what the nonce should be at the start of the last half. */
+        $computed_nonce = \Defuse\Crypto\Core::incrementCounter(
+            $starting_nonce,
+            0x150,
+            $config
+        );
+
+        /* Try to decrypt it using that nonce. */
+        $decrypt = openssl_decrypt(
+            $cipher_lasthalf,
+            $config['CIPHER_METHOD'],
+            'YELLOW SUBMARINE',
+            OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
+            $computed_nonce
+        );
+
+        /* If it decrypts properly, we computed the nonce the same way. */
+        $this->assertEquals(
+            str_repeat('a', 0x150 * 16),
+            $decrypt
+        );
+    }
 }
