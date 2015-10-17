@@ -2,6 +2,7 @@
 namespace Defuse\Crypto;
 
 use \Defuse\Crypto\Exception as Ex;
+use \Defuse\Crypto\Crypto;
 
 final class Core
 {
@@ -189,7 +190,7 @@ final class Core
             throw new Ex\CannotPerformOperationException();
         }
 
-        $blind = self::createNewRandomKey();
+        $blind = self::secureRandom(32);
         $message_compare = hash_hmac('sha256', $given, $blind);
         $correct_compare = hash_hmac('sha256', $expected, $blind);
         return $correct_compare === $message_compare;
