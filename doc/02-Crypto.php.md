@@ -3,8 +3,8 @@ Symmetric Key Encryption
 
 At a glance:
 
-* **Cipher and Mode**: `AES-128-CBC`
-* **Padding**: `PKCS#7`
+* **Cipher and Mode**: `AES-128-CTR`
+* **Padding**: None (CTR mode doesn't pad)
 * **Authentication**: `HMAC-SHA-256`
 * **Construction**: `Encrypt then MAC`
 * **Algorithm Backend**: `ext/openssl`
