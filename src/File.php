@@ -4,6 +4,7 @@ namespace Defuse\Crypto;
 use \Defuse\Crypto\Exception as Ex;
 
 use \Defuse\Crypto\Core;
+use \Defuse\Crypto\FileConfig;
 
 /*
  * PHP Encryption Library
@@ -49,7 +50,7 @@ final class File implements StreamInterface
             Core::CURRENT_FILE_VERSION,
             Core::CURRENT_FILE_VERSION
         );
-        return Core::secureRandom($config['KEY_BYTE_SIZE']);
+        return Core::secureRandom($config->keyByteSize());
     }
 
     /**
@@ -236,40 +237,40 @@ final class File implements StreamInterface
         );
 
         // Let's add this check before anything
-        if (!\in_array($config['HASH_FUNCTION'], \hash_algos())) {
+        if (!\in_array($config->hashFunctionName(), \hash_algos())) {
             throw new Ex\CannotPerformOperationException(
                 'The specified hash function does not exist'
             );
         }
 
         // Sanity check; key must be the appropriate length!
-        if (Core::ourStrlen($key) !== $config['KEY_BYTE_SIZE']) {
+        if (Core::ourStrlen($key) !== $config->keyByteSize()) {
             throw new Ex\InvalidInput(
-                'Invalid key length. Keys should be '.$config['KEY_BYTE_SIZE'].' bytes long.'
+                'Invalid key length. Keys should be '.$config->keyByteSize().' bytes long.'
             );
         }
 
         /**
          *  Let's split our keys
          */
-        $file_salt = Core::secureRandom($config['SALT_SIZE']);
+        $file_salt = Core::secureRandom($config->saltByteSize());
 
         // $ekey -- Encryption Key -- used for AES
         $ekey = Core::HKDF(
-            $config['HASH_FUNCTION'],
+            $config->hashFunctionName(),
             $key,
-            $config['KEY_BYTE_SIZE'],
-            $config['ENCRYPTION_INFO'],
+            $config->keyByteSize(),
+            $config->encryptionInfoString(),
             $file_salt,
             $config
         );
 
         // $akey -- Authentication Key -- used for HMAC
         $akey = Core::HKDF(
-            $config['HASH_FUNCTION'],
+            $config->hashFunctionName(),
             $key,
-            $config['KEY_BYTE_SIZE'],
-            $config['AUTHENTICATION_INFO'],
+            $config->keyByteSize(),
+            $config->authenticationInfoString(),
             $file_salt,
             $config
         );
@@ -278,7 +279,7 @@ final class File implements StreamInterface
          *  Generate a random initialization vector.
          */
         Core::ensureFunctionExists("openssl_cipher_iv_length");
-        $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
+        $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
         if ($ivsize === false || $ivsize <= 0) {
             throw new Ex\CannotPerformOperationException(
                 'Improper IV size'
@@ -292,7 +293,7 @@ final class File implements StreamInterface
         if (\fwrite(
             $outputHandle,
             Core::CURRENT_FILE_VERSION . $file_salt . $iv, 
-            Core::HEADER_VERSION_SIZE + $config['SALT_SIZE'] + $ivsize
+            Core::HEADER_VERSION_SIZE + $config->saltByteSize() + $ivsize
         ) === false) {
             throw new Ex\CannotPerformOperationException(
                 'Cannot write to output file'
@@ -303,7 +304,7 @@ final class File implements StreamInterface
          * We're going to initialize a HMAC-SHA256 with the given $akey
          * and update it with each ciphertext chunk
          */
-        $hmac = \hash_init($config['HASH_FUNCTION'], HASH_HMAC, $akey);
+        $hmac = \hash_init($config->hashFunctionName(), HASH_HMAC, $akey);
         if ($hmac === false) {
             throw new Ex\CannotPerformOperationException(
                 'Cannot initialize a hash context'
@@ -320,7 +321,7 @@ final class File implements StreamInterface
          * How much do we increase the counter after each buffered encryption to
          * prevent nonce reuse?
          */
-        $inc = $config['BUFFER'] / $config['BLOCK_SIZE'];
+        $inc = $config->bufferByteSize() / $config->blockByteSize();
 
         /**
          * Let's MAC our salt and IV/nonce
@@ -333,7 +334,7 @@ final class File implements StreamInterface
          * Iterate until we reach the end of the input file
          */
         while (!\feof($inputHandle)) {
-            $read = \fread($inputHandle, $config['BUFFER']);
+            $read = \fread($inputHandle, $config->bufferByteSize());
             if ($read === false) {
                 throw new Ex\CannotPerformOperationException(
                     'Cannot read input file'
@@ -346,7 +347,7 @@ final class File implements StreamInterface
              */
             $encrypted = \openssl_encrypt(
                 $read,
-                $config['CIPHER_METHOD'],
+                $config->cipherMethod(),
                 $ekey,
                 OPENSSL_RAW_DATA,
                 $thisIv
@@ -378,7 +379,7 @@ final class File implements StreamInterface
         // Now let's get our HMAC and append it
         $finalHMAC = \hash_final($hmac, true);
 
-        $appended = \fwrite($outputHandle, $finalHMAC, $config['MAC_BYTE_SIZE']);
+        $appended = \fwrite($outputHandle, $finalHMAC, $config->macByteSize());
         if ($appended === false) {
             throw new Ex\CannotPerformOperationException(
                 'Cannot write to output file'
@@ -424,20 +425,20 @@ final class File implements StreamInterface
         );
 
         // Let's add this check before anything
-        if (!\in_array($config['HASH_FUNCTION'], \hash_algos())) {
+        if (!\in_array($config->hashFunctionName(), \hash_algos())) {
             throw new Ex\CannotPerformOperationException(
                 'The specified hash function does not exist'
             );
         }
 
         // Sanity check; key must be the appropriate length!
-        if (Core::ourStrlen($key) !== $config['KEY_BYTE_SIZE']) {
+        if (Core::ourStrlen($key) !== $config->keyByteSize()) {
             throw new Ex\InvalidInput(
-                'Invalid key length. Keys should be '.$config['KEY_BYTE_SIZE'].' bytes long.'
+                'Invalid key length. Keys should be '.$config->keyByteSize().' bytes long.'
             );
         }
         // Let's grab the file salt.
-        $file_salt = \fread($inputHandle, $config['SALT_SIZE']);
+        $file_salt = \fread($inputHandle, $config->saltByteSize());
         if ($file_salt === false ) {
             throw new Ex\CannotPerformOperationException(
                 'Cannot read input file'
@@ -456,10 +457,10 @@ final class File implements StreamInterface
              * $ekey -- Encryption Key -- used for AES
              */
             $ekey = Core::HKDF(
-                $config['HASH_FUNCTION'],
+                $config->hashFunctionName(),
                 $key,
-                $config['KEY_BYTE_SIZE'],
-                $config['ENCRYPTION_INFO'],
+                $config->keyByteSize(),
+                $config->encryptionInfoString(),
                 $file_salt,
                 $config
             );
@@ -468,10 +469,10 @@ final class File implements StreamInterface
              * $akey -- Authentication Key -- used for HMAC
              */
             $akey = Core::HKDF(
-                $config['HASH_FUNCTION'],
+                $config->hashFunctionName(),
                 $key,
-                $config['KEY_BYTE_SIZE'],
-                $config['AUTHENTICATION_INFO'],
+                $config->keyByteSize(),
+                $config->authenticationInfoString(),
                 $file_salt,
                 $config
             );
@@ -481,7 +482,7 @@ final class File implements StreamInterface
              *
              * It should be the first N blocks of the file (N = 16)
              */
-            $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
+            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
             $iv = \fread($inputHandle, $ivsize);
             if ($iv === false ) {
                 throw new Ex\CannotPerformOperationException(
@@ -490,7 +491,7 @@ final class File implements StreamInterface
             }
 
             // How much do we increase the counter after each buffered encryption to prevent nonce reuse
-            $inc = $config['BUFFER'] / $config['BLOCK_SIZE'];
+            $inc = $config->bufferByteSize() / $config->blockByteSize();
 
             $thisIv = $iv;
 
@@ -499,7 +500,7 @@ final class File implements StreamInterface
              *
              * It should be the last N blocks of the file (N = 32)
              */
-            if (\fseek($inputHandle, (-1 * $config['MAC_BYTE_SIZE']), SEEK_END) === false) {
+            if (\fseek($inputHandle, (-1 * $config->macByteSize()), SEEK_END) === false) {
                 throw new Ex\CannotPerformOperationException(
                     'Cannot seek to beginning of MAC within input file'
                 );
@@ -515,7 +516,7 @@ final class File implements StreamInterface
             --$cipher_end; // We need to subtract one
 
             // We keep our MAC stored in this variable
-            $stored_mac = \fread($inputHandle, $config['MAC_BYTE_SIZE']);
+            $stored_mac = \fread($inputHandle, $config->macByteSize());
             if ($stored_mac === false) {
                 throw new Ex\CannotPerformOperationException(
                     'Cannot read input file'
@@ -525,7 +526,7 @@ final class File implements StreamInterface
             /**
              * We begin recalculating the HMAC for the entire file...
              */
-            $hmac = \hash_init($config['HASH_FUNCTION'], HASH_HMAC, $akey);
+            $hmac = \hash_init($config->hashFunctionName(), HASH_HMAC, $akey);
             if ($hmac === false) {
                 throw new Ex\CannotPerformOperationException(
                     'Cannot initialize a hash context'
@@ -544,7 +545,7 @@ final class File implements StreamInterface
             /**
              * Set it to the first non-salt and non-IV byte
              */
-            if (\fseek($inputHandle, $config['SALT_SIZE'] + $ivsize, SEEK_CUR) === false) {
+            if (\fseek($inputHandle, $config->saltByteSize() + $ivsize, SEEK_CUR) === false) {
                 throw new Ex\CannotPerformOperationException(
                     'Cannot read seek input file to beginning of ciphertext'
                 );
@@ -576,11 +577,11 @@ final class File implements StreamInterface
                  * Would a full DBUFFER read put it past the end of the
                  * ciphertext? If so, only return a portion of the file.
                  */
-                if ($pos + $config['BUFFER'] >= $cipher_end) {
+                if ($pos + $config->bufferByteSize() >= $cipher_end) {
                     $break = true;
                     $read = \fread($inputHandle, $cipher_end - $pos + 1);
                 } else {
-                    $read = \fread($inputHandle, $config['BUFFER']);
+                    $read = \fread($inputHandle, $config->bufferByteSize());
                 }
                 if ($read === false) {
                     throw new Ex\CannotPerformOperationException(
@@ -621,7 +622,7 @@ final class File implements StreamInterface
             /**
              * Return file pointer to the first non-header, non-IV byte in the file
              */
-            if (\fseek($inputHandle, $config['SALT_SIZE'] + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+            if (\fseek($inputHandle, $config->saltByteSize() + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
                 throw new Ex\CannotPerformOperationException(
                     'Could not move the input file pointer during decryption'
                 );
@@ -651,11 +652,11 @@ final class File implements StreamInterface
                  * Would a full BUFFER read put it past the end of the
                  * ciphertext? If so, only return a portion of the file.
                  */
-                if ($pos + $config['BUFFER'] >= $cipher_end) {
+                if ($pos + $config->bufferByteSize() >= $cipher_end) {
                     $breakW = true;
                     $read = \fread($inputHandle, $cipher_end - $pos + 1);
                 } else {
-                    $read = \fread($inputHandle, $config['BUFFER']);
+                    $read = \fread($inputHandle, $config->bufferByteSize());
                 }
                 if ($read === false) {
                     throw new Ex\CannotPerformOperationException(
@@ -694,7 +695,7 @@ final class File implements StreamInterface
                  */
                 $decrypted = \openssl_decrypt(
                     $read,
-                    $config['CIPHER_METHOD'],
+                    $config->cipherMethod(),
                     $ekey,
                     OPENSSL_RAW_DATA,
                     $thisIv
@@ -776,17 +777,17 @@ final class File implements StreamInterface
         if ($major === 2) {
             switch ($minor) {
             case 0:
-                return [
-                    'CIPHER_METHOD' => 'aes-256-ctr',
-                    'BLOCK_SIZE' => 16,
-                    'KEY_BYTE_SIZE' => 32,
-                    'SALT_SIZE' => 16,
-                    'HASH_FUNCTION' => 'sha256',
-                    'MAC_BYTE_SIZE' => 32,
-                    'ENCRYPTION_INFO' => 'DefusePHP|V2File|KeyForEncryption',
-                    'AUTHENTICATION_INFO' => 'DefusePHP|V2File|KeyForAuthentication',
-                    'BUFFER' => 1048576
-                ];
+                return new FileConfig([
+                    'cipher_method' => 'aes-256-ctr',
+                    'block_byte_size' => 16,
+                    'key_byte_size' => 32,
+                    'salt_byte_size' => 16,
+                    'hash_function_name' => 'sha256',
+                    'mac_byte_size' => 32,
+                    'encryption_info_string' => 'DefusePHP|V2File|KeyForEncryption',
+                    'authentication_info_string' => 'DefusePHP|V2File|KeyForAuthentication',
+                    'buffer_byte_size' => 1048576
+                ]);
             default:
                 throw new Ex\InvalidCiphertextException(
                     "Unsupported file ciphertext version."

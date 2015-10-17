@@ -48,7 +48,7 @@ class RuntimeTests extends Crypto
             $test_state = 2;
 
             Core::ensureFunctionExists('openssl_get_cipher_methods');
-            if (\in_array($config['CIPHER_METHOD'], \openssl_get_cipher_methods()) === false) {
+            if (\in_array($config->cipherMethod(), \openssl_get_cipher_methods()) === false) {
                 throw new Ex\CryptoTestFailedException("Cipher method not supported.");
             }
 
@@ -57,11 +57,11 @@ class RuntimeTests extends Crypto
             RuntimeTests::HKDFTestVector($config);
 
             RuntimeTests::testEncryptDecrypt($config);
-            if (Core::ourStrlen(Crypto::createNewRandomKey()->getRawBytes()) != $config['KEY_BYTE_SIZE']) {
+            if (Core::ourStrlen(Crypto::createNewRandomKey()->getRawBytes()) != $config->keyByteSize()) {
                 throw new Ex\CryptoTestFailedException();
             }
 
-            if ($config['ENCRYPTION_INFO'] == $config['AUTHENTICATION_INFO']) {
+            if ($config->encryptionInfoString() == $config->authenticationInfoString()) {
                 throw new Ex\CryptoTestFailedException();
             }
         } catch (Ex\CryptoTestFailedException $ex) {
@@ -121,7 +121,7 @@ class RuntimeTests extends Crypto
 
         // Ciphertext too small (shorter than HMAC).
         $key = Crypto::createNewRandomKey();
-        $ciphertext = \str_repeat("A", $config['MAC_BYTE_SIZE'] - 1);
+        $ciphertext = \str_repeat("A", $config->macByteSize() - 1);
         try {
             Crypto::decrypt($ciphertext, $key, true);
             throw new Ex\CryptoTestFailedException();
@@ -184,7 +184,7 @@ class RuntimeTests extends Crypto
         $key = \str_repeat("\x0b", 20);
         $data = "Hi There";
         $correct = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
-        if (\hash_hmac($config['HASH_FUNCTION'], $data, $key) !== $correct) {
+        if (\hash_hmac($config->hashFunctionName(), $data, $key) !== $correct) {
             throw new Ex\CryptoTestFailedException();
         }
     }

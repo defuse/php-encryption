@@ -1,6 +1,18 @@
 <?php
 
 use \Defuse\Crypto\Core;
+use \Defuse\Crypto\FileConfig;
+
+class MockConfig extends FileConfig
+{
+    public function __construct() { }
+
+    public function cipherMethod()
+    {
+        return 'aes-256-ctr';
+    }
+}
+
 
 class CtrModeTest extends PHPUnit_Framework_TestCase
 {
@@ -72,10 +84,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
      */
     public function testIncrementCounterTestVector($start, $end, $inc)
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
-
+        $config = new MockConfig;
         $actual_end = \Defuse\Crypto\Core::incrementCounter(\hex2bin($start), $inc, $config);
         $this->assertEquals(
             $end,
@@ -86,9 +95,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     public function testFuzzIncrementCounter()
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
+        $config = new MockConfig;
 
         /* Test carry propagation. */
         for ($offset = 0; $offset < 16; $offset++) {
@@ -147,9 +154,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
      */
     public function testIncrementByNegativeValue()
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
+        $config = new MockConfig;
 
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
@@ -174,9 +179,8 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
      */
     public function testIncrementCausingOverflowInFirstByte($lsb)
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
+        $config = new MockConfig;
+
         /* Smallest value that will overflow. */
         $increment = (PHP_INT_MAX - $lsb) + 1;
         $start = str_repeat("\x00", 15) . chr($lsb);
@@ -188,9 +192,8 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
      */
     public function testIncrementWithShortIvLength()
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
+        $config = new MockConfig;
+
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 15),
             1,
@@ -203,9 +206,8 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
      */
     public function testIncrementWithLongIvLength()
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
+        $config = new MockConfig;
+
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 17),
             1,
@@ -218,9 +220,8 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
      */
     public function testIncrementByNonInteger()
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
+        $config = new MockConfig;
+
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
             1.0,
@@ -230,9 +231,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     public function testCompatibilityWithOpenSSL()
     {
-        $config = [
-            'CIPHER_METHOD' => 'aes-128-ctr',
-        ];
+        $config = new MockConfig;
 
         /* Plaintext is 0x300 blocks. */
         $plaintext = str_repeat('a', 0x300 * 16);
@@ -242,7 +241,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
         $ciphertext = openssl_encrypt(
             $plaintext,
-            $config['CIPHER_METHOD'],
+            $config->cipherMethod(),
             'YELLOW SUBMARINE',
             OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
             $starting_nonce
@@ -261,7 +260,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         /* Try to decrypt it using that nonce. */
         $decrypt = openssl_decrypt(
             $cipher_lasthalf,
-            $config['CIPHER_METHOD'],
+            $config->cipherMethod(),
             'YELLOW SUBMARINE',
             OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
             $computed_nonce
