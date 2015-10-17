@@ -57,7 +57,7 @@ class RuntimeTests extends Crypto
             RuntimeTests::HKDFTestVector($config);
 
             RuntimeTests::testEncryptDecrypt($config);
-            if (Core::ourStrlen(Crypto::createNewRandomKey()) != $config['KEY_BYTE_SIZE']) {
+            if (Core::ourStrlen(Crypto::createNewRandomKey()->getRawBytes()) != $config['KEY_BYTE_SIZE']) {
                 throw new Ex\CryptoTestFailedException();
             }
 
