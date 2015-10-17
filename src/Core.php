@@ -27,7 +27,7 @@ final class Core
     {
         static $ivsize = null;
         if ($ivsize === null) {
-            $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
+            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
             if ($ivsize === false) {
                 throw new Ex\CannotPerformOperationException(
                     "Problem obtaining the correct nonce length."
@@ -107,8 +107,8 @@ final class Core
     public static function HKDF($hash, $ikm, $length, $info = '', $salt = null, $config = null)
     {
         // Find the correct digest length as quickly as we can.
-        $digest_length = $config['MAC_BYTE_SIZE'];
-        if ($hash != $config['HASH_FUNCTION']) {
+        $digest_length = $config->macByteSize();
+        if ($hash != $config->hashFunctionName()) {
             $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
         }
         // Sanity-check the desired output length.
