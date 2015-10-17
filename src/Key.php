@@ -176,4 +176,13 @@ final class Key
             "Invalid key version header."
         );
     }
+
+    /*
+     * NEVER use this, exept for testing.
+     */
+    public static function LoadFromRawBytesForTestingPurposesOnlyInsecure($bytes)
+    {
+        return new Key(self::KEY_CURRENT_VERSION, $bytes);
+    }
+
 }

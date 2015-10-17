@@ -425,7 +425,7 @@ class Crypto
      * @return array
      * @throws Ex\InvalidCiphertextException
      */
-    protected static function getVersionConfigFromHeader($header, $min_ver_header)
+    public static function getVersionConfigFromHeader($header, $min_ver_header)
     {
         if (Core::ourSubstr($header, 0, 2) !== Core::ourSubstr(Core::HEADER_MAGIC, 0, 2)) {
             throw new Ex\InvalidCiphertextException(

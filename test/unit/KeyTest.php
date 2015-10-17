@@ -49,4 +49,16 @@ class KeyTest extends PHPUnit_Framework_TestCase
         $str[2*Key::KEY_HEADER_SIZE + 8] = 'f';
         Key::LoadFromAsciiSafeString($str);
     }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedExceptionMessage invalid hex encoding
+     */
+    function testBadHexEncoding()
+    {
+        $key = Key::CreateNewRandomKey();
+        $str = $key->saveToAsciiSafeString();
+        $str[0] = "Z";
+        Key::LoadFromAsciiSafeString($str);
+    }
 }
