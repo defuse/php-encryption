@@ -65,7 +65,13 @@ final class Key
 
     public static function LoadFromAsciiSafeString($savedKeyString)
     {
-        $bytes = Encoding::hexToBin($savedKeyString);
+        try {
+            $bytes = Encoding::hexToBin($savedKeyString);
+        } catch (\RangeException $ex) {
+            throw new Ex\CannotPerformOperationException(
+                "Key has invalid hex encoding."
+            );
+        }
 
         /* Make sure we have enough bytes to get the version header. */
         if (Core::ourStrlen($bytes) < self::KEY_HEADER_SIZE) {
