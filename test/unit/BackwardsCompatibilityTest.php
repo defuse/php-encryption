@@ -148,7 +148,9 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
             array(2, 1),
             array(2, 2),
             array(3, 0),
-            array(4, 0)
+            array(4, 0),
+            array(255, 0),
+            array(255, 255)
         );
     }
 
