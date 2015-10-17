@@ -741,7 +741,7 @@ final class File implements StreamInterface
      */
     private static function getFileVersionConfigFromHeader($header, $min_ver_header)
     {
-        if ($header[0] !== Core::CURRENT_FILE_VERSION[0] || $header[1] !== Core::CURRENT_FILE_VERSION[1]) {
+        if (Core::ourSubstr($header, 0, 2) !== Core::ourSubstr(Core::HEADER_MAGIC_FILE, 0, 2)) {
             throw new Ex\InvalidCiphertextException(
                 "Ciphertext file has a bad magic number."
             );
