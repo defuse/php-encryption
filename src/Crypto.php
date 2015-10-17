@@ -488,6 +488,10 @@ class Crypto
                         "Unsupported ciphertext version."
                     );
             }
+        } else {
+            throw new Ex\InvalidCiphertextException(
+                "Unsupported ciphertext version."
+            );
         }
     }
 
