@@ -33,17 +33,17 @@ fi
 
 # Let's grab the latest release and its signature
 if [ ! -f phpunit.phar ]; then
-    wget https://phar.phpunit.de/phpunit.phar
-    if [ $? -ne 0 ]; then
-        echo "wget phpunit.phar was unsuccessful"
-        exit 1
+    if [[ $PHP_VERSION -ge 50600 ]]; then
+        wget https://phar.phpunit.de/phpunit.phar
+    else
+        wget -O phpunit.phar https://phar.phpunit.de/phpunit-old.phar
     fi
 fi
 if [ ! -f phpunit.phar.asc ]; then
-    wget https://phar.phpunit.de/phpunit.phar.asc
-    if [ $? -ne 0 ]; then
-        echo "wget phpunit.phar.asc was unsuccessful"
-        exit 1
+    if [[ $PHP_VERSION -ge 50600 ]]; then
+        wget https://phar.phpunit.de/phpunit.phar.asc
+    else
+        wget -O phpunit.phar.asc https://phar.phpunit.de/phpunit-old.phar.asc
     fi
 fi
 
