@@ -152,7 +152,13 @@ class Crypto
         $key = $key->getRawBytes();
 
         if (!$raw_binary) {
-            $ciphertext = Encoding::hexToBin($ciphertext);
+            try {
+                $ciphertext = Encoding::hexToBin($ciphertext);
+            } catch (\RangeException $ex) {
+                throw new Ex\InvalidCiphertextException(
+                    "Ciphertext has invalid hex encoding."
+                );
+            }
         }
 
         // Grab the header tag
