@@ -164,7 +164,7 @@ final class Core
      * @param string $expected string (raw binary)
      * @param string $given string (raw binary)
      * @return boolean
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
     public static function hashEquals($expected, $given)
     {

@@ -81,7 +81,7 @@ final class File implements StreamInterface
              */
             $if = \fopen($inputFilename, 'rb');
             if ($if === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot open input file for encrypting'
                 );
             }
@@ -92,7 +92,7 @@ final class File implements StreamInterface
              */
             $of = \fopen($outputFilename, 'wb');
             if ($of === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot open output file for encrypting'
                 );
             }
@@ -107,12 +107,12 @@ final class File implements StreamInterface
          * Close handles
          */
         if (\fclose($if) === false) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot close input file for encrypting'
             );
         }
         if (\fclose($of) === false) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot close input file for encrypting'
             );
         }
@@ -152,7 +152,7 @@ final class File implements StreamInterface
              */
             $if = \fopen($inputFilename, 'rb');
             if ($if === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot open input file for decrypting'
                 );
             }
@@ -163,7 +163,7 @@ final class File implements StreamInterface
              */
             $of = \fopen($outputFilename, 'wb');
             if ($of === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot open output file for decrypting'
                 );
             }
@@ -178,12 +178,12 @@ final class File implements StreamInterface
          * Close handles
          */
         if (\fclose($if) === false) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot close input file for decrypting'
             );
         }
         if (\fclose($of) === false) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot close input file for decrypting'
             );
         }
@@ -223,7 +223,7 @@ final class File implements StreamInterface
 
         // Let's add this check before anything
         if (!\in_array($config['HASH_FUNCTION'], \hash_algos())) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'The specified hash function does not exist'
             );
         }
@@ -266,7 +266,7 @@ final class File implements StreamInterface
         Core::ensureFunctionExists("openssl_cipher_iv_length");
         $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
         if ($ivsize === false || $ivsize <= 0) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Improper IV size'
             );
         }
@@ -280,7 +280,7 @@ final class File implements StreamInterface
             Core::CURRENT_FILE_VERSION . $file_salt . $iv, 
             Core::HEADER_VERSION_SIZE + $config['SALT_SIZE'] + $ivsize
         ) === false) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot write to output file'
             );
         }
@@ -291,7 +291,7 @@ final class File implements StreamInterface
          */
         $hmac = \hash_init($config['HASH_FUNCTION'], HASH_HMAC, $akey);
         if ($hmac === false) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot initialize a hash context'
             );
         }
@@ -321,7 +321,7 @@ final class File implements StreamInterface
         while (!\feof($inputHandle)) {
             $read = \fread($inputHandle, $config['BUFFER']);
             if ($read === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot read input file'
                 );
             }
@@ -341,7 +341,7 @@ final class File implements StreamInterface
              * Check that the encryption was performed successfully
              */
             if ($encrypted === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'OpenSSL encryption error'
                 );
             }
@@ -350,7 +350,7 @@ final class File implements StreamInterface
              * Write the ciphertext to the output file
              */
             if (\fwrite($outputHandle, $encrypted, Core::ourStrlen($encrypted)) === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot write to output file during encryption'
                 );
             }
@@ -366,7 +366,7 @@ final class File implements StreamInterface
 
         $appended = \fwrite($outputHandle, $finalHMAC, $config['MAC_BYTE_SIZE']);
         if ($appended === false) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot write to output file'
             );
         }
@@ -411,7 +411,7 @@ final class File implements StreamInterface
 
         // Let's add this check before anything
         if (!\in_array($config['HASH_FUNCTION'], \hash_algos())) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'The specified hash function does not exist'
             );
         }
@@ -425,7 +425,7 @@ final class File implements StreamInterface
         // Let's grab the file salt.
         $file_salt = \fread($inputHandle, $config['SALT_SIZE']);
         if ($file_salt === false ) {
-            throw new Ex\CannotPerformOperation(
+            throw new Ex\CannotPerformOperationException(
                 'Cannot read input file'
             );
         }
@@ -470,7 +470,7 @@ final class File implements StreamInterface
             $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
             $iv = \fread($inputHandle, $ivsize);
             if ($iv === false ) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot read input file'
                 );
             }
@@ -486,7 +486,7 @@ final class File implements StreamInterface
              * It should be the last N blocks of the file (N = 32)
              */
             if (\fseek($inputHandle, (-1 * $config['MAC_BYTE_SIZE']), SEEK_END) === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot seek to beginning of MAC within input file'
                 );
             }
@@ -494,7 +494,7 @@ final class File implements StreamInterface
             // Grab our last position of ciphertext before we read the MAC
             $cipher_end = \ftell($inputHandle);
             if ($cipher_end === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot read input file'
                 );
             }
@@ -503,7 +503,7 @@ final class File implements StreamInterface
             // We keep our MAC stored in this variable
             $stored_mac = \fread($inputHandle, $config['MAC_BYTE_SIZE']);
             if ($stored_mac === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot read input file'
                 );
             }
@@ -513,7 +513,7 @@ final class File implements StreamInterface
              */
             $hmac = \hash_init($config['HASH_FUNCTION'], HASH_HMAC, $akey);
             if ($hmac === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot initialize a hash context'
                 );
             }
@@ -522,7 +522,7 @@ final class File implements StreamInterface
              * Reset file pointer to the beginning of the file after the header
              */
             if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot read seek within input file'
                 );
             }
@@ -531,7 +531,7 @@ final class File implements StreamInterface
              * Set it to the first non-salt and non-IV byte
              */
             if (\fseek($inputHandle, $config['SALT_SIZE'] + $ivsize, SEEK_CUR) === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Cannot read seek input file to beginning of ciphertext'
                 );
             }
@@ -553,7 +553,7 @@ final class File implements StreamInterface
                  */
                 $pos = \ftell($inputHandle);
                 if ($pos === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'Could not get current position in input file during decryption'
                     );
                 }
@@ -569,7 +569,7 @@ final class File implements StreamInterface
                     $read = \fread($inputHandle, $config['BUFFER']);
                 }
                 if ($read === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'Could not read input file during decryption'
                     );
                 }
@@ -583,7 +583,7 @@ final class File implements StreamInterface
                  */
                 $chunkMAC = \hash_copy($hmac);
                 if ($chunkMAC === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'Cannot duplicate a hash context'
                     );
                 }
@@ -597,7 +597,7 @@ final class File implements StreamInterface
          * 3. Did we match?
          */
             if (!Core::hashEquals($finalHMAC, $stored_mac)) {
-                throw new Ex\InvalidCiphertext(
+                throw new Ex\InvalidCiphertextException(
                     'Message Authentication failure; tampering detected.'
                 );
             }
@@ -608,7 +608,7 @@ final class File implements StreamInterface
              * Return file pointer to the first non-header, non-IV byte in the file
              */
             if (\fseek($inputHandle, $config['SALT_SIZE'] + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
-                throw new Ex\CannotPerformOperation(
+                throw new Ex\CannotPerformOperationException(
                     'Could not move the input file pointer during decryption'
                 );
             }
@@ -628,7 +628,7 @@ final class File implements StreamInterface
                  */
                 $pos = \ftell($inputHandle);
                 if ($pos === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'Could not get current position in input file during decryption'
                     );
                 }
@@ -644,7 +644,7 @@ final class File implements StreamInterface
                     $read = \fread($inputHandle, $config['BUFFER']);
                 }
                 if ($read === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'Could not read input file during decryption'
                     );
                 }
@@ -657,14 +657,14 @@ final class File implements StreamInterface
                 \hash_update($hmac2, $read);
                 $calcMAC = \hash_copy($hmac2);
                 if ($calcMAC === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'Cannot duplicate a hash context'
                     );
                 }
                 $calc = \hash_final($calcMAC);
 
                 if (empty($macs)) {
-                    throw new Ex\InvalidCiphertext(
+                    throw new Ex\InvalidCiphertextException(
                         'File was modified after MAC verification'
                     );
                 } elseif (!Core::hashEquals(\array_shift($macs), $calc)) {
@@ -690,7 +690,7 @@ final class File implements StreamInterface
                  * Test for decryption faulure
                  */
                 if ($decrypted === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'OpenSSL decryption error'
                     );
                 }
@@ -708,7 +708,7 @@ final class File implements StreamInterface
                  * Check result
                  */
                 if ($result === false) {
-                    throw new Ex\CannotPerformOperation(
+                    throw new Ex\CannotPerformOperationException(
                         'Could not write to output file during decryption.'
                     );
                 }

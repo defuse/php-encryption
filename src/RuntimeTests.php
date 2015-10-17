@@ -16,7 +16,7 @@ class RuntimeTests extends Crypto
 {
     /*
      * Runs tests.
-     * Raises CannotPerformOperationExceptionException or CryptoTestFailedExceptionException if
+     * Raises Ex\CannotPerformOperationException or Ex\CryptoTestFailedException if
      * one of the tests fail. If any tests fails, your system is not capable of
      * performing encryption, so make sure you fail safe in that case.
      */
@@ -88,7 +88,7 @@ class RuntimeTests extends Crypto
             $decrypted = Crypto::decrypt($ciphertext, $key, true);
         } catch (Ex\InvalidCiphertextException $ex) {
             // It's important to catch this and change it into a
-            // CryptoTestFailedExceptionException, otherwise a test failure could trick
+            // Ex\CryptoTestFailedException, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
             throw new Ex\CryptoTestFailedException();
         }
