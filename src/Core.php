@@ -33,7 +33,7 @@ final class Core
             }
         }
 
-        if (strlen($ctr) !== $ivsize) {
+        if (self::ourStrlen($ctr) !== $ivsize) {
             throw new Ex\CannotPerformOperationException(
                 "Trying to increment a nonce of the wrong size."
             );
