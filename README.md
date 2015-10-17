@@ -8,9 +8,8 @@ This is a class for doing symmetric encryption in PHP. **Requires PHP 5.4 or new
 Implementation
 --------------
 
-Messages are encrypted with AES-128 in CBC mode and are authenticated with
-HMAC-SHA256 (Encrypt-then-Mac). PKCS7 padding is used to pad the message to
-a multiple of the block size. HKDF is used to split the user-provided key into
+Messages are encrypted with AES-128 in CTR mode and are authenticated with
+HMAC-SHA256 (Encrypt-then-Mac). HKDF is used to split the user-provided key into
 two keys: one for encryption, and the other for authentication. It is
 implemented using the `openssl_` and `hash_hmac` functions.
 
