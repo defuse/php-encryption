@@ -176,11 +176,6 @@ final class Core
         if ($native) {
             return \hash_equals($expected, $given);
         }
-        static $config = null;
-        if ($config === null) {
-            $valid = 0;
-            $config = self::getCoreVersionConfig(1, 0, $valid);
-        }
 
         // We can't just compare the strings with '==', since it would make
         // timing attacks possible. We could use the XOR-OR constant-time
@@ -195,8 +190,8 @@ final class Core
         }
 
         $blind = self::createNewRandomKey();
-        $message_compare = hash_hmac($config['HASH_FUNCTION'], $given, $blind);
-        $correct_compare = hash_hmac($config['HASH_FUNCTION'], $expected, $blind);
+        $message_compare = hash_hmac('sha256', $given, $blind);
+        $correct_compare = hash_hmac('sha256', $expected, $blind);
         return $correct_compare === $message_compare;
     }
     /**
