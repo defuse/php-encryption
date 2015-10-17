@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# This was written by Scott Arciszewski. I copied it from his Halite project:
+# https://github.com/paragonie/halite
+
 origdir=`pwd`
 cdir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $origdir
