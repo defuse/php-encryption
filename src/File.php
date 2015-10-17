@@ -777,9 +777,9 @@ final class File implements StreamInterface
             switch ($minor) {
             case 0:
                 return [
-                    'CIPHER_METHOD' => 'aes-128-ctr',
+                    'CIPHER_METHOD' => 'aes-256-ctr',
                     'BLOCK_SIZE' => 16,
-                    'KEY_BYTE_SIZE' => 16,
+                    'KEY_BYTE_SIZE' => 32,
                     'SALT_SIZE' => 16,
                     'HASH_FUNCTION' => 'sha256',
                     'MAC_BYTE_SIZE' => 32,

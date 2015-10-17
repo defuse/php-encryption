@@ -3,7 +3,7 @@ Symmetric Key Encryption
 
 At a glance:
 
-* **Cipher and Mode**: `AES-128-CTR`
+* **Cipher and Mode**: `AES-256-CTR`
 * **Padding**: None (CTR mode doesn't pad)
 * **Authentication**: `HMAC-SHA-256`
 * **Construction**: `Encrypt then MAC`
