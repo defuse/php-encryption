@@ -403,7 +403,7 @@ class Crypto
      */
     protected static function getVersionConfigFromHeader($header, $min_ver_header)
     {
-        if ($header[0] !== Core::HEADER_MAGIC[0] || $header[1] !== Core::HEADER_MAGIC[1]) {
+        if (Core::ourSubstr($header, 0, 2) !== Core::ourSubstr(Core::HEADER_MAGIC, 0, 2)) {
             throw new Ex\InvalidCiphertextException(
                 "Ciphertext has a bad magic number."
             );

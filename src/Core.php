@@ -5,13 +5,14 @@ use \Defuse\Crypto\Exception as Ex;
 
 final class Core
 {
-    const HEADER_MAGIC = "\xDE\xF5";
-    const HEADER_MAGIC_FILE = "\xDE\xF4";
-
-    const CURRENT_VERSION =         "\xDE\xF5\x02\x00";
-    const CURRENT_FILE_VERSION =    "\xDE\xF4\x02\x00";
-    const LEGACY_VERSION =          "\xDE\xF5\x01\x00";
     const HEADER_VERSION_SIZE = 4;  /* This must never change. */
+
+    const HEADER_MAGIC =            "\xDE\xF5";
+    const CURRENT_VERSION =         "\xDE\xF5\x02\x00";
+    const LEGACY_VERSION =          "\xDE\xF5\x01\x00";
+
+    const HEADER_MAGIC_FILE =       "\xDE\xF4";
+    const CURRENT_FILE_VERSION =    "\xDE\xF4\x02\x00";
 
     /**
      * Increment a counter (prevent nonce reuse)
