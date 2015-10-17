@@ -26,9 +26,30 @@ final class Core
         static $ivsize = null;
         if ($ivsize === null) {
             $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
+            if ($ivsize === false) {
+                throw new Ex\CannotPerformOperationException(
+                    "Problem obtaining the correct nonce length."
+                );
+            }
         }
 
-        // XXX: check the range and type of $ctr, $inc
+        if (strlen($ctr) !== $ivsize) {
+            throw new Ex\CannotPerformOperationException(
+                "Trying to increment a nonce of the wrong size."
+            );
+        }
+
+        if (!is_int($inc)) {
+            throw new Ex\CannotPerformOperationException(
+                "Trying to increment nonce by a non-integer."
+            );
+        }
+
+        if ($inc < 0) {
+            throw new Ex\CannotPerformOperationException(
+                "Trying to increment nonce by a negative amount."
+            );
+        }
 
         /**
          * We start at the rightmost byte (big-endian)
@@ -36,6 +57,14 @@ final class Core
          */
         for ($i = $ivsize - 1; $i >= 0; --$i) {
             $sum = \ord($ctr[$i]) + $inc;
+
+            /* Detect integer overflow and fail. */
+            if (!is_int($sum)) {
+                throw new Ex\CannotPerformOperationException(
+                    "Integer overflow in CTR mode nonce increment."
+                );
+            }
+
             $ctr[$i] = \chr($sum & 0xFF);
             $inc = $sum >> 8;
         }
