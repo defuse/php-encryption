@@ -92,6 +92,7 @@ final class File implements StreamInterface
              */
             $of = \fopen($outputFilename, 'wb');
             if ($of === false) {
+                fclose($if);
                 throw new Ex\CannotPerformOperationException(
                     'Cannot open output file for encrypting'
                 );
@@ -101,7 +102,13 @@ final class File implements StreamInterface
         /**
          * Use encryptResource() to actually write the encrypted data to $of
          */
-        $encrypted = self::encryptResource($if, $of, $key);
+        try {
+            $encrypted = self::encryptResource($if, $of, $key);
+        } catch (\Ex\CryptoException $ex) {
+            fclose($if);
+            fclose($of);
+            throw $ex;
+        }
 
         /**
          * Close handles
@@ -163,6 +170,7 @@ final class File implements StreamInterface
              */
             $of = \fopen($outputFilename, 'wb');
             if ($of === false) {
+                fclose($if);
                 throw new Ex\CannotPerformOperationException(
                     'Cannot open output file for decrypting'
                 );
@@ -172,7 +180,13 @@ final class File implements StreamInterface
         /**
          * Use decryptResource() to actually write the decrypted data to $of
          */
-        $decrypted = self::decryptResource($if, $of, $key);
+        try {
+            $decrypted = self::decryptResource($if, $of, $key);
+        } catch (\Ex\CryptoException $ex) {
+            fclose($if);
+            fclose($of);
+            throw $ex;
+        }
 
         /**
          * Close handles
