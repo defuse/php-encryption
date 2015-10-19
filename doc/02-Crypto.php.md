@@ -3,8 +3,8 @@ Symmetric Key Encryption
 
 At a glance:
 
-* **Cipher and Mode**: `AES-128-CBC`
-* **Padding**: `PKCS#7`
+* **Cipher and Mode**: `AES-256-CTR`
+* **Padding**: None (CTR mode doesn't pad)
 * **Authentication**: `HMAC-SHA-256`
 * **Construction**: `Encrypt then MAC`
 * **Algorithm Backend**: `ext/openssl`
@@ -37,9 +37,9 @@ try {
     //     \Defuse\Crypto\Crypto\binToHex()
     //     \Defuse\Crypto\Crypto\hexToBin()
     //
-} catch (\Defuse\Crypto\Exception\CryptoTestFailed $ex) {
+} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
     die('Cannot safely create a key');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperation $ex) {
+} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
     die('Cannot safely create a key');
 }
 ```
@@ -51,9 +51,9 @@ Encrypting a Message
 $message = 'ATTACK AT DAWN';
 try {
     $ciphertext = \Defuse\Crypto\Crypto::Encrypt($message, $key);
-} catch (\Defuse\Crypto\Exception\CryptoTestFailed $ex) {
+} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
     die('Cannot safely perform encryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperation $ex) {
+} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
     die('Cannot safely perform encryption');
 }
 ```
@@ -64,16 +64,16 @@ Decrypting a Message
 ```php
 try {
     $decrypted = self::Decrypt($ciphertext, $key);
-} catch (\Defuse\Crypto\Exception\InvalidCiphertext $ex) { // VERY IMPORTANT
+} catch (\Defuse\Crypto\Exception\InvalidCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or
     //   3. $ciphertext is not a valid ciphertext or was corrupted.
     // Assume the worst.
     die('DANGER! DANGER! The ciphertext has been tampered with!');
-} catch (CryptoTestFailedException $ex) {
+} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
     die('Cannot safely perform decryption');
-} catch (CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
     die('Cannot safely perform decryption');
 }
 ```
@@ -86,16 +86,16 @@ Decrypting a Message Encrypted with version 1 of this Library
 ```php
 try {
     $decrypted = self::legacyDecrypt($ciphertext, $key);
-} catch (\Defuse\Crypto\Exception\InvalidCiphertext $ex) { // VERY IMPORTANT
+} catch (\Defuse\Crypto\Exception\InvalidCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or
     //   3. $ciphertext is not a valid ciphertext or was corrupted.
     // Assume the worst.
     die('DANGER! DANGER! The ciphertext has been tampered with!');
-} catch (CryptoTestFailedException $ex) {
+} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
     die('Cannot safely perform decryption');
-} catch (CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
     die('Cannot safely perform decryption');
 }
 ```

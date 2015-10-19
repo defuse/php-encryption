@@ -2,80 +2,18 @@
 namespace Defuse\Crypto;
 
 use \Defuse\Crypto\Exception as Ex;
+use \Defuse\Crypto\Crypto;
 
-class Core
+final class Core
 {
-    const VERSION = "\xD3\xF5\x02\x00";
-    const HEADER_VERSION_SIZE = 4; // This should never change
+    const HEADER_VERSION_SIZE = 4;  /* This must never change. */
 
-    /**
-     * Use this to generate a random encryption key.
-     *
-     * @return string
-     */
-    public static function createNewRandomKey()
-    {
-        $valid = 0;
-        $config = self::getCoreVersionConfig(1, 0, $valid);
-        return self::secureRandom($config['KEY_BYTE_SIZE']);
-    }
-    /**
-     * Convert a binary string into a hexadecimal string without cache-timing 
-     * leaks
-     *
-     * @param string $bin_string (raw binary)
-     * @return string
-     */
-    public static function binToHex($bin_string)
-    {
-        $hex = '';
-        $len = self::ourStrlen($bin_string);
-        for ($i = 0; $i < $len; ++$i) {
-            $c = \ord($bin_string[$i]) & 0xf;
-            $b = \ord($bin_string[$i]) >> 4;
-            $hex .= \chr(87 + $b + ((($b - 10) >> 8) & ~38));
-            $hex .= \chr(87 + $c + ((($c - 10) >> 8) & ~38));
-        }
-        return $hex;
-    }
+    const HEADER_MAGIC =            "\xDE\xF5";
+    const CURRENT_VERSION =         "\xDE\xF5\x02\x00";
+    const LEGACY_VERSION =          "\xDE\xF5\x01\x00";
 
-    /**
-     * Convert a hexadecimal string into a binary string without cache-timing 
-     * leaks
-     *
-     * @param string $hex_string
-     * @return string (raw binary)
-     */
-    public static function hexToBin($hex_string)
-    {
-        $hex_pos = 0;
-        $bin = '';
-        $hex_len = self::ourStrlen($hex_string);
-        $state = 0;
-        $c_acc = 0;
-
-        while ($hex_pos < $hex_len) {
-            $c = \ord($hex_string[$hex_pos]);
-            $c_num = $c ^ 48;
-            $c_num0 = ($c_num - 10) >> 8;
-            $c_alpha = ($c & ~32) - 55;
-            $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
-            if (($c_num0 | $c_alpha0) === 0) {
-                throw new \RangeException(
-                    'Crypto::hexToBin() only expects hexadecimal characters'
-                );
-            }
-            $c_val = ($c_num0 & $c_num) | ($c_alpha & $c_alpha0);
-            if ($state === 0) {
-                $c_acc = $c_val * 16;
-            } else {
-                $bin .= \chr($c_acc | $c_val);
-            }
-            $state = $state ? 0 : 1;
-            ++$hex_pos;
-        }
-        return $bin;
-    }
+    const HEADER_MAGIC_FILE =       "\xDE\xF4";
+    const CURRENT_FILE_VERSION =    "\xDE\xF4\x02\x00";
 
     /**
      * Increment a counter (prevent nonce reuse)
@@ -89,24 +27,48 @@ class Core
     {
         static $ivsize = null;
         if ($ivsize === null) {
-            $ivsize = \openssl_cipher_iv_length($config['CIPHER_METHOD']);
+            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
+            if ($ivsize === false) {
+                throw new Ex\CannotPerformOperationException(
+                    "Problem obtaining the correct nonce length."
+                );
+            }
+        }
+
+        if (self::ourStrlen($ctr) !== $ivsize) {
+            throw new Ex\CannotPerformOperationException(
+                "Trying to increment a nonce of the wrong size."
+            );
+        }
+
+        if (!is_int($inc)) {
+            throw new Ex\CannotPerformOperationException(
+                "Trying to increment nonce by a non-integer."
+            );
+        }
+
+        if ($inc < 0) {
+            throw new Ex\CannotPerformOperationException(
+                "Trying to increment nonce by a negative amount."
+            );
         }
 
         /**
          * We start at the rightmost byte (big-endian)
          * So, too, does OpenSSL: http://stackoverflow.com/a/3146214/2224584
          */
-
         for ($i = $ivsize - 1; $i >= 0; --$i) {
-            $c = \ord($ctr[$i]);
+            $sum = \ord($ctr[$i]) + $inc;
 
-            $ctr[$i] = \chr(($c + $inc) & 0xFF);
-            if (($c + $inc) <= 255) {
-                // We don't need to keep incrementing to the left unless we exceed 255
-                break;
+            /* Detect integer overflow and fail. */
+            if (!is_int($sum)) {
+                throw new Ex\CannotPerformOperationException(
+                    "Integer overflow in CTR mode nonce increment."
+                );
             }
-            $inc = ($inc >> 8) & ~0;
-            ++$inc;
+
+            $ctr[$i] = \chr($sum & 0xFF);
+            $inc = $sum >> 8;
         }
         return $ctr;
     }
@@ -118,7 +80,7 @@ class Core
      * @return string (raw binary)
      * @throws Ex\CannotPerformOperationException
      */
-    protected static function secureRandom($octets)
+    public static function secureRandom($octets)
     {
         self::ensureFunctionExists('openssl_random_pseudo_bytes');
         $secure = false;
@@ -142,15 +104,11 @@ class Core
      * @return string
      * @throws Ex\CannotPerformOperationException
      */
-    protected static function HKDF($hash, $ikm, $length, $info = '', $salt = null, $config = null)
+    public static function HKDF($hash, $ikm, $length, $info = '', $salt = null, $config = null)
     {
-        if (empty($config)) {
-            $valid = 0;
-            $config = self::getVersionConfig(1, 0, $valid);
-        }
         // Find the correct digest length as quickly as we can.
-        $digest_length = $config['MAC_BYTE_SIZE'];
-        if ($hash != $config['HASH_FUNCTION']) {
+        $digest_length = $config->macByteSize();
+        if ($hash != $config->hashFunctionName()) {
             $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
         }
         // Sanity-check the desired output length.
@@ -208,9 +166,9 @@ class Core
      * @param string $expected string (raw binary)
      * @param string $given string (raw binary)
      * @return boolean
-     * @throws Ex\CannotPerformOperation
+     * @throws Ex\CannotPerformOperationException
      */
-    protected static function hashEquals($expected, $given)
+    public static function hashEquals($expected, $given)
     {
         static $native = null;
         if ($native === null) {
@@ -218,11 +176,6 @@ class Core
         }
         if ($native) {
             return \hash_equals($expected, $given);
-        }
-        static $config = null;
-        if ($config === null) {
-            $valid = 0;
-            $config = self::getCoreVersionConfig(1, 0, $valid);
         }
 
         // We can't just compare the strings with '==', since it would make
@@ -237,9 +190,9 @@ class Core
             throw new Ex\CannotPerformOperationException();
         }
 
-        $blind = self::createNewRandomKey();
-        $message_compare = hash_hmac($config['HASH_FUNCTION'], $given, $blind);
-        $correct_compare = hash_hmac($config['HASH_FUNCTION'], $expected, $blind);
+        $blind = self::secureRandom(32);
+        $message_compare = hash_hmac('sha256', $given, $blind);
+        $correct_compare = hash_hmac('sha256', $expected, $blind);
         return $correct_compare === $message_compare;
     }
     /**
@@ -248,7 +201,7 @@ class Core
      * @param string $name
      * @throws Ex\CannotPerformOperationException
      */
-    protected static function ensureConstantExists($name)
+    public static function ensureConstantExists($name)
     {
         if (!\defined($name)) {
             throw new Ex\CannotPerformOperationException();
@@ -261,7 +214,7 @@ class Core
      * @param string $name Function name
      * @throws Ex\CannotPerformOperationException
      */
-    protected static function ensureFunctionExists($name)
+    public static function ensureFunctionExists($name)
     {
         if (!\function_exists($name)) {
             throw new Ex\CannotPerformOperationException();
@@ -281,7 +234,7 @@ class Core
      * @param string $str
      * @return int
      */
-    protected static function ourStrlen($str)
+    public static function ourStrlen($str)
     {
         static $exists = null;
         if ($exists === null) {
@@ -307,7 +260,7 @@ class Core
      * @param int $length
      * @return string
      */
-    protected static function ourSubstr($str, $start, $length = null)
+    public static function ourSubstr($str, $start, $length = null)
     {
         static $exists = null;
         if ($exists === null) {
@@ -336,59 +289,4 @@ class Core
         }
     }
 
-    /**
-     * Take a 4-byte header and get meaningful version information out of it.
-     * Common configuration options should go in Core.php
-     *
-     * DO NOT CHANGE THESE VALUES!
-     *
-     * We spent *weeks* testing this code, making sure it is as perfect and
-     * correct as possible. Are you going to do the same after making your
-     * changes? Probably not. Besides, any change to these constants will break
-     * the runtime tests, which are extremely important for your security.
-     * You're literally millions of times more likely to screw up your own
-     * security by changing something here than you are to fall victim to an
-     * 128-bit key brute-force attack. You're also breaking your own
-     * compatibility with future updates to this library, so you'll be left
-     * vulnerable if we ever find a security bug and release a fix.
-     *
-     * So, PLEASE, do not change these constants.
-     *
-     * @param int $major
-     * @param int $minor
-     * @param ref $valid
-     * @return type
-     */
-    protected static function getCoreVersionConfig($major, $minor, &$valid)
-    {
-        if ($major === 2) {
-            switch ($minor) {
-                case 0:
-                    return [
-                        'BLOCK_SIZE' => 16,
-                        'KEY_BYTE_SIZE' => 16,
-                        'SALT_SIZE' => 16,
-                        'HASH_FUNCTION' => 'sha256',
-                        'MAC_BYTE_SIZE' => 32,
-                        'ENCRYPTION_INFO' => 'DefusePHP|KeyForEncryption',
-                        'AUTHENTICATION_INFO' => 'DefusePHP|KeyForAuthentication'
-                    ];
-                default:
-                    $valid |= 0xFF;
-                    break;
-            }
-        } elseif ($major === 1) {
-            $valid |= 0xFF; // Set to a nonzero value to mark it as invalid
-            return [
-                'BLOCK_SIZE' => 16,
-                'KEY_BYTE_SIZE' => 16,
-                'SALT_SIZE' => null,
-                'HASH_FUNCTION' => 'sha256',
-                'MAC_BYTE_SIZE' => 32,
-                'ENCRYPTION_INFO' => 'DefusePHP|KeyForEncryption',
-                'AUTHENTICATION_INFO' => 'DefusePHP|KeyForAuthentication'
-            ];
-        }
-        $valid |= 0xFF; // Set to a nonzero value to mark it as invalid
-    }
 }

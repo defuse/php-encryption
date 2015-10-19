@@ -35,6 +35,6 @@ try {
     die('DANGER! DANGER! The ciphertext has been tampered with!');
 } catch (Ex\CryptoTestFailedException $ex) {
     die('Cannot safely perform decryption');
-} catch (Ex\CannotPerformOperation $ex) {
+} catch (Ex\CannotPerformOperationException $ex) {
     die('Cannot safely perform decryption');
 }

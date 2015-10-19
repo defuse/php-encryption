@@ -1,7 +1,7 @@
 <?php
 use \Defuse\Crypto\Crypto;
 
-require_once'autoload.php';
+require_once 'autoload.php';
 
 function showResults($type, $start, $end, $count)
 {
