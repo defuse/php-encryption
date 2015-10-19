@@ -12,7 +12,7 @@ use \Defuse\Crypto\Crypto;
  * class. Always prefix explicitly with Crypto:: or RuntimeTests::.
  */
 
-class RuntimeTests
+class RuntimeTests extends Crypto
 {
     /**
      * Runs tests.
