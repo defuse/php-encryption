@@ -290,15 +290,11 @@ final class File implements StreamInterface
         /**
          * First let's write our header, file salt, and IV to the first N blocks of the output file
          */
-        if (\fwrite(
+        self::writeBytes(
             $outputHandle,
             Core::CURRENT_FILE_VERSION . $file_salt . $iv, 
             Core::HEADER_VERSION_SIZE + $config->saltByteSize() + $ivsize
-        ) === false) {
-            throw new Ex\CannotPerformOperationException(
-                'Cannot write to output file'
-            );
-        }
+        );
 
         /**
          * We're going to initialize a HMAC-SHA256 with the given $akey
@@ -334,12 +330,7 @@ final class File implements StreamInterface
          * Iterate until we reach the end of the input file
          */
         while (!\feof($inputHandle)) {
-            $read = \fread($inputHandle, $config->bufferByteSize());
-            if ($read === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot read input file'
-                );
-            }
+            $read = self::readBytes($inputHandle, $config->bufferByteSize());
             $thisIv = Core::incrementCounter($thisIv, $inc, $config);
 
             /**
@@ -364,11 +355,7 @@ final class File implements StreamInterface
             /**
              * Write the ciphertext to the output file
              */
-            if (\fwrite($outputHandle, $encrypted, Core::ourStrlen($encrypted)) === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot write to output file during encryption'
-                );
-            }
+            self::writeBytes($outputHandle, $encrypted, Core::ourStrlen($encrypted));
 
             /**
              * Update the HMAC for the entire file with the data from this block
@@ -379,12 +366,7 @@ final class File implements StreamInterface
         // Now let's get our HMAC and append it
         $finalHMAC = \hash_final($hmac, true);
 
-        $appended = \fwrite($outputHandle, $finalHMAC, $config->macByteSize());
-        if ($appended === false) {
-            throw new Ex\CannotPerformOperationException(
-                'Cannot write to output file'
-            );
-        }
+        self::writeBytes($outputHandle, $finalHMAC, $config->macByteSize());
         return true;
     }
 
@@ -412,13 +394,7 @@ final class File implements StreamInterface
         }
 
         // Parse the header.
-        $header = '';
-        $remaining = Core::HEADER_VERSION_SIZE;
-        do {
-            $header .= \fread($inputHandle, $remaining);
-            $remaining = Core::HEADER_VERSION_SIZE - Core::ourStrlen($header);
-        } while ($remaining > 0);
-
+        $header = self::readBytes($inputHandle, Core::HEADER_VERSION_SIZE);
         $config = self::getFileVersionConfigFromHeader(
             $header,
             Core::CURRENT_FILE_VERSION
@@ -438,12 +414,7 @@ final class File implements StreamInterface
             );
         }
         // Let's grab the file salt.
-        $file_salt = \fread($inputHandle, $config->saltByteSize());
-        if ($file_salt === false ) {
-            throw new Ex\CannotPerformOperationException(
-                'Cannot read input file'
-            );
-        }
+        $file_salt = self::readBytes($inputHandle, $config->saltByteSize());
             
         // For storing MACs of each buffer chunk
         $macs = [];
@@ -483,12 +454,7 @@ final class File implements StreamInterface
              * It should be the first N blocks of the file (N = 16)
              */
             $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
-            $iv = \fread($inputHandle, $ivsize);
-            if ($iv === false ) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot read input file'
-                );
-            }
+            $iv = self::readBytes($inputHandle, $ivsize);
 
             // How much do we increase the counter after each buffered encryption to prevent nonce reuse
             $inc = $config->bufferByteSize() / $config->blockByteSize();
@@ -516,12 +482,7 @@ final class File implements StreamInterface
             --$cipher_end; // We need to subtract one
 
             // We keep our MAC stored in this variable
-            $stored_mac = \fread($inputHandle, $config->macByteSize());
-            if ($stored_mac === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot read input file'
-                );
-            }
+            $stored_mac = self::readBytes($inputHandle, $config->macByteSize());
 
             /**
              * We begin recalculating the HMAC for the entire file...
@@ -579,9 +540,15 @@ final class File implements StreamInterface
                  */
                 if ($pos + $config->bufferByteSize() >= $cipher_end) {
                     $break = true;
-                    $read = \fread($inputHandle, $cipher_end - $pos + 1);
+                    $read = self::readBytes(
+                        $inputHandle,
+                        $cipher_end - $pos + 1
+                    );
                 } else {
-                    $read = \fread($inputHandle, $config->bufferByteSize());
+                    $read = self::readBytes(
+                        $inputHandle,
+                        $config->bufferByteSize()
+                    );
                 }
                 if ($read === false) {
                     throw new Ex\CannotPerformOperationException(
@@ -654,13 +621,14 @@ final class File implements StreamInterface
                  */
                 if ($pos + $config->bufferByteSize() >= $cipher_end) {
                     $breakW = true;
-                    $read = \fread($inputHandle, $cipher_end - $pos + 1);
+                    $read = self::readBytes(
+                        $inputHandle,
+                        $cipher_end - $pos + 1
+                    );
                 } else {
-                    $read = \fread($inputHandle, $config->bufferByteSize());
-                }
-                if ($read === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'Could not read input file during decryption'
+                    $read = self::readBytes(
+                        $inputHandle,
+                        $config->bufferByteSize()
                     );
                 }
 
@@ -713,20 +681,11 @@ final class File implements StreamInterface
                 /**
                  * Write the plaintext out to the output file
                  */
-                $result = \fwrite(
-                    $outputHandle, 
-                    $decrypted, 
+                self::writeBytes(
+                    $outputHandle,
+                    $decrypted,
                     Core::ourStrlen($decrypted)
                 );
-
-                /**
-                 * Check result
-                 */
-                if ($result === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'Could not write to output file during decryption.'
-                    );
-                }
             }
         // This should be an integer
         return $result;
@@ -798,5 +757,86 @@ final class File implements StreamInterface
                 "Unsupported file ciphertext version."
             );
         }
+    }
+    
+    
+
+    /**
+     * Read from a stream; prevent partial reads
+     *
+     * @param resource $stream
+     * @param int $num
+     * @return string
+     *
+     * @throws \RangeException
+     * @throws \Exception
+     * @throws Ex\CannotPerformOperationException
+     */
+    final public static function readBytes($stream, $num)
+    {
+        if ($num <= 0) {
+            throw new \RangeException(
+                'Tried to read less than 0 bytes'
+            );
+        }
+        $fstat = \fstat($stream);
+        $pos = \ftell($stream);
+        if (($pos + $num) > $fstat['size']) {
+            throw new \Exception('Out-of-bounds read');
+        }
+        $buf = '';
+        $remaining = $num;
+        do {
+            if ($remaining <= 0) {
+                break;
+            }
+            $read = \fread($stream, $remaining);
+            if ($read === false) {
+                throw new Ex\CannotPerformOperationException(
+                    'Could not write to the file'
+                );
+            }
+            $buf .= $read;
+            $remaining -= Core::ourStrlen($read);
+        } while ($remaining > 0);
+        return $buf;
+    }
+
+    /**
+     * Write to a stream; prevent partial writes
+     *
+     * @param resource $stream
+     * @param string $buf
+     * @param int $num (number of bytes)
+     * @return string
+     * @throws \RangeException
+     * @throws Ex\CannotPerformOperationException
+     */
+    final public static function writeBytes($stream, $buf, $num = null)
+    {
+        $bufSize = Core::ourStrlen($buf);
+        if ($num === null || $num > $bufSize) {
+            $num = $bufSize;
+        }
+        if ($num < 0) {
+            throw new \RangeException(
+                'Tried to write less than 0 bytes'
+            );
+        }
+        $remaining = $num;
+        do {
+            if ($remaining <= 0) {
+                break;
+            }
+            $written = \fwrite($stream, $buf, $remaining);
+            if ($written === false) {
+                throw new Ex\CannotPerformOperationException(
+                    'Could not write to the file'
+                );
+            }
+            $buf = Core::ourSubstr($buf, $written, null);
+            $remaining -= $written;
+        } while ($remaining > 0);
+        return $num;
     }
 }
