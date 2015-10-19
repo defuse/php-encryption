@@ -5,6 +5,77 @@ use \Defuse\Crypto\Exception as Ex;
 use \Defuse\Crypto\Core;
 use \Defuse\Crypto\Encoding;
 
+final class KeyConfig
+{
+    private $key_byte_size;
+    private $checksum_hash_function;
+    private $checksum_byte_size;
+
+    public function __construct($config_array)
+    {
+        $expected_keys = array(
+            "key_byte_size",
+            "checksum_hash_function",
+            "checksum_byte_size"
+        );
+        if (sort($expected_keys) !== true) {
+            throw Ex\CannotPerformOperationException(
+                "sort() failed."
+            );
+        }
+
+        $actual_keys = array_keys($config_array);
+        if (sort($actual_keys) !== true) {
+            throw Ex\CannotPerformOperationException(
+                "sort() failed."
+            );
+        }
+
+        if ($expected_keys !== $actual_keys) {
+            throw new Ex\CannotPerformOperationException(
+                "Trying to instantiate a bad key configuration."
+            );
+        }
+
+        $this->key_byte_size = $config_array["key_byte_size"];
+        $this->checksum_hash_function = $config_array["checksum_hash_function"];
+        $this->checksum_byte_size = $config_array["checksum_byte_size"];
+
+        if (!\is_int($this->key_byte_size) || $this->key_byte_size <= 0) {
+            throw new Ex\CannotPerformOperationException(
+                "Invalid key byte size."
+            );
+        }
+
+        if (\in_array($this->checksum_hash_function, \hash_algos()) === false) {
+            throw new Ex\CannotPerformOperationException(
+                "Invalid hash function name."
+            );
+        }
+
+        if (!\is_int($this->checksum_byte_size) || $this->checksum_byte_size <= 0) {
+            throw new Ex\CannotPerformOperationException(
+                "Invalid checksum byte size."
+            );
+        }
+    }
+
+    public function keyByteSize()
+    {
+        return $this->key_byte_size;
+    }
+
+    public function checksumHashFunction()
+    {
+        return $this->checksum_hash_function;
+    }
+
+    public function checksumByteSize()
+    {
+        return $this->checksum_byte_size;
+    }
+}
+
 final class Key
 {
     /* We keep the key versioning independent of the ciphertext versioning. */
@@ -59,7 +130,7 @@ final class Key
     public static function CreateNewRandomKey()
     {
         $config = self::GetKeyVersionConfigFromKeyHeader(self::KEY_CURRENT_VERSION);
-        $bytes = Core::secureRandom($config['KEY_BYTE_SIZE']);
+        $bytes = Core::secureRandom($config->keyByteSize());
         return new Key(self::KEY_CURRENT_VERSION, $bytes);
     }
 
@@ -88,8 +159,8 @@ final class Key
 
         /* Now that we know the version, check the length is correct. */
         if (Core::ourStrlen($bytes) !== self::KEY_HEADER_SIZE +
-                                        $config['KEY_BYTE_SIZE'] +
-                                        $config['CHECKSUM_BYTE_SIZE'] ) {
+                                        $config->keyByteSize() +
+                                        $config->checksumByteSize()) {
             throw new Ex\CannotPerformOperationException(
                 "Saved Key is not the correct size."
             );
@@ -99,22 +170,18 @@ final class Key
         $checked_bytes = Core::ourSubstr(
             $bytes,
             0,
-            self::KEY_HEADER_SIZE + $config['KEY_BYTE_SIZE']
+            self::KEY_HEADER_SIZE + $config->keyByteSize()
         );
 
         /* Grab the included checksum. */
         $checksum_a = Core::ourSubstr(
             $bytes,
-            self::KEY_HEADER_SIZE + $config['KEY_BYTE_SIZE'],
-            $config['CHECKSUM_BYTE_SIZE']
+            self::KEY_HEADER_SIZE + $config->keyByteSize(),
+            $config->checksumByteSize()
         );
 
         /* Re-compute the checksum. */
-        $checksum_b = Core::ourSubstr(
-            hash($config['CHECKSUM_HASH_FUNCTION'], $checked_bytes, true),
-            0,
-            $config['CHECKSUM_BYTE_SIZE']
-        );
+        $checksum_b = hash($config->checksumHashFunction(), $checked_bytes, true);
 
         /* Validate it. It *is* important for this to be constant time. */
         if (!Core::hashEquals($checksum_a, $checksum_b)) {
@@ -124,7 +191,7 @@ final class Key
         }
 
         /* Everything checks out. Grab the key and create a Key object. */
-        $key_bytes = Core::ourSubstr($bytes, self::KEY_HEADER_SIZE, $config['KEY_BYTE_SIZE']);
+        $key_bytes = Core::ourSubstr($bytes, self::KEY_HEADER_SIZE, $config->keyByteSize());
         return new Key($version_header, $key_bytes);
     }
 
@@ -141,7 +208,7 @@ final class Key
             $this->key_version_header .
             $this->key_bytes .
             hash(
-                $this->config['CHECKSUM_HASH_FUNCTION'],
+                $this->config->checksumHashFunction(),
                 $this->key_version_header . $this->key_bytes,
                 true
             )
@@ -166,11 +233,11 @@ final class Key
 
     private static function GetKeyVersionConfigFromKeyHeader($key_header) {
         if ($key_header === self::KEY_CURRENT_VERSION) {
-            return [
-                'KEY_BYTE_SIZE' => 32,
-                'CHECKSUM_HASH_FUNCTION' => 'sha256',
-                'CHECKSUM_BYTE_SIZE' => 32
-            ];
+            return new KeyConfig([
+                'key_byte_size' => 32,
+                'checksum_hash_function' => 'sha256',
+                'checksum_byte_size' => 32
+            ]);
         }
         throw new Ex\CannotPerformOperationException(
             "Invalid key version header."
