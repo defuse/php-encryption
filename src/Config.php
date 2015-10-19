@@ -29,14 +29,14 @@ class Config
         );
         if (sort($expected_keys) !== true) {
             throw Ex\CannotPerformOperationException(
-                "sort() failed.\n"
+                "sort() failed."
             );
         }
 
         $actual_keys = array_keys($config_array);
         if (sort($actual_keys) !== true) {
             throw Ex\CannotPerformOperationException(
-                "sort() failed.\n"
+                "sort() failed."
             );
         }
 
@@ -62,13 +62,13 @@ class Config
             );
         }
 
-        if (!is_int($this->block_byte_size) || $this->block_byte_size <= 0) {
+        if (!\is_int($this->block_byte_size) || $this->block_byte_size <= 0) {
             throw new Ex\CannotPerformOperationException(
                 "Configuration contains an invalid block byte size."
             );
         }
 
-        if (!is_int($this->key_byte_size) || $this->key_byte_size <= 0) {
+        if (!\is_int($this->key_byte_size) || $this->key_byte_size <= 0) {
             throw new Ex\CannotPerformOperationException(
                 "Configuration contains an invalid key byte size."
             );
@@ -82,7 +82,7 @@ class Config
             }
         }
 
-        if (!is_int($this->mac_byte_size) || $this->mac_byte_size <= 0) {
+        if (!\is_int($this->mac_byte_size) || $this->mac_byte_size <= 0) {
             throw new Ex\CannotPerformOperationException(
                 "Configuration contains an invalid MAC byte size."
             );
@@ -94,13 +94,13 @@ class Config
             );
         }
 
-        if (!is_string($this->encryption_info_string) || $this->encryption_info_string === "") {
+        if (!\is_string($this->encryption_info_string) || $this->encryption_info_string === "") {
             throw new Ex\CannotPerformOperationException(
                 "Configuration contains an invalid encryption info string."
             );
         }
 
-        if (!is_string($this->authentication_info_string) || $this->authentication_info_string === "") {
+        if (!\is_string($this->authentication_info_string) || $this->authentication_info_string === "") {
             throw new Ex\CannotPerformOperationException(
                 "Configuration contains an invalid authentication info string."
             );
