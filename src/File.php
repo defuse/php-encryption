@@ -235,6 +235,8 @@ final class File implements StreamInterface
             Core::CURRENT_FILE_VERSION,
             Core::CURRENT_FILE_VERSION
         );
+        $inputStat = \fstat($inputHandle);
+        $inputSize = $inputStat['size'];
 
         // Let's add this check before anything
         if (!\in_array($config->hashFunctionName(), \hash_algos())) {
@@ -329,8 +331,21 @@ final class File implements StreamInterface
         /**
          * Iterate until we reach the end of the input file
          */
-        while (!\feof($inputHandle)) {
-            $read = self::readBytes($inputHandle, $config->bufferByteSize());
+        $breakR = false;
+        while (!\feof($inputHandle) && !$breakR) {
+            $pos = \ftell($inputHandle);
+            if ($pos + $config->bufferByteSize() >= $inputSize) {
+                $breakR = true;
+                $read = self::readBytes(
+                    $inputHandle,
+                    $inputSize - $pos
+                );
+            } else {
+                $read = self::readBytes(
+                    $inputHandle,
+                    $config->bufferByteSize()
+                );
+            }
             $thisIv = Core::incrementCounter($thisIv, $inc, $config);
 
             /**
