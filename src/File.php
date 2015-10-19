@@ -411,12 +411,12 @@ final class File implements StreamInterface
             );
         }
 
-        // Parse the header, ensuring we get 4 bytes
+        // Parse the header.
         $header = '';
-        $remaining = 4;
+        $remaining = Core::HEADER_VERSION_SIZE;
         do {
             $header .= \fread($inputHandle, $remaining);
-            $remaining = 4 - Core::ourStrlen($header);
+            $remaining = Core::HEADER_VERSION_SIZE - Core::ourStrlen($header);
         } while ($remaining > 0);
 
         $config = self::getFileVersionConfigFromHeader(
