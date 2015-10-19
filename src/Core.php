@@ -2,7 +2,6 @@
 namespace Defuse\Crypto;
 
 use \Defuse\Crypto\Exception as Ex;
-use \Defuse\Crypto\Crypto;
 
 final class Core
 {

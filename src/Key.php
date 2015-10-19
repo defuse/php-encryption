@@ -127,6 +127,11 @@ final class Key
     private $key_bytes = null;
     private $config = null;
 
+    /**
+     * Creates a new random Key object for use with this library.
+     * 
+     * @return \Defuse\Crypto\Key
+     */
     public static function CreateNewRandomKey()
     {
         $config = self::GetKeyVersionConfigFromKeyHeader(self::KEY_CURRENT_VERSION);
@@ -134,6 +139,13 @@ final class Key
         return new Key(self::KEY_CURRENT_VERSION, $bytes);
     }
 
+    /**
+     * Loads a Key object from an ASCII-safe string
+     * 
+     * @param string $savedKeyString
+     * @return \Defuse\Crypto\Key
+     * @throws Ex\CannotPerformOperationException
+     */
     public static function LoadFromAsciiSafeString($savedKeyString)
     {
         try {
@@ -195,6 +207,14 @@ final class Key
         return new Key($version_header, $key_bytes);
     }
 
+    /**
+     * Private constructor -> cannot be instantiated directly:
+     * 
+     *    $key = new Key("\xDE\xF0\x02\x00", "some_key_string"); // errors
+     * 
+     * @param string $version_header
+     * @param string $bytes
+     */
     private function __construct($version_header, $bytes)
     {
         $this->key_version_header = $version_header;
@@ -202,6 +222,11 @@ final class Key
         $this->config = self::GetKeyVersionConfigFromKeyHeader($this->key_version_header);
     }
 
+    /**
+     * Encodes the key as an ASCII string, with a checksum, for storing.
+     * 
+     * @return string
+     */
     public function saveToAsciiSafeString()
     {
         return Encoding::binToHex(
@@ -221,6 +246,12 @@ final class Key
         return $major == 2 && $minor == 0;
     }
 
+    /**
+     * Get the raw bytes of the encryption key
+     * 
+     * @return string
+     * @throws CannotPerformOperationException
+     */
     public function getRawBytes()
     {
         if (is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
@@ -231,6 +262,13 @@ final class Key
         return $this->key_bytes;
     }
 
+    /**
+     * Parse a key header, get the configuration
+     * 
+     * @param string $key_header
+     * @return \Defuse\Crypto\KeyConfig
+     * @throws Ex\CannotPerformOperationException
+     */
     private static function GetKeyVersionConfigFromKeyHeader($key_header) {
         if ($key_header === self::KEY_CURRENT_VERSION) {
             return new KeyConfig([
@@ -244,8 +282,11 @@ final class Key
         );
     }
 
-    /*
-     * NEVER use this, exept for testing.
+    /**
+     * NEVER use this, except for testing.
+     * 
+     * @param string $bytes
+     * @return \Defuse\Crypto\Key
      */
     public static function LoadFromRawBytesForTestingPurposesOnlyInsecure($bytes)
     {
