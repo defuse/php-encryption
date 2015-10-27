@@ -784,7 +784,6 @@ final class File implements StreamInterface
      * @return string
      *
      * @throws \RangeException
-     * @throws \Exception
      * @throws Ex\CannotPerformOperationException
      */
     final public static function readBytes($stream, $num)
@@ -797,7 +796,9 @@ final class File implements StreamInterface
         $fstat = \fstat($stream);
         $pos = \ftell($stream);
         if (($pos + $num) > $fstat['size']) {
-            throw new \Exception('Out-of-bounds read');
+            throw new Ex\CannotPerformOperationException(
+                'Out-of-bounds read'
+            );
         }
         $buf = '';
         $remaining = $num;
@@ -808,7 +809,7 @@ final class File implements StreamInterface
             $read = \fread($stream, $remaining);
             if ($read === false) {
                 throw new Ex\CannotPerformOperationException(
-                    'Could not write to the file'
+                    'Could not read from the file'
                 );
             }
             $buf .= $read;
