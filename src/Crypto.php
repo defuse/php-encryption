@@ -467,7 +467,7 @@ class Crypto
                         'cipher_method' => 'aes-256-ctr',
                         'block_byte_size' => 16,
                         'key_byte_size' => 32,
-                        'salt_byte_size' => 16,
+                        'salt_byte_size' => 32,
                         'hash_function_name' => 'sha256',
                         'mac_byte_size' => 32,
                         'encryption_info_string' => 'DefusePHP|V2|KeyForEncryption',
