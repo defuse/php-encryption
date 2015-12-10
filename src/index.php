@@ -1,5 +1,11 @@
 <?php
 /**
+ * This is meant to be the Phar stub when you run other/build_phar.php, not a
+ * general-purpose index.php script. It's a workaround for a deficit in the
+ * Phar extension that prevents custom stubs with OpenSSL signatures.
+ * 
+ * @ref https://bugs.php.net/bug.php?id=71087
+ * 
  * PSR-4 compatible autoloader
  */
 \spl_autoload_register(function ($class) {
