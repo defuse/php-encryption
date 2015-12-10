@@ -59,10 +59,10 @@ final class File implements StreamInterface
      *
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function encryptFile($inputFilename, $outputFilename, $key)
+    public static function encryptFile($inputFilename, $outputFilename, Key $key)
     {
         if (!\is_string($inputFilename)) {
             throw new Ex\InvalidInput(
@@ -137,10 +137,10 @@ final class File implements StreamInterface
      *
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function decryptFile($inputFilename, $outputFilename, $key)
+    public static function decryptFile($inputFilename, $outputFilename, Key $key)
     {
         if (!\is_string($inputFilename)) {
             throw new Ex\InvalidInput(
@@ -215,10 +215,10 @@ final class File implements StreamInterface
      *
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function encryptResource($inputHandle, $outputHandle, $key)
+    public static function encryptResource($inputHandle, $outputHandle, Key $key)
     {
         // Because we don't have strict typing in PHP 5
         if (!\is_resource($inputHandle)) {
@@ -245,13 +245,6 @@ final class File implements StreamInterface
             );
         }
 
-        // Sanity check; key must be the appropriate length!
-        if (Core::ourStrlen($key) !== $config->keyByteSize()) {
-            throw new Ex\InvalidInput(
-                'Invalid key length. Keys should be '.$config->keyByteSize().' bytes long.'
-            );
-        }
-
         /**
          *  Let's split our keys
          */
@@ -260,7 +253,7 @@ final class File implements StreamInterface
         // $ekey -- Encryption Key -- used for AES
         $ekey = Core::HKDF(
             $config->hashFunctionName(),
-            $key,
+            $key->getRawBytes(),
             $config->keyByteSize(),
             $config->encryptionInfoString(),
             $file_salt,
@@ -270,7 +263,7 @@ final class File implements StreamInterface
         // $akey -- Authentication Key -- used for HMAC
         $akey = Core::HKDF(
             $config->hashFunctionName(),
-            $key,
+            $key->getRawBytes(),
             $config->keyByteSize(),
             $config->authenticationInfoString(),
             $file_salt,
@@ -332,10 +325,11 @@ final class File implements StreamInterface
          * Iterate until we reach the end of the input file
          */
         $breakR = false;
-        while (!\feof($inputHandle) && !$breakR) {
+        while (!\feof($inputHandle)) {
             $pos = \ftell($inputHandle);
             if ($pos + $config->bufferByteSize() >= $inputSize) {
                 $breakR = true;
+                // We need to break after this loop iteration
                 $read = self::readBytes(
                     $inputHandle,
                     $inputSize - $pos
@@ -376,6 +370,9 @@ final class File implements StreamInterface
              * Update the HMAC for the entire file with the data from this block
              */
             \hash_update($hmac, $encrypted);
+            if ($breakR) {
+                break;
+            }
         }
 
         // Now let's get our HMAC and append it
@@ -391,10 +388,10 @@ final class File implements StreamInterface
      *
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function decryptResource($inputHandle, $outputHandle, $key)
+    public static function decryptResource($inputHandle, $outputHandle, Key $key)
     {
         // Because we don't have strict typing in PHP 5
         if (!\is_resource($inputHandle)) {
@@ -421,13 +418,7 @@ final class File implements StreamInterface
                 'The specified hash function does not exist'
             );
         }
-
-        // Sanity check; key must be the appropriate length!
-        if (Core::ourStrlen($key) !== $config->keyByteSize()) {
-            throw new Ex\InvalidInput(
-                'Invalid key length. Keys should be '.$config->keyByteSize().' bytes long.'
-            );
-        }
+        
         // Let's grab the file salt.
         $file_salt = self::readBytes($inputHandle, $config->saltByteSize());
             
@@ -444,7 +435,7 @@ final class File implements StreamInterface
              */
             $ekey = Core::HKDF(
                 $config->hashFunctionName(),
-                $key,
+                $key->getRawBytes(),
                 $config->keyByteSize(),
                 $config->encryptionInfoString(),
                 $file_salt,
@@ -456,7 +447,7 @@ final class File implements StreamInterface
              */
             $akey = Core::HKDF(
                 $config->hashFunctionName(),
-                $key,
+                $key->getRawBytes(),
                 $config->keyByteSize(),
                 $config->authenticationInfoString(),
                 $file_salt,
@@ -773,8 +764,6 @@ final class File implements StreamInterface
             );
         }
     }
-    
-    
 
     /**
      * Read from a stream; prevent partial reads
@@ -802,11 +791,9 @@ final class File implements StreamInterface
         }
         $buf = '';
         $remaining = $num;
-        do {
-            if ($remaining <= 0) {
-                break;
-            }
+        while ($remaining > 0 && !\feof($stream)) {
             $read = \fread($stream, $remaining);
+            
             if ($read === false) {
                 throw new Ex\CannotPerformOperationException(
                     'Could not read from the file'
@@ -814,7 +801,12 @@ final class File implements StreamInterface
             }
             $buf .= $read;
             $remaining -= Core::ourStrlen($read);
-        } while ($remaining > 0);
+        }
+        if (Core::ourStrlen($buf) !== $num) {
+            throw new Ex\CannotPerformOperationException(
+                'Could not safely read the appropriate number of bytes from the file - possible TOCTOU'
+            );
+        }
         return $buf;
     }
 
@@ -825,25 +817,26 @@ final class File implements StreamInterface
      * @param string $buf
      * @param int $num (number of bytes)
      * @return string
-     * @throws \RangeException
      * @throws Ex\CannotPerformOperationException
      */
     final public static function writeBytes($stream, $buf, $num = null)
     {
         $bufSize = Core::ourStrlen($buf);
-        if ($num === null || $num > $bufSize) {
+        if ($num === null) {
             $num = $bufSize;
         }
+        if ($num > $bufSize) {
+            throw new Ex\CannotPerformOperationException(
+                'Trying to write more bytes than the buffer contains.'
+            );
+        }
         if ($num < 0) {
-            throw new \RangeException(
+            throw new Ex\CannotPerformOperationException(
                 'Tried to write less than 0 bytes'
             );
         }
         $remaining = $num;
-        do {
-            if ($remaining <= 0) {
-                break;
-            }
+        while ($remaining > 0) {
             $written = \fwrite($stream, $buf, $remaining);
             if ($written === false) {
                 throw new Ex\CannotPerformOperationException(
@@ -852,7 +845,7 @@ final class File implements StreamInterface
             }
             $buf = Core::ourSubstr($buf, $written, null);
             $remaining -= $written;
-        } while ($remaining > 0);
+        }
         return $num;
     }
 }

@@ -9,10 +9,10 @@ interface StreamInterface
      * 
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function encryptFile($inputFilename, $outputFilename, $key);
+    public static function encryptFile($inputFilename, $outputFilename, Key $key);
 
     /**
      * Decrypt the contents at $inputFilename, storing the result in $outputFilename
@@ -20,10 +20,10 @@ interface StreamInterface
      * 
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function decryptFile($inputFilename, $outputFilename, $key);
+    public static function decryptFile($inputFilename, $outputFilename, Key $key);
 
     /**
      * Encrypt the contents of a file handle $inputHandle and store the results
@@ -31,10 +31,10 @@ interface StreamInterface
      * 
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function encryptResource($inputHandle, $outputHandle, $key);
+    public static function encryptResource($inputHandle, $outputHandle, Key $key);
 
     /**
      * Decrypt the contents of a file handle $inputHandle and store the results
@@ -42,8 +42,8 @@ interface StreamInterface
      * 
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param string $key
+     * @param Key $key
      * @return boolean
      */
-    public static function decryptResource($inputHandle, $outputHandle, $key);
+    public static function decryptResource($inputHandle, $outputHandle, Key $key);
 }
