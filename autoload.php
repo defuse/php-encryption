@@ -4,7 +4,7 @@
  */
 \spl_autoload_register(function ($class) {
     // Project-specific namespace prefix
-    $prefix = 'Defuse\\Crypto';
+    $prefix = 'Defuse\\Crypto\\';
 
     // Base directory for the namespace prefix
     $base_dir = __DIR__.'/src/';
@@ -18,19 +18,34 @@
 
     // Get the relative class name
     $relative_class = \substr($class, $len);
-
-    // Replace the namespace prefix with the base directory, replace namespace
-    // separators with directory separators in the relative class name, append
-    // with .php
-    $file = $base_dir.
-        \str_replace(
-            ['\\', '_'],
-            '/',
-            $relative_class
-        ).'.php';
-
-    // If the file exists, require it
-    if (\file_exists($file)) {
-        require $file;
+    
+    /**
+     * unserialize() -> autoloader -> LFI hardening
+     */
+    $classmap = array(
+        'Core' =>
+            'Core.php',
+        'Crypto' =>
+            'Crypto.php', 
+        'File' =>
+            'File.php',
+        'ExceptionHandler' =>
+            'ExceptionHandler.php',
+        'StreamInterface' =>
+            'StreamInterface.php',
+        // Exceptions:
+        'Exception\\CannotPerformOperationException' =>
+            'Exception/CannotPerformOperationException.php',
+        'Exception\\CryptoException' =>
+            'Exception/CryptoException.php',
+        'Exception\\CryptoTestFailedException' =>
+            'Exception/CryptoTestFailedException.php',
+        'Exception\\InvalidCiphertextException' =>
+            'Exception/InvalidCiphertextException.php',
+    );
+    foreach ($classmap as $classname => $file) {
+        if ($classname === $relative_class) {
+            require $base_dir.$file;
+        }
     }
 });
