@@ -13,9 +13,6 @@ $phar = new \Phar(
 );
 
 $phar->buildFromDirectory(dirname(__DIR__).'/src');
-$phar->setStub(
-    $phar->createDefaultStub('phar_autoloader.php', 'phar_autoloader.php')
-);
 
 /**
  * If we pass an (optional) path to a private key as a second argument, we will
