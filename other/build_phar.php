@@ -32,7 +32,9 @@ if ($argc > 1) {
     
     $private = \openssl_get_privatekey($pkeyFile);
     if ($private !== false) {
-        $phar->setSignatureAlgorithm(\Phar::OPENSSL, $private);
+        $pkey = '';
+        \openssl_pkey_export($private, $pkey);
+        $phar->setSignatureAlgorithm(\Phar::OPENSSL, $pkey);
         
         /**
          * Save the corresponding public key to the file
