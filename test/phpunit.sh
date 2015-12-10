@@ -7,6 +7,7 @@ origdir=`pwd`
 cdir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $origdir
 parentdir="$(dirname $cdir)"
+PHP_VERSION=$(php -r "echo PHP_VERSION_ID;");
 
 clean=0 # Clean up?
 gpg --fingerprint D8406D0D82947747293778314AA394086372C20A
