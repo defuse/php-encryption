@@ -692,7 +692,6 @@ final class File implements StreamInterface
                     Core::ourStrlen($decrypted)
                 );
             }
-        // This should be an integer
         return true;
     }
 
