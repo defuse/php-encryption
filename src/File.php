@@ -609,7 +609,6 @@ final class File implements StreamInterface
             /**
              * This loop writes plaintext to the destination file:
              */
-            $result = null;
             while (!$breakW) {
                 /**
                  * Get the current position
@@ -694,7 +693,7 @@ final class File implements StreamInterface
                 );
             }
         // This should be an integer
-        return $result;
+        return true;
     }
 
     /**
