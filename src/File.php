@@ -781,13 +781,6 @@ final class File implements StreamInterface
                 'Tried to read less than 0 bytes'
             );
         }
-        $fstat = \fstat($stream);
-        $pos = \ftell($stream);
-        if (($pos + $num) > $fstat['size']) {
-            throw new Ex\CannotPerformOperationException(
-                'Out-of-bounds read'
-            );
-        }
         $buf = '';
         $remaining = $num;
         while ($remaining > 0 && !\feof($stream)) {
@@ -803,7 +796,7 @@ final class File implements StreamInterface
         }
         if (Core::ourStrlen($buf) !== $num) {
             throw new Ex\CannotPerformOperationException(
-                'Could not safely read the appropriate number of bytes from the file - possible TOCTOU'
+                'Tried to read past the end of the file'
             );
         }
         return $buf;
