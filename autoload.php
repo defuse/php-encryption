@@ -39,6 +39,8 @@
             'FileConfig.php',
         'Key' =>
             'Key.php',
+        'KeyConfig' =>
+            'KeyConfig.php',
         'RuntimeTests' =>
             'RuntimeTests.php',
         'StreamInterface' =>
