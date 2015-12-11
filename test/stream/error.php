@@ -1,7 +1,7 @@
 <?php
 require_once \dirname(__DIR__).'/autoload.php';
 
-$key = base64_decode(file_get_contents('key.txt'));
+$key = \Defuse\Crypto\Key::LoadFromAsciiSafeString(\file_get_contents('key.txt'));
 
 echo 'Buffers: ', \Defuse\Crypto\File::BUFFER, "\n";
 echo microtime(true), "\n";
@@ -31,7 +31,7 @@ fclose($ifp);
 fclose($ofp);
 
 \Defuse\Crypto\File::decryptFile(
-    'damaged.data', 
-    'wat-damaged.jpg', 
+    'damaged.data',
+    'wat-damaged.jpg',
     $key
 );
