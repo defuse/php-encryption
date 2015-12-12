@@ -105,13 +105,33 @@ class FileTest extends \PHPUnit_Framework_TestCase
      * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
      * @excpectedExceptionMessage Ciphertext file has a bad magic number.
      */
-    public function testDecryptGarbage()
+    public function testDecryptBadMagicNumber()
     {
         $junk = self::$TEMP_DIR . '/junk'; 
-        file_put_contents($junk, 
-            str_repeat("this is not anything that can be decrypted.", 100));
-        
+        file_put_contents($junk, "This file does not have the right magic number.");
         File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+    }
+
+    /**
+     * @dataProvider garbageCiphertextProvider
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     */
+    public function testDecryptGarbage($ciphertext)
+    {
+        $junk = self::$TEMP_DIR . '/junk'; 
+        file_put_contents($junk, $ciphertext);
+        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+    }
+
+    public function garbageCiphertextProvider()
+    {
+        $ciphertexts = array(
+            array(str_repeat("this is not anything that can be decrypted.", 100))
+        );
+        for ($i = 0; $i < 1024; $i++) {
+            $ciphertexts[] = array(Core::CURRENT_FILE_VERSION . str_repeat("A", $i));
+        }
+        return $ciphertexts;
     }
 
     /**
