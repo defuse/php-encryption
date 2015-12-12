@@ -21,8 +21,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             mkdir(self::$TEMP_DIR);
         }
         
-        // See test 'testFileCreateKey'
-        $this->key = Key::CreateNewRandomKey();
+        $this->key = File::createNewRandomKey();
     }
     
     public function tearDown()
