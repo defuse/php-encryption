@@ -101,6 +101,35 @@ class FileTest extends \PHPUnit_Framework_TestCase
             'Original file mismatches the result of encrypt and decrypt');
         
     }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @excpectedExceptionMessage Ciphertext file has a bad magic number.
+     */
+    public function testGarbage()
+    {
+        $junk = self::$TEMP_DIR . '/junk'; 
+        file_put_contents($junk, 
+            str_repeat("this is not anything that can be decrypted.", 100));
+        
+        $success = File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+    }
+    
+    /**
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @excpectedExceptionMessage Message Authentication failure; tampering detected.
+     */
+    public function testExtraData()
+    {
+        $src = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        $dest = self::$TEMP_DIR . '/err';
+        
+        File::encryptFile($src, $dest, $this->key);
+        
+        file_put_contents($dest, str_repeat('A', 2048), FILE_APPEND);
+        
+        File::decryptFile($dest, $dest . '.jpg', $this->key);
+    }
     
     public function testFileCreateRandomKey()
     {
