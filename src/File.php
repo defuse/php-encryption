@@ -42,15 +42,11 @@ final class File implements StreamInterface
     /**
      * Use this to generate a random encryption key.
      *
-     * @return string
+     * @return Key
      */
     public static function createNewRandomKey()
     {
-        $config = self::getFileVersionConfigFromHeader(
-            Core::CURRENT_FILE_VERSION,
-            Core::CURRENT_FILE_VERSION
-        );
-        return Core::secureRandom($config->keyByteSize());
+        return Key::CreateNewRandomKey();
     }
 
     /**
