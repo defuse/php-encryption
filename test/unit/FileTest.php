@@ -105,15 +105,45 @@ class FileTest extends \PHPUnit_Framework_TestCase
      * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
      * @excpectedExceptionMessage Ciphertext file has a bad magic number.
      */
-    public function testGarbage()
+    public function testDecryptGarbage()
     {
         $junk = self::$TEMP_DIR . '/junk'; 
         file_put_contents($junk, 
             str_repeat("this is not anything that can be decrypted.", 100));
         
-        $success = File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
-    
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     */
+    public function testDecryptEmptyFile()
+    {
+        $junk = self::$TEMP_DIR . '/junk'; 
+        file_put_contents($junk, "");
+        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     */
+    public function testDecryptTruncatedCiphertext()
+    {
+        // This tests for issue #115 on GitHub.
+        $plaintext_path = self::$TEMP_DIR . '/plaintext';
+        $ciphertext_path = self::$TEMP_DIR . '/ciphertext';
+        $truncated_path = self::$TEMP_DIR . '/truncated';
+
+        file_put_contents($plaintext_path, str_repeat("A", 1024));
+        File::encryptFile($plaintext_path, $ciphertext_path, $this->key);
+
+        $ciphertext = file_get_contents($ciphertext_path);
+        $truncated = substr($ciphertext, 0, 64);
+        file_put_contents($truncated_path, $truncated);
+
+        File::decryptFile($truncated_path, $plaintext_path, $this->key);
+    }
+
     /**
      * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
      * @excpectedExceptionMessage Message Authentication failure; tampering detected.
