@@ -142,12 +142,9 @@ class FileTest extends \PHPUnit_Framework_TestCase
         
         $data['wat-giagantic-duck'] = ['wat-gigantic-duck.jpg'];
         $data['large'] = ['large.jpg'];
-        
-        if (file_exists(__DIR__ . '/File/In_the_Conservatory.jpg')){
-            // see File/get_large.sh
-            $data['extra-large'] = ['In_the_Conservatory.jpg'];
-        }
-        
+        # Created from /dev/urandom in test.sh
+        $data['extra-large'] = ['big-generated-file'];
+
         return $data;
     }
 }
