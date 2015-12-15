@@ -18,14 +18,14 @@ final class KeyConfig
             "checksum_hash_function",
             "checksum_byte_size"
         );
-        if (sort($expected_keys) !== true) {
+        if (\sort($expected_keys) !== true) {
             throw Ex\CannotPerformOperationException(
                 "sort() failed."
             );
         }
 
-        $actual_keys = array_keys($config_array);
-        if (sort($actual_keys) !== true) {
+        $actual_keys = \array_keys($config_array);
+        if (\sort($actual_keys) !== true) {
             throw Ex\CannotPerformOperationException(
                 "sort() failed."
             );
@@ -181,7 +181,7 @@ final class Key
         );
 
         /* Re-compute the checksum. */
-        $checksum_b = hash($config->checksumHashFunction(), $checked_bytes, true);
+        $checksum_b = \hash($config->checksumHashFunction(), $checked_bytes, true);
 
         /* Validate it. It *is* important for this to be constant time. */
         if (!Core::hashEquals($checksum_a, $checksum_b)) {
@@ -207,7 +207,7 @@ final class Key
         return Encoding::binToHex(
             $this->key_version_header .
             $this->key_bytes .
-            hash(
+            \hash(
                 $this->config->checksumHashFunction(),
                 $this->key_version_header . $this->key_bytes,
                 true
@@ -223,7 +223,7 @@ final class Key
 
     public function getRawBytes()
     {
-        if (is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
+        if (\is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
             throw new CannotPerformOperationException(
                 "An attempt was made to use an uninitialzied or too-short key"
             );
