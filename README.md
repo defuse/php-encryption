@@ -13,6 +13,32 @@ HMAC-SHA256 (Encrypt-then-Mac). HKDF is used to split the user-provided key into
 two keys: one for encryption, and the other for authentication. It is
 implemented using the `openssl_` and `hash_hmac` functions.
 
+## Installing this Library
+
+### Using Composer
+
+```sh
+composer require defuse/php-encryption
+```
+
+### Direct Installation (Phar)
+
+Download the PHP Archive and public key. Extract 
+
+### Direct Installation (Manual)
+
+Download the [latest release](https://github.com/defuse/php-encryption/releases). Extract all of the files into a directory on your webserver (e.g. `/var/www/lib/defuse/php-encryption`).
+
+Then add this to your PHP scripts:
+
+```php
+require '/var/www/lib/defuse/php-encryption/autoload.php';
+```
+
+## Using this Library
+
+(TODO)
+
 Audit Status
 -------------
 
