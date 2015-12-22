@@ -27,12 +27,7 @@ final class Core
     {
         static $ivsize = null;
         if ($ivsize === null) {
-            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
-            if ($ivsize === false) {
-                throw new Ex\CannotPerformOperationException(
-                    "Problem obtaining the correct nonce length."
-                );
-            }
+            $ivsize = self::cipherIvLength($config->cipherMethod());
         }
 
         if (self::ourStrlen($ctr) !== $ivsize) {
@@ -71,6 +66,27 @@ final class Core
             $inc = $sum >> 8;
         }
         return $ctr;
+    }
+
+    /**
+     * Returns the cipher initialization vector (iv) length.
+     *
+     * @param string $method
+     * @return int
+     * @throws Ex\CannotPerformOperationException
+     */
+    public static function cipherIvLength($method)
+    {
+        self::ensureFunctionExists('openssl_cipher_iv_length');
+        $ivsize = \openssl_cipher_iv_length($method);
+
+        if ($ivsize === false || $ivsize <= 0) {
+            throw new Ex\CannotPerformOperationException(
+                'Could not get the IV length from OpenSSL'
+            );
+        }
+
+        return $ivsize;
     }
 
     /**
