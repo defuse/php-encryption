@@ -18,7 +18,7 @@ for ($i = 0; $i < 1000; $i++) {
     $key = Crypto::createNewRandomKey();
 }
 $end = \microtime(true);
-showResults("createNewRandomKey()", $start, $end, 1000);
+\showResults("createNewRandomKey()", $start, $end, 1000);
 
 $start = \microtime(true);
 for ($i = 0; $i < 100; $i++) {
@@ -27,10 +27,10 @@ for ($i = 0; $i < 100; $i++) {
         \str_repeat("B", 16)
     );
 }
-$end = microtime(true);
-showResults("encrypt(1MB)", $start, $end, 100);
+$end = \microtime(true);
+\showResults("encrypt(1MB)", $start, $end, 100);
 
-$start = microtime(true);
+$start = \microtime(true);
 for ($i = 0; $i < 1000; $i++) {
     $ciphertext = Crypto::encrypt(
         \str_repeat("A", 1024),
@@ -38,4 +38,4 @@ for ($i = 0; $i < 1000; $i++) {
     );
 }
 $end = \microtime(true);
-showResults("encrypt(1KB)", $start, $end, 1000);
+\showResults("encrypt(1KB)", $start, $end, 1000);

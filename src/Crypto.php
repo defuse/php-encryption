@@ -70,7 +70,7 @@ class Crypto
         RuntimeTests::runtimeTest();
 
         /* Attempt to validate that the key was generated safely. */
-        if (!is_a($key, "\Defuse\Crypto\Key")) {
+        if (!\is_a($key, "\Defuse\Crypto\Key")) {
             throw new Ex\CannotPerformOperationException(
                 "The given key is not a valid Key object."
             );
@@ -139,7 +139,7 @@ class Crypto
         RuntimeTests::runtimeTest();
 
         /* Attempt to validate that the key was generated safely. */
-        if (!is_a($key, "\Defuse\Crypto\Key")) {
+        if (!\is_a($key, "\Defuse\Crypto\Key")) {
             throw new Ex\CannotPerformOperationException(
                 "The given key is not a valid Key object."
             );
