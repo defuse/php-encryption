@@ -217,7 +217,7 @@ class Crypto
                     "Could not get the IV length from OpenSSL"
                 );
             }
-            if (Core::ourStrlen($ciphertext) <= $ivsize) {
+            if (Core::ourStrlen($ciphertext) < $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."
                 );
@@ -225,6 +225,14 @@ class Crypto
             $iv = Core::ourSubstr($ciphertext, 0, $ivsize);
             if ($iv === false) {
                 throw new Ex\CannotPerformOperationException();
+            }
+            /**
+             * If you encrypt an empty string with a stream cipher, you get an
+             * empty string. So if we have exactly $ivsize bytes, we know that
+             * is what happened here.
+             */
+            if (Core::ourStrlen($ciphertext) === $ivsize) {
+                return '';
             }
             $ciphertext = Core::ourSubstr($ciphertext, $ivsize);
             if ($ciphertext === false) {
@@ -309,6 +317,8 @@ class Crypto
                     "Could not get the IV length from OpenSSL"
                 );
             }
+            
+            // Note: This check makes sense with a block cipher
             if (Core::ourStrlen($ciphertext) <= $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."
