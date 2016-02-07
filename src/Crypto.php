@@ -166,7 +166,7 @@ class Crypto
         $ciphertext = Core::ourSubstr($ciphertext, Core::HEADER_VERSION_SIZE, null);
 
         // Extract the HMAC from the front of the ciphertext.
-        if (Core::ourStrlen($ciphertext) <= $config->macByteSize()) {
+        if (Core::ourStrlen($ciphertext) < $config->macByteSize()) {
             throw new Ex\InvalidCiphertextException(
                 "Ciphertext is too short."
             );
