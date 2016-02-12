@@ -37,7 +37,119 @@ require '/var/www/lib/defuse/php-encryption/autoload.php';
 
 ## Using this Library
 
-(TODO)
+1. Generate and store an encryption key.
+2. Encrypt plaintext strings with your key to obtain ciphertext, using `Crypto`.
+3. Decrypt ciphertext strings with your key to obtain plaintext, using `Crypto`.
+4. Encrypt/decrypt files with your key, using `File`.
+
+### Generate and Store an Encryption Key
+
+Generate a new key:
+
+```php
+$key = \Defuse\Crypto\Key::createNewRandomKey();
+````
+
+The above command will generate a random encryption key, using a 
+cryptographically secure pseudorandom number generator. This will generally only
+need to be done *once* if you need to reuse this key for multiple messages.
+
+```php
+$encryptionKeyDataForStorage = $key->saveToAsciiSafeString()
+```
+
+This returns an encoded string that you can use to persist a key across multiple
+runs of the application. You might decide to copy it to a configuration file
+not tracked by Git, for example. To load it again on the next script execution,
+just do this:
+
+```php
+$key = \Defuse\Crypto\Key::LoadFromAsciiSafeString($storedKeyData);
+```
+
+### Encrypting Strings
+
+Once you have a `Key` object, you're ready to encrypt data. All you have to do
+is pass your desired string and the `Key` object to `Crypto::encrypt()`.
+
+```php
+try {
+    $ciphertext = \Defuse\Crypto\Crypto::encrypt("Test message", $key);
+} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
+    die("Our platform is not secure enough to use this cryptography library.");
+}
+```
+
+### Decrypting Strings
+
+If encryption made sense, then the decryption API should be intuitive and
+precisely what you expect it to be:
+
+
+### Interlude: A Complete Example
+
+First, generate a key and store it:
+
+```php
+<?php
+require_once "/path/to/defuse/php-encryption/autoload.php';
+$key = \Defuse\Crypto\Key::createNewRandomKey();
+file_put_contents('shared_key.txt', $key->saveToAsciiSafeString());
+```
+
+The two scripts below, `encrypt_msg.php` and `decrypt_msg.php` are command-line
+PHP scripts meant to encrypt/decrypt messages using a pre-shared-key.
+
+Sender:
+
+```php
+<?php
+use \Defuse\Crypto\Crypto;
+use \Defuse\Crypto\Key;
+require_once "/path/to/defuse/php-encryption/autoload.php';
+
+$keyData = file_get_contents('shared_key.txt');
+$key = Key::LoadFromAsciiSafeString($keyData);
+
+$encrypted = Crypto::encrypt($argv[1], $key);
+echo $encrypted, "\n";
+```
+
+Receiver:
+
+```php
+<?php
+use \Defuse\Crypto\Crypto;
+use \Defuse\Crypto\Key;
+require_once "/path/to/defuse/php-encryption/autoload.php';
+
+$keyData = file_get_contents('shared_key.txt');
+$key = Key::LoadFromAsciiSafeString();
+
+$decrypted = Crypto::decrypt($argv[1], $key);
+echo $decrypted, "\n";
+```
+
+If you run this command:
+
+    php decrypt_msg.php `php encrypt_msg.php It\ Works\!`
+
+It will print "It works!" into your console. Now, assuming you and your 
+recipient have the same `shared-key.txt`, you can send messages to/from them and
+only they should be able to decrypt them.
+
+### Encrypting and Decrypting Files
+
+In addition to our standard `Crypto::encrypt()` and `Crypto::decrypt()` 
+interface, this library has a separate class for encrypting/decrypting files.
+
+This is mostly useful for encrypting large files (say, 1.5 GB) on a machine with
+very low memory usage (say, a maximum of 64 MB of RAM).
+
+```php
+\Defuse\Crypto\File::encryptFile($inputFilename, $outputFilename, $key);
+\Defuse\Crypto\File::decryptFile($encryptedFile, $plaintextFile, $key);
+```
 
 Audit Status
 -------------
