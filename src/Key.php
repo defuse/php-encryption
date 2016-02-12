@@ -5,77 +5,6 @@ use \Defuse\Crypto\Exception as Ex;
 use \Defuse\Crypto\Core;
 use \Defuse\Crypto\Encoding;
 
-final class KeyConfig
-{
-    private $key_byte_size;
-    private $checksum_hash_function;
-    private $checksum_byte_size;
-
-    public function __construct($config_array)
-    {
-        $expected_keys = array(
-            "key_byte_size",
-            "checksum_hash_function",
-            "checksum_byte_size"
-        );
-        if (sort($expected_keys) !== true) {
-            throw Ex\CannotPerformOperationException(
-                "sort() failed."
-            );
-        }
-
-        $actual_keys = array_keys($config_array);
-        if (sort($actual_keys) !== true) {
-            throw Ex\CannotPerformOperationException(
-                "sort() failed."
-            );
-        }
-
-        if ($expected_keys !== $actual_keys) {
-            throw new Ex\CannotPerformOperationException(
-                "Trying to instantiate a bad key configuration."
-            );
-        }
-
-        $this->key_byte_size = $config_array["key_byte_size"];
-        $this->checksum_hash_function = $config_array["checksum_hash_function"];
-        $this->checksum_byte_size = $config_array["checksum_byte_size"];
-
-        if (!\is_int($this->key_byte_size) || $this->key_byte_size <= 0) {
-            throw new Ex\CannotPerformOperationException(
-                "Invalid key byte size."
-            );
-        }
-
-        if (\in_array($this->checksum_hash_function, \hash_algos()) === false) {
-            throw new Ex\CannotPerformOperationException(
-                "Invalid hash function name."
-            );
-        }
-
-        if (!\is_int($this->checksum_byte_size) || $this->checksum_byte_size <= 0) {
-            throw new Ex\CannotPerformOperationException(
-                "Invalid checksum byte size."
-            );
-        }
-    }
-
-    public function keyByteSize()
-    {
-        return $this->key_byte_size;
-    }
-
-    public function checksumHashFunction()
-    {
-        return $this->checksum_hash_function;
-    }
-
-    public function checksumByteSize()
-    {
-        return $this->checksum_byte_size;
-    }
-}
-
 final class Key
 {
     /* We keep the key versioning independent of the ciphertext versioning. */
@@ -127,6 +56,11 @@ final class Key
     private $key_bytes = null;
     private $config = null;
 
+    /**
+     * Creates a new random Key object for use with this library.
+     * 
+     * @return \Defuse\Crypto\Key
+     */
     public static function CreateNewRandomKey()
     {
         $config = self::GetKeyVersionConfigFromKeyHeader(self::KEY_CURRENT_VERSION);
@@ -134,6 +68,13 @@ final class Key
         return new Key(self::KEY_CURRENT_VERSION, $bytes);
     }
 
+    /**
+     * Loads a Key object from an ASCII-safe string
+     * 
+     * @param string $savedKeyString
+     * @return \Defuse\Crypto\Key
+     * @throws Ex\CannotPerformOperationException
+     */
     public static function LoadFromAsciiSafeString($savedKeyString)
     {
         try {
@@ -195,6 +136,14 @@ final class Key
         return new Key($version_header, $key_bytes);
     }
 
+    /**
+     * Private constructor -> cannot be instantiated directly:
+     * 
+     *    $key = new Key("\xDE\xF0\x02\x00", "some_key_string"); // errors
+     * 
+     * @param string $version_header
+     * @param string $bytes
+     */
     private function __construct($version_header, $bytes)
     {
         $this->key_version_header = $version_header;
@@ -202,6 +151,11 @@ final class Key
         $this->config = self::GetKeyVersionConfigFromKeyHeader($this->key_version_header);
     }
 
+    /**
+     * Encodes the key as an ASCII string, with a checksum, for storing.
+     * 
+     * @return string
+     */
     public function saveToAsciiSafeString()
     {
         return Encoding::binToHex(
@@ -221,6 +175,12 @@ final class Key
         return $major == 2 && $minor == 0;
     }
 
+    /**
+     * Get the raw bytes of the encryption key
+     * 
+     * @return string
+     * @throws CannotPerformOperationException
+     */
     public function getRawBytes()
     {
         if (is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
@@ -231,6 +191,13 @@ final class Key
         return $this->key_bytes;
     }
 
+    /**
+     * Parse a key header, get the configuration
+     * 
+     * @param string $key_header
+     * @return \Defuse\Crypto\KeyConfig
+     * @throws Ex\CannotPerformOperationException
+     */
     private static function GetKeyVersionConfigFromKeyHeader($key_header) {
         if ($key_header === self::KEY_CURRENT_VERSION) {
             return new KeyConfig([
@@ -244,8 +211,11 @@ final class Key
         );
     }
 
-    /*
-     * NEVER use this, exept for testing.
+    /**
+     * NEVER use this, except for testing.
+     * 
+     * @param string $bytes
+     * @return \Defuse\Crypto\Key
      */
     public static function LoadFromRawBytesForTestingPurposesOnlyInsecure($bytes)
     {

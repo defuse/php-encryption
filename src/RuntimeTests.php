@@ -14,7 +14,7 @@ use \Defuse\Crypto\Crypto;
 
 class RuntimeTests extends Crypto
 {
-    /*
+    /**
      * Runs tests.
      * Raises Ex\CannotPerformOperationException or Ex\CryptoTestFailedException if
      * one of the tests fail. If any tests fails, your system is not capable of
@@ -74,6 +74,13 @@ class RuntimeTests extends Crypto
         $test_state = 1;
     }
 
+    /**
+     * Run-time test: string encryption and decryption
+     *
+     * @param \Defuse\Crypto\Config $config
+     *
+     * @throws Ex\CryptoTestFailedException
+     */
     private static function testEncryptDecrypt($config)
     {
         $key = Crypto::createNewRandomKey();
@@ -129,7 +136,9 @@ class RuntimeTests extends Crypto
     }
 
     /**
-     * Run-time testing
+     * Run-time testing: HKDF
+     *
+     * @param \Defuse\Crypto\Config $config
      *
      * @throws Ex\CryptoTestFailedException
      */
@@ -171,7 +180,7 @@ class RuntimeTests extends Crypto
     }
 
     /**
-     * Run-Time tests
+     * Run-Time testing: HMAC
      *
      * @throws Ex\CryptoTestFailedException
      */
@@ -190,7 +199,9 @@ class RuntimeTests extends Crypto
     }
 
     /**
-     * Run-time tests
+     * Run-time testing: AES-256-CTR
+     * 
+     * @param \Defuse\Crypto\Config $config
      *
      * @throws Ex\CryptoTestFailedException
      */
@@ -219,12 +230,14 @@ class RuntimeTests extends Crypto
 
         $computed_ciphertext = Crypto::plainEncrypt($plaintext, $key, $iv, $config);
         if ($computed_ciphertext !== $ciphertext) {
+            /*
             echo str_repeat("\n", 30);
             var_dump($config);
             echo \bin2hex($computed_ciphertext);
             echo "\n---\n";
             echo \bin2hex($ciphertext);
             echo str_repeat("\n", 30);
+            */
             throw new Ex\CryptoTestFailedException();
         }
 
@@ -233,5 +246,4 @@ class RuntimeTests extends Crypto
             throw new Ex\CryptoTestFailedException();
         }
     }
-
 }
