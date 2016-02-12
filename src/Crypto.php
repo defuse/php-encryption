@@ -81,6 +81,10 @@ final class Crypto
     public static function encrypt($plaintext, $key)
     {
         self::runtimeTest();
+        if (!is_string($plaintext))
+        {
+            throw new Ex\CannotPerformOperationException("Plaintext must be a string.");
+        }
 
         if (self::ourStrlen($key) !== self::KEY_BYTE_SIZE)
         {
@@ -126,6 +130,10 @@ final class Crypto
     public static function decrypt($ciphertext, $key)
     {
         self::runtimeTest();
+        if (!is_string($ciphertext))
+        {
+            throw new Ex\CannotPerformOperationException("Ciphertext must be a string.");
+        }
 
         // Extract the HMAC from the front of the ciphertext.
         if (self::ourStrlen($ciphertext) <= self::MAC_BYTE_SIZE) {
