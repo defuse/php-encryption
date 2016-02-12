@@ -75,16 +75,13 @@ This library is developed around several core values:
 
 - Rule #4: The library should require no special installation.
 
-    > Some PHP encryption libraries, like libsodium-php [1], are not
-    > straightforward to install and cannot packaged with "just download and
-    > extract" applications. This library will always be just a handful of PHP
-    > files that you can copy to your source tree and require().
+    > Some PHP encryption libraries, like [libsodium-php](https://github.com/jedisct1/libsodium-php),
+    > are not straightforward to install and cannot packaged with "just download
+    > and extract" applications. This library will always be just a handful of
+    > PHP files that you can copy to your source tree and require().
 
-References:
-
-    [1] https://github.com/jedisct1/libsodium-php
 
 Authors
 ---------
 
-This library is authored by Taylor Hornby and Scott Arciszewski.
+This library is authored by [Taylor Hornby](https://bqp.io) and [Scott Arciszewski](https://paragonie.com/blog/author/scott-arciszewski).
