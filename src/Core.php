@@ -14,6 +14,8 @@ final class Core
     const HEADER_MAGIC_FILE =       "\xDE\xF4";
     const CURRENT_FILE_VERSION =    "\xDE\xF4\x02\x00";
 
+    const BCRYPT_HASH_SIZE =        60;
+
     /**
      * Increment a counter (prevent nonce reuse)
      *
@@ -21,6 +23,8 @@ final class Core
      * @param int $inc - how much?
      *
      * @return string (raw binary)
+     *
+     * @throws Ex\CannotPerformOperationException
      */
     public static function incrementCounter($ctr, $inc, &$config)
     {
