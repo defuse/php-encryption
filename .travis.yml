@@ -9,7 +9,5 @@ sudo: false
 
 matrix:
     fast_finish: true
-    allow_failures:
-      - php: "7.0"
 
 script: ./test.sh
