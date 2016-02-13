@@ -61,4 +61,13 @@ class KeyTest extends PHPUnit_Framework_TestCase
         $str[0] = "Z";
         Key::LoadFromAsciiSafeString($str);
     }
+
+    function testPasswordProtectedKey()
+    {
+        $password = 'correct horse battery staple';
+        $verifier = Key::createPasswordProtectedKey($password);
+        $key = Key::unlockPasswordProtectedKey($password, $verifier);
+
+        $this->assertTrue($key instanceof Key);
+    }
 }
