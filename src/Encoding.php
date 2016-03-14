@@ -20,8 +20,11 @@ final class Encoding {
         for ($i = 0; $i < $len; ++$i) {
             $c = \ord($bin_string[$i]) & 0xf;
             $b = \ord($bin_string[$i]) >> 4;
-            $hex .= \chr(87 + $b + ((($b - 10) >> 8) & ~38));
-            $hex .= \chr(87 + $c + ((($c - 10) >> 8) & ~38));
+            $hex .= \pack(
+                'CC',
+                87 + $b + ((($b - 10) >> 8) & ~38),
+                87 + $c + ((($c - 10) >> 8) & ~38)
+            );
         }
         return $hex;
     }
@@ -56,12 +59,11 @@ final class Encoding {
             if ($state === 0) {
                 $c_acc = $c_val * 16;
             } else {
-                $bin .= \chr($c_acc | $c_val);
+                $bin .= \pack('C', $c_acc | $c_val);
             }
-            $state = $state ? 0 : 1;
+            $state ^= 1;
             ++$hex_pos;
         }
         return $bin;
     }
-
 }
