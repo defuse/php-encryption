@@ -44,11 +44,11 @@ class Crypto
     /**
      * Use this to generate a random encryption key.
      *
-     * @return string
+     * @return Key
      */
     public static function createNewRandomKey()
     {
-        return Key::CreateNewRandomKey(Core::CURRENT_VERSION);
+        return Key::CreateNewRandomKey();
     }
 
     /**
