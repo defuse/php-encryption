@@ -46,11 +46,8 @@ final class File implements StreamInterface
      */
     public static function createNewRandomKey()
     {
-        $config = self::getFileVersionConfigFromHeader(
-            Core::CURRENT_FILE_VERSION,
-            Core::CURRENT_FILE_VERSION
-        );
-        return Core::secureRandom($config->keyByteSize());
+        // XXX: This is duplicate code.
+        return Key::CreateNewRandomKey(Core::CURRENT_VERSION);
     }
 
     /**
