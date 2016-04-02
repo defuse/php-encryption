@@ -700,10 +700,14 @@ final class Crypto
         $hex = '';
         $len = self::ourStrlen($bin_string);
         for ($i = 0; $i < $len; ++$i) {
-            $c = \ord($bin_string[$i]) & 0xf;
-            $b = \ord($bin_string[$i]) >> 4;
-            $hex .= \chr(87 + $b + ((($b - 10) >> 8) & ~38));
-            $hex .= \chr(87 + $c + ((($c - 10) >> 8) & ~38));
+            $chunk = unpack('C', self::ourSubstr($bin_string, $i, 1));
+            $c = $chunk[1] & 0xf;
+            $b = $chunk[1] >> 4;
+            $hex .= pack(
+                'CC',
+                (87 + $b + ((($b - 10) >> 8) & ~38)),
+                (87 + $c + ((($c - 10) >> 8) & ~38))
+            );
         }
         return $hex;
     }
@@ -722,8 +726,10 @@ final class Crypto
         $hex_len = self::ourStrlen($hex_string);
         $state = 0;
         
+        $chunk = \unpack('C*', $hex_string);
         while ($hex_pos < $hex_len) {
-            $c = \ord($hex_string[$hex_pos]);
+            ++$hex_pos;
+            $c = $chunk[$hex_pos];
             $c_num = $c ^ 48;
             $c_num0 = ($c_num - 10) >> 8;
             $c_alpha = ($c & ~32) - 55;
@@ -739,8 +745,7 @@ final class Crypto
             } else {
                 $bin .= \chr($c_acc | $c_val);
             }
-            $state = $state ? 0 : 1;
-            ++$hex_pos;
+            $state ^= 1;
         }
         return $bin;
     }
