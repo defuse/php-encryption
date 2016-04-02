@@ -6,15 +6,15 @@
     // Project-specific namespace prefix
     $prefix = 'Defuse\\Crypto\\';
 
-    // Base directory for the namespace prefix
-    $base_dir = __DIR__.'/src/';
-
     // Does the class use the namespace prefix?
     $len = \strlen($prefix);
     if (\strncmp($prefix, $class, $len) !== 0) {
         // no, move to the next registered autoloader
-        return;
+        return false;
     }
+
+    // Base directory for the namespace prefix
+    $base_dir = __DIR__.'/src/';
 
     // Get the relative class name
     $relative_class = \substr($class, $len);
@@ -57,9 +57,11 @@
         'Exception\\InvalidInput' =>
             'Exception/InvalidInput.php',
     );
-    foreach ($classmap as $classname => $file) {
-        if ($classname === $relative_class) {
-            require $base_dir.$file;
-        }
+
+    if (isset($classmap[$relative_class])) {
+        require $base_dir.$classmap[$relative_class];
+        return true;
     }
+
+    return false;
 });
