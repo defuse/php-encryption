@@ -10,7 +10,4 @@ sudo: false
 matrix:
     fast_finish: true
 
-install:
-  - travis_retry composer update
-
 script: ./test.sh
