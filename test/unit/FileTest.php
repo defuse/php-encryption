@@ -21,8 +21,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             mkdir(self::$TEMP_DIR);
         }
         
-        // See test 'testFileCreateKey'
-        $this->key = Key::CreateNewRandomKey();
+        $this->key = File::createNewRandomKey();
     }
     
     public function tearDown()
@@ -106,15 +105,65 @@ class FileTest extends \PHPUnit_Framework_TestCase
      * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
      * @excpectedExceptionMessage Ciphertext file has a bad magic number.
      */
-    public function testGarbage()
+    public function testDecryptBadMagicNumber()
     {
         $junk = self::$TEMP_DIR . '/junk'; 
-        file_put_contents($junk, 
-            str_repeat("this is not anything that can be decrypted.", 100));
-        
-        $success = File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        file_put_contents($junk, "This file does not have the right magic number.");
+        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
-    
+
+    /**
+     * @dataProvider garbageCiphertextProvider
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     */
+    public function testDecryptGarbage($ciphertext)
+    {
+        $junk = self::$TEMP_DIR . '/junk'; 
+        file_put_contents($junk, $ciphertext);
+        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+    }
+
+    public function garbageCiphertextProvider()
+    {
+        $ciphertexts = array(
+            array(str_repeat("this is not anything that can be decrypted.", 100))
+        );
+        for ($i = 0; $i < 1024; $i++) {
+            $ciphertexts[] = array(Core::CURRENT_FILE_VERSION . str_repeat("A", $i));
+        }
+        return $ciphertexts;
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     */
+    public function testDecryptEmptyFile()
+    {
+        $junk = self::$TEMP_DIR . '/junk'; 
+        file_put_contents($junk, "");
+        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     */
+    public function testDecryptTruncatedCiphertext()
+    {
+        // This tests for issue #115 on GitHub.
+        $plaintext_path = self::$TEMP_DIR . '/plaintext';
+        $ciphertext_path = self::$TEMP_DIR . '/ciphertext';
+        $truncated_path = self::$TEMP_DIR . '/truncated';
+
+        file_put_contents($plaintext_path, str_repeat("A", 1024));
+        File::encryptFile($plaintext_path, $ciphertext_path, $this->key);
+
+        $ciphertext = file_get_contents($ciphertext_path);
+        $truncated = substr($ciphertext, 0, 64);
+        file_put_contents($truncated_path, $truncated);
+
+        File::decryptFile($truncated_path, $plaintext_path, $this->key);
+    }
+
     /**
      * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
      * @excpectedExceptionMessage Message Authentication failure; tampering detected.
@@ -143,12 +192,9 @@ class FileTest extends \PHPUnit_Framework_TestCase
         
         $data['wat-giagantic-duck'] = ['wat-gigantic-duck.jpg'];
         $data['large'] = ['large.jpg'];
-        
-        if (file_exists(__DIR__ . '/File/In_the_Conservatory.jpg')){
-            // see File/get_large.sh
-            $data['extra-large'] = ['In_the_Conservatory.jpg'];
-        }
-        
+        # Created from /dev/urandom in test.sh
+        $data['extra-large'] = ['big-generated-file'];
+
         return $data;
     }
 }

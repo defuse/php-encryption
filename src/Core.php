@@ -7,6 +7,7 @@ use \Defuse\Crypto\Crypto;
 final class Core
 {
     const HEADER_VERSION_SIZE = 4;  /* This must never change. */
+    const MINIMUM_FILE_SIZE = 84;   /* Absolute minimum */
 
     const HEADER_MAGIC =            "\xDE\xF5";
     const CURRENT_VERSION =         "\xDE\xF5\x02\x00";
@@ -67,7 +68,7 @@ final class Core
                 );
             }
 
-            $ctr[$i] = \chr($sum & 0xFF);
+            $ctr[$i] = \pack('C', $sum & 0xFF);
             $inc = $sum >> 8;
         }
         return $ctr;

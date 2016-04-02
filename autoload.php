@@ -54,6 +54,8 @@
             'Exception/CryptoTestFailedException.php',
         'Exception\\InvalidCiphertextException' =>
             'Exception/InvalidCiphertextException.php',
+        'Exception\\InvalidInput' =>
+            'Exception/InvalidInput.php',
     );
     foreach ($classmap as $classname => $file) {
         if ($classname === $relative_class) {
