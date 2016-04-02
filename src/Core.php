@@ -42,7 +42,7 @@ final class Core
             );
         }
 
-        if (!is_int($inc)) {
+        if (!\is_int($inc)) {
             throw new Ex\CannotPerformOperationException(
                 "Trying to increment nonce by a non-integer."
             );
@@ -62,7 +62,7 @@ final class Core
             $sum = \ord($ctr[$i]) + $inc;
 
             /* Detect integer overflow and fail. */
-            if (!is_int($sum)) {
+            if (!\is_int($sum)) {
                 throw new Ex\CannotPerformOperationException(
                     "Integer overflow in CTR mode nonce increment."
                 );
@@ -192,8 +192,8 @@ final class Core
         }
 
         $blind = self::secureRandom(32);
-        $message_compare = hash_hmac('sha256', $given, $blind);
-        $correct_compare = hash_hmac('sha256', $expected, $blind);
+        $message_compare = \hash_hmac('sha256', $given, $blind);
+        $correct_compare = \hash_hmac('sha256', $expected, $blind);
         return $correct_compare === $message_compare;
     }
     /**
