@@ -87,3 +87,12 @@ Authors
 ---------
 
 This library is authored by Taylor Hornby and Scott Arciszewski.
+
+Development Environment Setup
+-----------------------------
+
+In order to work on this library, you need to set up your development
+environment. We try to keep this process as simple as possible. Right now, all
+you have to do is:
+
+1. Install [composer](https://getcomposer.org/).
