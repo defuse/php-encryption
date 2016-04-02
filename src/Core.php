@@ -67,7 +67,7 @@ final class Core
                 );
             }
 
-            $ctr[$i] = \chr($sum & 0xFF);
+            $ctr[$i] = \pack('C', $sum & 0xFF);
             $inc = $sum >> 8;
         }
         return $ctr;
