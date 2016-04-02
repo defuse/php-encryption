@@ -42,15 +42,11 @@ final class File implements StreamInterface
     /**
      * Use this to generate a random encryption key.
      *
-     * @return string
+     * @return Key
      */
     public static function createNewRandomKey()
     {
-        $config = self::getFileVersionConfigFromHeader(
-            Core::CURRENT_FILE_VERSION,
-            Core::CURRENT_FILE_VERSION
-        );
-        return Core::secureRandom($config->keyByteSize());
+        return Key::CreateNewRandomKey();
     }
 
     /**
@@ -105,7 +101,7 @@ final class File implements StreamInterface
          */
         try {
             $encrypted = self::encryptResource($if, $of, $key);
-        } catch (\Ex\CryptoException $ex) {
+        } catch (Ex\CryptoException $ex) {
             fclose($if);
             fclose($of);
             throw $ex;
@@ -183,7 +179,7 @@ final class File implements StreamInterface
          */
         try {
             $decrypted = self::decryptResource($if, $of, $key);
-        } catch (\Ex\CryptoException $ex) {
+        } catch (Ex\CryptoException $ex) {
             fclose($if);
             fclose($of);
             throw $ex;
@@ -217,6 +213,10 @@ final class File implements StreamInterface
      * @param resource $outputHandle
      * @param Key $key
      * @return boolean
+     *
+     * @throws Exception\CannotPerformOperationException
+     * @throws Exception\InvalidCiphertextException
+     * @throws Exception\InvalidInput
      */
     public static function encryptResource($inputHandle, $outputHandle, Key $key)
     {
@@ -384,6 +384,10 @@ final class File implements StreamInterface
      * @param resource $outputHandle
      * @param Key $key
      * @return boolean
+     *
+     * @throws Exception\CannotPerformOperationException
+     * @throws Exception\InvalidCiphertextException
+     * @throws Exception\InvalidInput
      */
     public static function decryptResource($inputHandle, $outputHandle, Key $key)
     {
@@ -396,6 +400,12 @@ final class File implements StreamInterface
         if (!\is_resource($outputHandle)) {
             throw new Ex\InvalidInput(
                 'Output handle must be a resource!'
+            );
+        }
+        $stat = \fstat($inputHandle);
+        if ($stat['size'] < Core::MINIMUM_FILE_SIZE) {
+            throw new Ex\InvalidCiphertextException(
+                'Input file is too small to have been created by this library.'
             );
         }
 
@@ -769,10 +779,12 @@ final class File implements StreamInterface
      */
     final public static function readBytes($stream, $num)
     {
-        if ($num <= 0) {
+        if ($num < 0) {
             throw new \RangeException(
                 'Tried to read less than 0 bytes'
             );
+        } elseif ($num === 0) {
+            return '';
         }
         $buf = '';
         $remaining = $num;
