@@ -42,5 +42,6 @@ class ExceptionHandler
         if ($this->rethrow) {
             throw $this->rethrow;
         }
+        \restore_exception_handler();
     }
 }
