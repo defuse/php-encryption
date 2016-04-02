@@ -105,13 +105,7 @@ class Crypto
         );
 
         // Generate a random initialization vector.
-        Core::ensureFunctionExists("openssl_cipher_iv_length");
-        $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
-        if ($ivsize === false || $ivsize <= 0) {
-            throw new Ex\CannotPerformOperationException(
-                "Could not get the IV length from OpenSSL"
-            );
-        }
+        $ivsize = Core::cipherIvLength($config->cipherMethod());
         $iv = Core::secureRandom($ivsize);
 
         $ciphertext = $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv, $config);
@@ -210,13 +204,7 @@ class Crypto
             $ekey = Core::HKDF($config->hashFunctionName(), $key, $config->keyByteSize(), $config->encryptionInfoString(), $salt, $config);
 
             // Extract the initialization vector from the ciphertext.
-            Core::EnsureFunctionExists("openssl_cipher_iv_length");
-            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
-            if ($ivsize === false || $ivsize <= 0) {
-                throw new Ex\CannotPerformOperationException(
-                    "Could not get the IV length from OpenSSL"
-                );
-            }
+            $ivsize = Core::cipherIvLength($config->cipherMethod());
             if (Core::ourStrlen($ciphertext) <= $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."
@@ -302,13 +290,7 @@ class Crypto
             );
 
             // Extract the initialization vector from the ciphertext.
-            Core::EnsureFunctionExists("openssl_cipher_iv_length");
-            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
-            if ($ivsize === false || $ivsize <= 0) {
-                throw new Ex\CannotPerformOperationException(
-                    "Could not get the IV length from OpenSSL"
-                );
-            }
+            $ivsize = Core::cipherIvLength($config->cipherMethod());
             if (Core::ourStrlen($ciphertext) <= $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."

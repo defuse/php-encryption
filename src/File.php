@@ -273,13 +273,7 @@ final class File implements StreamInterface
         /**
          *  Generate a random initialization vector.
          */
-        Core::ensureFunctionExists("openssl_cipher_iv_length");
-        $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
-        if ($ivsize === false || $ivsize <= 0) {
-            throw new Ex\CannotPerformOperationException(
-                'Improper IV size'
-            );
-        }
+        $ivsize = Core::cipherIvLength($config->cipherMethod());
         $iv = Core::secureRandom($ivsize);
 
         /**
@@ -469,7 +463,7 @@ final class File implements StreamInterface
              *
              * It should be the first N blocks of the file (N = 16)
              */
-            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
+            $ivsize = Core::cipherIvLength($config->cipherMethod());
             $iv = self::readBytes($inputHandle, $ivsize);
 
             // How much do we increase the counter after each buffered encryption to prevent nonce reuse

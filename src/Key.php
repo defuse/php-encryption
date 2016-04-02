@@ -58,9 +58,23 @@ final class Key
 
     public static function CreateNewRandomKey()
     {
+        return Key::CreateKey(function($size) {
+           return Core::secureRandom($size);
+        });
+    }
+
+    private static function CreateKey(callable $keyGenerator) 
+    {
         $config = self::GetKeyVersionConfigFromKeyHeader(self::KEY_CURRENT_VERSION);
-        $bytes = Core::secureRandom($config->keyByteSize());
+        $bytes = $keyGenerator($config->keyByteSize());
         return new Key(self::KEY_CURRENT_VERSION, $bytes);
+    }
+    
+    public static function CreateKeyBasedOnPassword($password, $salt) 
+    {
+        return Key::CreateKey(function($size) use ($password, $salt) {
+           return hash_pbkdf2('sha256', $password, $salt, 100000, $size, true);
+        });
     }
 
     public static function LoadFromAsciiSafeString($savedKeyString)
