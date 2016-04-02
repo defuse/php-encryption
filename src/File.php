@@ -102,8 +102,8 @@ final class File implements StreamInterface
         try {
             $encrypted = self::encryptResource($if, $of, $key);
         } catch (Ex\CryptoException $ex) {
-            fclose($if);
-            fclose($of);
+            \fclose($if);
+            \fclose($of);
             throw $ex;
         }
 
@@ -180,8 +180,8 @@ final class File implements StreamInterface
         try {
             $decrypted = self::decryptResource($if, $of, $key);
         } catch (Ex\CryptoException $ex) {
-            fclose($if);
-            fclose($of);
+            \fclose($if);
+            \fclose($of);
             throw $ex;
         }
 
