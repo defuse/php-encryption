@@ -86,7 +86,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     {
         $config = new MockConfig;
         $actual_end = \Defuse\Crypto\Core::incrementCounter(\hex2bin($start), $inc, $config);
-        $this->assertEquals(
+        $this->assertSame(
             $end,
             \bin2hex($actual_end),
             $start . " + " . $inc
@@ -112,7 +112,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
             $start = str_repeat("\xFF", $offset) . "\xFE" . str_repeat("\xFF", 16 - $offset - 1);
             $expected_end = str_repeat("\xFF", $offset + 1) . str_repeat("\x00", 16 - $offset - 1);
             $actual_end = \Defuse\Crypto\Core::incrementCounter($start, 1, $config);
-            $this->assertEquals(
+            $this->assertSame(
                 \bin2hex($expected_end),
                 \bin2hex($actual_end),
                 \bin2hex($start) . " + " . 1
@@ -141,7 +141,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
                 chr(($sum >> 0) & 0xff);
             $actual_end = \Defuse\Crypto\Core::incrementCounter($start, $rand_b, $config);
 
-            $this->assertEquals(
+            $this->assertSame(
                 \bin2hex($expected_end),
                 \bin2hex($actual_end),
                 \bin2hex($start) . " + " . $rand_b
@@ -267,7 +267,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         );
 
         /* If it decrypts properly, we computed the nonce the same way. */
-        $this->assertEquals(
+        $this->assertSame(
             str_repeat('a', 0x150 * 16),
             $decrypt
         );

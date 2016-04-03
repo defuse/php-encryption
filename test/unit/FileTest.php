@@ -50,7 +50,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($result, 
             sprintf('File "%s" did not decrypt successfully.', $dest1));
         $this->assertFileExists($reverse1);
-        $this->assertEquals(md5_file($src), md5_file($reverse1), 
+        $this->assertSame(md5_file($src), md5_file($reverse1), 
             'File and encrypted-decrypted file do not match.');
         
         $dest2 = self::$TEMP_DIR . '/ff2';
@@ -66,7 +66,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $result = File::decryptFile($dest2, $reverse2, $this->key);
         $this->assertTrue($result,
             sprintf('File "%s" did not re-decrypt successfully.', $dest1));
-        $this->assertEquals(md5_file($src), md5_file($reverse2),
+        $this->assertSame(md5_file($src), md5_file($reverse2),
             'File and encrypted-decrypted file do not match.');
         
     }
@@ -96,7 +96,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         fclose($src2);
         fclose($dest2);
         
-        $this->assertEquals(md5_file($srcName), md5_file(self::$TEMP_DIR . '/dest2'),
+        $this->assertSame(md5_file($srcName), md5_file(self::$TEMP_DIR . '/dest2'),
             'Original file mismatches the result of encrypt and decrypt');
         
     }

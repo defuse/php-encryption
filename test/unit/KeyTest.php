@@ -8,7 +8,7 @@ class KeyTest extends PHPUnit_Framework_TestCase
     function testCreateNewRandomKey()
     {
         $key = Key::CreateNewRandomKey();
-        $this->assertEquals(32, Core::ourStrlen($key->getRawBytes()));
+        $this->assertSame(32, Core::ourStrlen($key->getRawBytes()));
     }
 
     function testSaveAndLoadKey()
@@ -16,7 +16,7 @@ class KeyTest extends PHPUnit_Framework_TestCase
         $key1 = Key::CreateNewRandomKey();
         $str = $key1->saveToAsciiSafeString();
         $key2 = Key::LoadFromAsciiSafeString($str);
-        $this->assertEquals($key1->getRawBytes(), $key2->getRawBytes());
+        $this->assertSame($key1->getRawBytes(), $key2->getRawBytes());
     }
 
     /**
