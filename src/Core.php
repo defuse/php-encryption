@@ -302,6 +302,10 @@ final class Core
                 return '';
             }
 
+            if ($start > self::ourStrlen($str)) {
+                return false;
+            }
+
             return \mb_substr($str, $start, $length, '8bit');
         }
 
