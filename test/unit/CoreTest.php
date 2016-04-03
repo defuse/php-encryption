@@ -18,16 +18,29 @@ class CoreTest extends PHPUnit_Framework_TestCase
         } else {
             $this->assertSame(16, strlen($str));
 
-            // We want ourSubstr to behave identically to substr() in the
-            // non-mbstring case. This double checks what that behavior *is.*
-            $this->assertSame(
-                '',
-                substr("ABC", 3, 0)
-            );
-            $this->assertSame(
-                '',
-                substr("ABC", 3)
-            );
+            // We want ourSubstr to behave identically to substr() in PHP 7 in
+            // the non-mbstring case. This double checks what that behavior is.
+            if (version_compare(phpversion(), '7.0.0', '>=')) {
+                $this->assertSame(
+                    '',
+                    substr("ABC", 3, 0)
+                );
+                $this->assertSame(
+                    '',
+                    substr("ABC", 3)
+                );
+            } else {
+                // The behavior was changed for PHP 7. It used to be...
+                $this->assertSame(
+                    false,
+                    substr("ABC", 3, 0)
+                );
+                $this->assertSame(
+                    false,
+                    substr("ABC", 3)
+                );
+            }
+            // Seriously, fuck this shit. Don't use PHP.
         }
 
         // This checks that the behavior is indeed the same.
