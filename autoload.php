@@ -8,6 +8,9 @@
 
     // Base directory for the namespace prefix
     $base_dir = __DIR__.'/src/';
+    if (!\function_exists('\\random_int')) {
+        require_once $base_dir . '/random_compat/random.php';
+    }
 
     // Does the class use the namespace prefix?
     $len = \strlen($prefix);

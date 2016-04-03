@@ -99,15 +99,8 @@ final class Core
      */
     public static function secureRandom($octets)
     {
-        self::ensureFunctionExists('openssl_random_pseudo_bytes');
-        $secure = false;
-        $random = \openssl_random_pseudo_bytes($octets, $secure);
-        if ($random === false || $secure === false) {
-            throw new Ex\CannotPerformOperationException(
-                "openssl_random_pseudo_bytes() failed."
-            );
-        }
-        return $random;
+        self::ensureFunctionExists('random_bytes');
+        return \random_bytes($octets);
     }
     /**
      * Use HKDF to derive multiple keys from one.
