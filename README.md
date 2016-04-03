@@ -23,7 +23,13 @@ composer require defuse/php-encryption
 
 ### Direct Installation (Phar)
 
-Download the PHP Archive and public key. Extract 
+Download the PHP Archive and public key. Place both of them in the same directory (e.g. `vendor/defuse/php-encryption.phar` and `vendor/defuse/php-encryption.phar.pubkey`).
+
+Then, just add this line and you're golden:
+
+```php
+require_once "vendor/defuse/php-encryption.phar";
+```
 
 ### Direct Installation (Manual)
 
@@ -85,6 +91,15 @@ try {
 If encryption made sense, then the decryption API should be intuitive and
 precisely what you expect it to be:
 
+```php
+try {
+    $plaintext = \Defuse\Crypto\Crypto::decrypt($ciphertext, $key);
+} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
+    die("Our platform is not secure enough to use this cryptography library.");
+} catch (\Defuse\Crypto\Exception\InvalidCiphertextException $ex) {
+    die("Ciphertext was modified in transit.");
+}
+```
 
 ### Interlude: A Complete Example
 
