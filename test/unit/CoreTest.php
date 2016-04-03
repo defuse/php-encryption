@@ -14,7 +14,14 @@ class CoreTest extends PHPUnit_Framework_TestCase
 
         if (ini_get("mbstring.func_overload") == 7) {
             // This checks that the above hex string is indeed "weird."
-            $this->assertSame(12, strlen($str));
+            // Edit: Er... at least, on PHP 5.6.0 and above it's weird.
+            //  I DON'T KNOW WHY THE LENGTH OF A STRING DEPENDS ON THE VERSION
+            //  OF PHP BUT APPARENTLY IT DOES ¯\_(ツ)_/¯
+            if (version_compare(phpversion(), '5.6.0', '>=')) {
+                $this->assertSame(12, strlen($str));
+            } else {
+                $this->assertSame(16, strlen($str));
+            }
         } else {
             $this->assertSame(16, strlen($str));
 
@@ -40,7 +47,7 @@ class CoreTest extends PHPUnit_Framework_TestCase
                     substr("ABC", 3)
                 );
             }
-            // Seriously, fuck this shit. Don't use PHP.
+            // Seriously, fuck this shit. Don't use PHP. ╯‵Д′)╯彡┻━┻
         }
 
         // This checks that the behavior is indeed the same.
