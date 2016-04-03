@@ -12,7 +12,7 @@ final class Key
     const KEY_MAGIC = "\xDE\xF0";
     const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
 
-    const MIN_SAFE_KEY_BYTE_SIZE = 16;
+    const MIN_SAFE_KEY_BYTE_SIZE = 32;
 
     /*
      * Format:
