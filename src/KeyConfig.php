@@ -16,14 +16,14 @@ final class KeyConfig
             "checksum_hash_function",
             "checksum_byte_size"
         );
-        if (sort($expected_keys) !== true) {
+        if (\sort($expected_keys) !== true) {
             throw Ex\CannotPerformOperationException(
                 "sort() failed."
             );
         }
 
-        $actual_keys = array_keys($config_array);
-        if (sort($actual_keys) !== true) {
+        $actual_keys = \array_keys($config_array);
+        if (\sort($actual_keys) !== true) {
             throw Ex\CannotPerformOperationException(
                 "sort() failed."
             );

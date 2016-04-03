@@ -104,7 +104,7 @@ class RuntimeTests extends Crypto
 
         // Modifying the ciphertext: Changing an IV byte.
         try {
-            $ciphertext[4] = chr((ord($ciphertext[4]) + 1) % 256);
+            $ciphertext[4] = \chr((\ord($ciphertext[4]) + 1) % 256);
             Crypto::decrypt($ciphertext, $key, true);
             throw new Ex\CryptoTestFailedException();
         } catch (Ex\InvalidCiphertextException $e) { /* expected */ }
@@ -219,12 +219,12 @@ class RuntimeTests extends Crypto
 
         $computed_ciphertext = Crypto::plainEncrypt($plaintext, $key, $iv, $config);
         if ($computed_ciphertext !== $ciphertext) {
-            echo str_repeat("\n", 30);
-            var_dump($config);
+            echo \str_repeat("\n", 30);
+            \var_dump($config);
             echo \bin2hex($computed_ciphertext);
             echo "\n---\n";
             echo \bin2hex($ciphertext);
-            echo str_repeat("\n", 30);
+            echo \str_repeat("\n", 30);
             throw new Ex\CryptoTestFailedException();
         }
 

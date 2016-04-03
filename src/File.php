@@ -89,7 +89,7 @@ final class File implements StreamInterface
              */
             $of = \fopen($outputFilename, 'wb');
             if ($of === false) {
-                fclose($if);
+                \fclose($if);
                 throw new Ex\CannotPerformOperationException(
                     'Cannot open output file for encrypting'
                 );
@@ -102,8 +102,8 @@ final class File implements StreamInterface
         try {
             $encrypted = self::encryptResource($if, $of, $key);
         } catch (Ex\CryptoException $ex) {
-            fclose($if);
-            fclose($of);
+            \fclose($if);
+            \fclose($of);
             throw $ex;
         }
 
@@ -167,7 +167,7 @@ final class File implements StreamInterface
              */
             $of = \fopen($outputFilename, 'wb');
             if ($of === false) {
-                fclose($if);
+                \fclose($if);
                 throw new Ex\CannotPerformOperationException(
                     'Cannot open output file for decrypting'
                 );
@@ -180,8 +180,8 @@ final class File implements StreamInterface
         try {
             $decrypted = self::decryptResource($if, $of, $key);
         } catch (Ex\CryptoException $ex) {
-            fclose($if);
-            fclose($of);
+            \fclose($if);
+            \fclose($of);
             throw $ex;
         }
 
@@ -273,13 +273,7 @@ final class File implements StreamInterface
         /**
          *  Generate a random initialization vector.
          */
-        Core::ensureFunctionExists("openssl_cipher_iv_length");
-        $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
-        if ($ivsize === false || $ivsize <= 0) {
-            throw new Ex\CannotPerformOperationException(
-                'Improper IV size'
-            );
-        }
+        $ivsize = Core::cipherIvLength($config->cipherMethod());
         $iv = Core::secureRandom($ivsize);
 
         /**
@@ -469,7 +463,7 @@ final class File implements StreamInterface
              *
              * It should be the first N blocks of the file (N = 16)
              */
-            $ivsize = \openssl_cipher_iv_length($config->cipherMethod());
+            $ivsize = Core::cipherIvLength($config->cipherMethod());
             $iv = self::readBytes($inputHandle, $ivsize);
 
             // How much do we increase the counter after each buffered encryption to prevent nonce reuse

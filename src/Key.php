@@ -58,9 +58,23 @@ final class Key
 
     public static function CreateNewRandomKey()
     {
+        return Key::CreateKey(function($size) {
+           return Core::secureRandom($size);
+        });
+    }
+
+    private static function CreateKey(callable $keyGenerator) 
+    {
         $config = self::GetKeyVersionConfigFromKeyHeader(self::KEY_CURRENT_VERSION);
-        $bytes = Core::secureRandom($config->keyByteSize());
+        $bytes = $keyGenerator($config->keyByteSize());
         return new Key(self::KEY_CURRENT_VERSION, $bytes);
+    }
+    
+    public static function CreateKeyBasedOnPassword($password, $salt) 
+    {
+        return Key::CreateKey(function($size) use ($password, $salt) {
+           return hash_pbkdf2('sha256', $password, $salt, 100000, $size, true);
+        });
     }
 
     public static function LoadFromAsciiSafeString($savedKeyString)
@@ -110,7 +124,7 @@ final class Key
         );
 
         /* Re-compute the checksum. */
-        $checksum_b = hash($config->checksumHashFunction(), $checked_bytes, true);
+        $checksum_b = \hash($config->checksumHashFunction(), $checked_bytes, true);
 
         /* Validate it. It *is* important for this to be constant time. */
         if (!Core::hashEquals($checksum_a, $checksum_b)) {
@@ -136,7 +150,7 @@ final class Key
         return Encoding::binToHex(
             $this->key_version_header .
             $this->key_bytes .
-            hash(
+            \hash(
                 $this->config->checksumHashFunction(),
                 $this->key_version_header . $this->key_bytes,
                 true
@@ -152,7 +166,7 @@ final class Key
 
     public function getRawBytes()
     {
-        if (is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
+        if (\is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
             throw new CannotPerformOperationException(
                 "An attempt was made to use an uninitialzied or too-short key"
             );

@@ -27,14 +27,14 @@ class Config
             "encryption_info_string",
             "authentication_info_string"
         );
-        if (sort($expected_keys) !== true) {
+        if (\sort($expected_keys) !== true) {
             throw Ex\CannotPerformOperationException(
                 "sort() failed."
             );
         }
 
-        $actual_keys = array_keys($config_array);
-        if (sort($actual_keys) !== true) {
+        $actual_keys = \array_keys($config_array);
+        if (\sort($actual_keys) !== true) {
             throw Ex\CannotPerformOperationException(
                 "sort() failed."
             );
@@ -75,7 +75,7 @@ class Config
         }
 
         if ($this->salt_byte_size !== false) {
-            if (!is_int($this->salt_byte_size) || $this->salt_byte_size <= 0) {
+            if (!\is_int($this->salt_byte_size) || $this->salt_byte_size <= 0) {
                 throw new Ex\CannotPerformOperationException(
                     "Configuration contains an invalid salt byte size."
                 );
