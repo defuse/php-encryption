@@ -11,8 +11,8 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         $key = Key::CreateNewRandomKey();
         $cipher = Crypto::encrypt($str, $key);
         $this->assertEquals(
-            Crypto::decrypt($cipher, $key),
-            $str
+            $str,
+            Crypto::decrypt($cipher, $key)
         );
     }
 }

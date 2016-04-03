@@ -279,6 +279,13 @@ final class Core
                 }
             }
 
+            // This is required to make mb_substr behavior identical to substr.
+            // Without this, mb_substr() would return false, contra to what the
+            // PHP documentation says (it doesn't say it can return false.)
+            if ($start === self::ourStrlen($str) && $length === 0) {
+                return '';
+            }
+
             return \mb_substr($str, $start, $length, '8bit');
         }
 
