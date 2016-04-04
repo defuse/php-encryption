@@ -9,37 +9,8 @@ use \Defuse\Crypto\Encoding;
 use \Defuse\Crypto\RuntimeTests;
 use \Defuse\Crypto\Config;
 
-/*
- * PHP Encryption Library
- * Copyright (c) 2014-2015, Taylor Hornby <https://defuse.ca>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
 class Crypto
 {
-    // Ciphertext format: [____VERSION____][____HMAC____][____IV____][____CIPHERTEXT____].
-    // Legacy format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
     /**
      * Use this to generate a random encryption key.
@@ -67,57 +38,7 @@ class Crypto
      */
     public static function encrypt($plaintext, $key, $raw_binary = false)
     {
-        RuntimeTests::runtimeTest();
-
-        /* Attempt to validate that the key was generated safely. */
-        if (!\is_a($key, "\Defuse\Crypto\Key")) {
-            throw new Ex\CannotPerformOperationException(
-                "The given key is not a valid Key object."
-            );
-        }
-        $key = $key->getRawBytes();
-
-        $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
-
-        if (Core::ourStrlen($key) !== $config->keyByteSize()) {
-            throw new Ex\CannotPerformOperationException("Key is the wrong size.");
-        }
-        $salt = Core::secureRandom($config->saltByteSize());
-
-        // Generate a sub-key for encryption.
-        $ekey = Core::HKDF(
-            $config->hashFunctionName(),
-            $key,
-            $config->keyByteSize(),
-            $config->encryptionInfoString(),
-            $salt,
-            $config
-        );
-
-        // Generate a sub-key for authentication and apply the HMAC.
-        $akey = Core::HKDF(
-            $config->hashFunctionName(),
-            $key,
-            $config->keyByteSize(),
-            $config->authenticationInfoString(),
-            $salt,
-            $config
-        );
-
-        // Generate a random initialization vector.
-        $ivsize = Core::cipherIvLength($config->cipherMethod());
-        $iv = Core::secureRandom($ivsize);
-
-        $ciphertext = $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv, $config);
-        $auth = \hash_hmac($config->hashFunctionName(), Core::CURRENT_VERSION . $ciphertext, $akey, true);
-
-        // We're now appending the header as of 2.00
-        $ciphertext = Core::CURRENT_VERSION . $auth . $ciphertext;
-
-        if ($raw_binary) {
-            return $ciphertext;
-        }
-        return Encoding::binToHex($ciphertext);
+        return File::encryptString($plaintext, $key, $raw_binary);
     }
 
     /**
@@ -136,102 +57,7 @@ class Crypto
      */
     public static function decrypt($ciphertext, $key, $raw_binary = false)
     {
-        RuntimeTests::runtimeTest();
-
-        /* Attempt to validate that the key was generated safely. */
-        if (!\is_a($key, "\Defuse\Crypto\Key")) {
-            throw new Ex\CannotPerformOperationException(
-                "The given key is not a valid Key object."
-            );
-        }
-        $key = $key->getRawBytes();
-
-        if (!$raw_binary) {
-            try {
-                $ciphertext = Encoding::hexToBin($ciphertext);
-            } catch (\RangeException $ex) {
-                throw new Ex\InvalidCiphertextException(
-                    "Ciphertext has invalid hex encoding."
-                );
-            }
-        }
-
-        // Grab the header tag
-        $version = Core::ourSubstr($ciphertext, 0, Core::HEADER_VERSION_SIZE);
-
-        // Load the configuration for this version
-        $config = self::getVersionConfigFromHeader($version, Core::CURRENT_VERSION);
-
-        // Now let's operate on the remainder of the ciphertext as normal
-        $ciphertext = Core::ourSubstr($ciphertext, Core::HEADER_VERSION_SIZE, null);
-
-        // Extract the HMAC from the front of the ciphertext.
-        if (Core::ourStrlen($ciphertext) < $config->macByteSize()) {
-            throw new Ex\InvalidCiphertextException(
-                "Ciphertext is too short."
-            );
-        }
-        $hmac = Core::ourSubstr(
-            $ciphertext, 
-            0,
-            $config->macByteSize()
-        );
-        if ($hmac === false) {
-            throw new Ex\CannotPerformOperationException();
-        }
-        $salt = Core::ourSubstr(
-            $ciphertext,
-            $config->macByteSize(), 
-            $config->saltByteSize()
-        );
-        if ($salt === false) {
-            throw new Ex\CannotPerformOperationException();
-        }
-        
-        $ciphertext = Core::ourSubstr(
-            $ciphertext,
-            $config->macByteSize() + $config->saltByteSize()
-        );
-        if ($ciphertext === false) {
-            throw new Ex\CannotPerformOperationException();
-        }
-
-        // Regenerate the same authentication sub-key.
-        $akey = Core::HKDF($config->hashFunctionName(), $key, $config->keyByteSize(), $config->authenticationInfoString(), $salt, $config);
-
-        if (self::verifyHMAC($hmac, $version . $salt . $ciphertext, $akey, $config)) {
-            // Regenerate the same encryption sub-key.
-            $ekey = Core::HKDF($config->hashFunctionName(), $key, $config->keyByteSize(), $config->encryptionInfoString(), $salt, $config);
-
-            // Extract the initialization vector from the ciphertext.
-            $ivsize = Core::cipherIvLength($config->cipherMethod());
-            if (Core::ourStrlen($ciphertext) < $ivsize) {
-                throw new Ex\InvalidCiphertextException(
-                    "Ciphertext is too short."
-                );
-            }
-            $iv = Core::ourSubstr($ciphertext, 0, $ivsize);
-            if ($iv === false) {
-                throw new Ex\CannotPerformOperationException();
-            }
-            $ciphertext = Core::ourSubstr($ciphertext, $ivsize);
-            if ($ciphertext === false) {
-                throw new Ex\CannotPerformOperationException();
-            }
-
-            $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv, $config);
-
-            return $plaintext;
-        } else {
-            /*
-             * We throw an exception instead of returning false because we want
-             * a script that doesn't handle this condition to CRASH, instead
-             * of thinking the ciphertext decrypted to the value false.
-             */
-            throw new Ex\InvalidCiphertextException(
-                "Integrity check failed."
-            );
-        }
+        return File::decryptString($ciphertext, $key, $raw_binary);
     }
 
     /**
@@ -250,6 +76,8 @@ class Crypto
      */
     public static function legacyDecrypt($ciphertext, $key)
     {
+        // Legacy format: [____HMAC____][____IV____][____CIPHERTEXT____].
+
         RuntimeTests::runtimeTest();
         $config = self::getVersionConfigFromHeader(Core::LEGACY_VERSION, Core::LEGACY_VERSION);
 

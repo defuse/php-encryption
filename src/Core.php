@@ -24,11 +24,11 @@ final class Core
      *
      * @return string (raw binary)
      */
-    public static function incrementCounter($ctr, $inc, &$config)
+    public static function incrementCounter($ctr, $inc, $cipherMethod)
     {
         static $ivsize = null;
         if ($ivsize === null) {
-            $ivsize = self::cipherIvLength($config->cipherMethod());
+            $ivsize = self::cipherIvLength($cipherMethod);
         }
 
         if (self::ourStrlen($ctr) !== $ivsize) {
@@ -121,13 +121,11 @@ final class Core
      * @return string
      * @throws Ex\CannotPerformOperationException
      */
-    public static function HKDF($hash, $ikm, $length, $info = '', $salt = null, $config = null)
+    public static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
     {
-        // Find the correct digest length as quickly as we can.
-        $digest_length = $config->macByteSize();
-        if ($hash != $config->hashFunctionName()) {
-            $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
-        }
+        // Find the correct digest length.
+        $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
+
         // Sanity-check the desired output length.
         if (empty($length) || !\is_int($length) ||
             $length < 0 || $length > 255 * $digest_length) {
