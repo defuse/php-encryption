@@ -7,7 +7,6 @@ use \Defuse\Crypto\Core;
 use \Defuse\Crypto\Key;
 use \Defuse\Crypto\Encoding;
 use \Defuse\Crypto\RuntimeTests;
-use \Defuse\Crypto\Config;
 
 class Crypto
 {
@@ -50,42 +49,38 @@ class Crypto
         }
         $key = $key->getRawBytes();
 
-        $config = self::getVersionConfigFromHeader(Core::CURRENT_VERSION, Core::CURRENT_VERSION);
-
-        if (Core::ourStrlen($key) !== $config->keyByteSize()) {
+        if (Core::ourStrlen($key) !== Core::KEY_BYTE_SIZE) {
             throw new Ex\CannotPerformOperationException("Key is the wrong size.");
         }
-        $salt = Core::secureRandom($config->saltByteSize());
+        $salt = Core::secureRandom(Core::SALT_BYTE_SIZE);
 
         // Generate a sub-key for encryption.
         $ekey = Core::HKDF(
-            $config->hashFunctionName(),
+            Core::HASH_FUNCTION_NAME,
             $key,
-            $config->keyByteSize(),
-            $config->encryptionInfoString(),
-            $salt,
-            $config
+            Core::KEY_BYTE_SIZE,
+            Core::ENCRYPTION_INFO_STRING,
+            $salt
         );
 
         // Generate a sub-key for authentication and apply the HMAC.
         $akey = Core::HKDF(
-            $config->hashFunctionName(),
+            Core::HASH_FUNCTION_NAME,
             $key,
-            $config->keyByteSize(),
-            $config->authenticationInfoString(),
-            $salt,
-            $config
+            Core::KEY_BYTE_SIZE,
+            Core::AUTHENTICATION_INFO_STRING,
+            $salt
         );
 
         // Generate a random initialization vector.
-        $ivsize = Core::cipherIvLength($config->cipherMethod());
+        $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
         $iv = Core::secureRandom($ivsize);
 
-        $ciphertext = $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv, $config);
-        $auth = \hash_hmac($config->hashFunctionName(), Core::CURRENT_VERSION . $ciphertext, $akey, true);
+        $ciphertext = Core::CURRENT_VERSION . $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv);
+        $auth = \hash_hmac(Core::HASH_FUNCTION_NAME, $ciphertext, $akey, true);
 
         // We're now appending the header as of 2.00
-        $ciphertext = Core::CURRENT_VERSION . $auth . $ciphertext;
+        $ciphertext = $ciphertext . $auth;
 
         if ($raw_binary) {
             return $ciphertext;
@@ -130,32 +125,34 @@ class Crypto
         }
 
         // Grab the header tag
-        $version = Core::ourSubstr($ciphertext, 0, Core::HEADER_VERSION_SIZE);
-
-        // Load the configuration for this version
-        $config = self::getVersionConfigFromHeader($version, Core::CURRENT_VERSION);
+        $header = Core::ourSubstr($ciphertext, 0, Core::HEADER_VERSION_SIZE);
+        if ($header !== Core::CURRENT_VERSION) {
+            throw new Ex\InvalidCiphertextException(
+                "Bad version header."
+            );
+        }
 
         // Now let's operate on the remainder of the ciphertext as normal
         $ciphertext = Core::ourSubstr($ciphertext, Core::HEADER_VERSION_SIZE, null);
 
         // Extract the HMAC from the front of the ciphertext.
-        if (Core::ourStrlen($ciphertext) < $config->macByteSize()) {
+        if (Core::ourStrlen($ciphertext) < Core::MAC_BYTE_SIZE) {
             throw new Ex\InvalidCiphertextException(
                 "Ciphertext is too short."
             );
         }
         $hmac = Core::ourSubstr(
             $ciphertext, 
-            0,
-            $config->macByteSize()
+            Core::ourStrlen($ciphertext) - Core::MAC_BYTE_SIZE,
+            Core::MAC_BYTE_SIZE
         );
         if ($hmac === false) {
             throw new Ex\CannotPerformOperationException();
         }
         $salt = Core::ourSubstr(
             $ciphertext,
-            $config->macByteSize(), 
-            $config->saltByteSize()
+            0, 
+            Core::SALT_BYTE_SIZE
         );
         if ($salt === false) {
             throw new Ex\CannotPerformOperationException();
@@ -163,21 +160,22 @@ class Crypto
         
         $ciphertext = Core::ourSubstr(
             $ciphertext,
-            $config->macByteSize() + $config->saltByteSize()
+            Core::SALT_BYTE_SIZE,
+            Core::ourStrlen($ciphertext) - Core::MAC_BYTE_SIZE - Core::SALT_BYTE_SIZE
         );
         if ($ciphertext === false) {
             throw new Ex\CannotPerformOperationException();
         }
 
         // Regenerate the same authentication sub-key.
-        $akey = Core::HKDF($config->hashFunctionName(), $key, $config->keyByteSize(), $config->authenticationInfoString(), $salt, $config);
+        $akey = Core::HKDF(Core::HASH_FUNCTION_NAME, $key, Core::KEY_BYTE_SIZE, Core::AUTHENTICATION_INFO_STRING, $salt);
 
-        if (self::verifyHMAC($hmac, $version . $salt . $ciphertext, $akey, $config)) {
+        if (self::verifyHMAC($hmac, $header . $salt . $ciphertext, $akey)) {
             // Regenerate the same encryption sub-key.
-            $ekey = Core::HKDF($config->hashFunctionName(), $key, $config->keyByteSize(), $config->encryptionInfoString(), $salt, $config);
+            $ekey = Core::HKDF(Core::HASH_FUNCTION_NAME, $key, Core::KEY_BYTE_SIZE, Core::ENCRYPTION_INFO_STRING, $salt);
 
             // Extract the initialization vector from the ciphertext.
-            $ivsize = Core::cipherIvLength($config->cipherMethod());
+            $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
             if (Core::ourStrlen($ciphertext) < $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."
@@ -192,7 +190,7 @@ class Crypto
                 throw new Ex\CannotPerformOperationException();
             }
 
-            $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv, $config);
+            $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv, Core::CIPHER_METHOD);
 
             return $plaintext;
         } else {
@@ -224,46 +222,43 @@ class Crypto
     public static function legacyDecrypt($ciphertext, $key)
     {
         RuntimeTests::runtimeTest();
-        $config = self::getVersionConfigFromHeader(Core::LEGACY_VERSION, Core::LEGACY_VERSION);
 
         // Extract the HMAC from the front of the ciphertext.
-        if (Core::ourStrlen($ciphertext) <= $config->macByteSize()) {
+        if (Core::ourStrlen($ciphertext) <= Core::LEGACY_MAC_BYTE_SIZE) {
             throw new Ex\InvalidCiphertextException(
                 "Ciphertext is too short."
             );
         }
-        $hmac = Core::ourSubstr($ciphertext, 0, $config->macByteSize());
+        $hmac = Core::ourSubstr($ciphertext, 0, Core::LEGACY_MAC_BYTE_SIZE);
         if ($hmac === false) {
             throw new Ex\CannotPerformOperationException();
         }
-        $ciphertext = Core::ourSubstr($ciphertext, $config->macByteSize());
+        $ciphertext = Core::ourSubstr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
         if ($ciphertext === false) {
             throw new Ex\CannotPerformOperationException();
         }
 
         // Regenerate the same authentication sub-key.
         $akey = Core::HKDF(
-            $config->hashFunctionName(),
+            Core::LEGACY_HASH_FUNCTION_NAME,
             $key,
-            $config->keyByteSize(),
-            $config->authenticationInfoString(),
-            null,
-            $config
+            Core::LEGACY_KEY_BYTE_SIZE,
+            Core::LEGACY_AUTHENTICATION_INFO_STRING,
+            null
         );
 
-        if (self::verifyHMAC($hmac, $ciphertext, $akey, $config)) {
+        if (self::verifyHMAC($hmac, $ciphertext, $akey)) {
             // Regenerate the same encryption sub-key.
             $ekey = Core::HKDF(
-                $config->hashFunctionName(),
+                Core::LEGACY_HASH_FUNCTION_NAME,
                 $key,
-                $config->keyByteSize(),
-                $config->encryptionInfoString(),
-                null,
-                $config
+                Core::LEGACY_KEY_BYTE_SIZE,
+                Core::LEGACY_ENCRYPTION_INFO_STRING,
+                null
             );
 
             // Extract the initialization vector from the ciphertext.
-            $ivsize = Core::cipherIvLength($config->cipherMethod());
+            $ivsize = Core::cipherIvLength(Core::LEGACY_CIPHER_METHOD);
             if (Core::ourStrlen($ciphertext) <= $ivsize) {
                 throw new Ex\InvalidCiphertextException(
                     "Ciphertext is too short."
@@ -278,7 +273,7 @@ class Crypto
                 throw new Ex\CannotPerformOperationException();
             }
 
-            $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv, $config);
+            $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv, Core::LEGACY_CIPHER_METHOD);
 
             return $plaintext;
         } else {
@@ -301,17 +296,17 @@ class Crypto
      * @param string $plaintext
      * @param string $key
      * @param string $iv
-     * @param array $config
+     * @param array $config // XXX comment out of date, probably others too
      * @return string
      * @throws Ex\CannotPerformOperationException
      */
-    protected static function plainEncrypt($plaintext, $key, $iv, $config)
+    protected static function plainEncrypt($plaintext, $key, $iv)
     {
         Core::ensureConstantExists("OPENSSL_RAW_DATA");
         Core::ensureFunctionExists("openssl_encrypt");
         $ciphertext = \openssl_encrypt(
             $plaintext,
-            $config->cipherMethod(),
+            Core::CIPHER_METHOD,
             $key,
             OPENSSL_RAW_DATA,
             $iv
@@ -338,13 +333,13 @@ class Crypto
      * @return string
      * @throws Ex\CannotPerformOperationException
      */
-    protected static function plainDecrypt($ciphertext, $key, $iv, $config)
+    protected static function plainDecrypt($ciphertext, $key, $iv, $cipherMethod)
     {
         Core::ensureConstantExists("OPENSSL_RAW_DATA");
         Core::ensureFunctionExists("openssl_decrypt");
         $plaintext = \openssl_decrypt(
             $ciphertext,
-            $config->cipherMethod(),
+            $cipherMethod,
             $key,
             OPENSSL_RAW_DATA,
             $iv
@@ -367,95 +362,10 @@ class Crypto
      * @return boolean
      * @throws Ex\CannotPerformOperationException
      */
-    protected static function verifyHMAC($correct_hmac, $message, $key, $config)
+    protected static function verifyHMAC($correct_hmac, $message, $key)
     {
-        $message_hmac = \hash_hmac($config->hashFunctionName(), $message, $key, true);
+        $message_hmac = \hash_hmac(Core::HASH_FUNCTION_NAME, $message, $key, true);
         return Core::hashEquals($correct_hmac, $message_hmac);
-    }
-
-    /**
-     * Get the encryption configuration based on the version in a header.
-     *
-     * @param string $header The header to read the version number from.
-     * @param string $min_ver_header The header of the minimum version number allowed.
-     * @return array
-     * @throws Ex\InvalidCiphertextException
-     */
-    public static function getVersionConfigFromHeader($header, $min_ver_header)
-    {
-        if (Core::ourSubstr($header, 0, 2) !== Core::ourSubstr(Core::HEADER_MAGIC, 0, 2)) {
-            throw new Ex\InvalidCiphertextException(
-                "Ciphertext has a bad magic number."
-            );
-        }
-
-        $major = \ord($header[2]);
-        $minor = \ord($header[3]);
-
-        $min_major = \ord($min_ver_header[2]);
-        $min_minor = \ord($min_ver_header[3]);
-
-        if ($major < $min_major || ($major === $min_major && $minor < $min_minor) ) {
-            throw new Ex\InvalidCiphertextException(
-                "Ciphertext is requesting an insecure fallback."
-            );
-        }
-
-        $config = self::getVersionConfigFromMajorMinor($major, $minor);
-
-        return $config;
-    }
-
-    /**
-     *
-     * @param int $major The major version number.
-     * @param int $minor The minor version number.
-     * @return array
-     * @throws Ex\InvalidCiphertextException
-     */
-    protected static function getVersionConfigFromMajorMinor($major, $minor)
-    {
-        if ($major === 2) {
-            switch ($minor) {
-                case 0:
-                    return new Config([
-                        'cipher_method' => 'aes-256-ctr',
-                        'block_byte_size' => 16,
-                        'key_byte_size' => 32,
-                        'salt_byte_size' => 32,
-                        'hash_function_name' => 'sha256',
-                        'mac_byte_size' => 32,
-                        'encryption_info_string' => 'DefusePHP|V2|KeyForEncryption',
-                        'authentication_info_string' => 'DefusePHP|V2|KeyForAuthentication'
-                    ]);
-                default:
-                    throw new Ex\InvalidCiphertextException(
-                        "Unsupported ciphertext version."
-                    );
-            }
-        } elseif ($major === 1) {
-            switch ($minor) {
-                case 0:
-                    return new Config([
-                        'cipher_method' => 'aes-128-cbc',
-                        'block_byte_size' => 16,
-                        'key_byte_size' => 16,
-                        'salt_byte_size' => false,
-                        'hash_function_name' => 'sha256',
-                        'mac_byte_size' => 32,
-                        'encryption_info_string' => 'DefusePHP|KeyForEncryption',
-                        'authentication_info_string' => 'DefusePHP|KeyForAuthentication'
-                    ]);
-                default:
-                    throw new Ex\InvalidCiphertextException(
-                        "Unsupported ciphertext version."
-                    );
-            }
-        } else {
-            throw new Ex\InvalidCiphertextException(
-                "Unsupported ciphertext version."
-            );
-        }
     }
 
 }
