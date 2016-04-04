@@ -15,7 +15,7 @@ try {
     die('Cannot safely create a key');
 }
 
-$message = "ATTACK AT DAWN";
+$message = 'ATTACK AT DAWN';
 try {
     $ciphertext = Crypto::encrypt($message, $key);
 } catch (Ex\CryptoTestFailedException $ex) {
