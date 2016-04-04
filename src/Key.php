@@ -164,12 +164,6 @@ final class Key
         );
     }
 
-    public function isSafeForCipherTextVersion($major, $minor)
-    {
-        /* Legacy decryption uses raw key byte strings, not Key. */
-        return $major == 2 && $minor == 0;
-    }
-
     public function getRawBytes()
     {
         if (\is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
