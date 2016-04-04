@@ -9,7 +9,7 @@ final class Salt
 {
     const SALT_BYTE_SIZE = 32;
 
-    private $salt;
+    private $salt = null;
 
     public static function CreateNewRandomSalt()
     {
@@ -43,7 +43,7 @@ final class Salt
 
     private function __construct($bytes)
     {
-        if (Core::ourStrlen($bytes) != self::SALT_BYTE_SIZE) {
+        if (Core::ourStrlen($bytes) !== self::SALT_BYTE_SIZE) {
             throw new Ex\CannotPerformOperationException(
                 "Bad salt length."
             );

@@ -39,8 +39,6 @@
             'FileConfig.php',
         'Key' =>
             'Key.php',
-        'KeyConfig' =>
-            'KeyConfig.php',
         'Salt' =>
             'Salt.php',
         'RuntimeTests' =>

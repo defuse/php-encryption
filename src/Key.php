@@ -11,7 +11,10 @@ final class Key
     const KEY_HEADER_SIZE = 4;
     const KEY_MAGIC = "\xDE\xF0";
     const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
-    const MIN_SAFE_KEY_BYTE_SIZE = 32;
+
+    const KEY_BYTE_SIZE = 32;
+    const CHECKSUM_BYTE_SIZE = 32;
+    const CHECKSUM_HASH_ALGO = 'sha256';
     const PBKDF2_ITERATIONS = 100000;
 
     /*
@@ -52,24 +55,13 @@ final class Key
      *      is more coarse-grained than a single byte).
      */
 
-    private $key_version_header = null;
     private $key_bytes = null;
-    private $config = null;
 
     public static function CreateNewRandomKey()
     {
-        return Key::CreateKey(function($size) {
-           return Core::secureRandom($size);
-        });
+        return new Key(Core::secureRandom(self::KEY_BYTE_SIZE));
     }
 
-    private static function CreateKey(callable $keyGenerator) 
-    {
-        $config = self::GetKeyVersionConfigFromKeyHeader(self::KEY_CURRENT_VERSION);
-        $bytes = $keyGenerator($config->keyByteSize());
-        return new Key(self::KEY_CURRENT_VERSION, $bytes);
-    }
-    
     public static function CreateKeyBasedOnPassword($password, $salt) 
     {
         if (!\is_a($salt, "\Defuse\Crypto\Salt")) {
@@ -77,10 +69,9 @@ final class Key
                 "You must provide an instance of the Salt class (not a string)."
             );
         }
-
-        return Key::CreateKey(function($size) use ($password, $salt) {
-           return hash_pbkdf2('sha256', $password, $salt->getRawBytes(), self::PBKDF2_ITERATIONS, $size, true);
-        });
+        return new Key(
+            hash_pbkdf2('sha256', $password, $salt->getRawBytes(), self::PBKDF2_ITERATIONS, self::KEY_BYTE_SIZE, true)
+        );
     }
 
     public static function LoadFromAsciiSafeString($savedKeyString)
@@ -103,13 +94,16 @@ final class Key
         /* Grab the version header. */
         $version_header = Core::ourSubstr($bytes, 0, self::KEY_HEADER_SIZE);
 
-        /* Grab the config for that version. */
-        $config = self::GetKeyVersionConfigFromKeyHeader($version_header);
+        if ($version_header !== self::KEY_CURRENT_VERSION) {
+            throw new Ex\CannotPerformOperationException(
+                "Invalid key version header."
+            );
+        }
 
         /* Now that we know the version, check the length is correct. */
         if (Core::ourStrlen($bytes) !== self::KEY_HEADER_SIZE +
-                                        $config->keyByteSize() +
-                                        $config->checksumByteSize()) {
+                                        self::KEY_BYTE_SIZE +
+                                        self::CHECKSUM_BYTE_SIZE) {
             throw new Ex\CannotPerformOperationException(
                 "Saved Key is not the correct size."
             );
@@ -119,18 +113,18 @@ final class Key
         $checked_bytes = Core::ourSubstr(
             $bytes,
             0,
-            self::KEY_HEADER_SIZE + $config->keyByteSize()
+            self::KEY_HEADER_SIZE + self::KEY_BYTE_SIZE
         );
 
         /* Grab the included checksum. */
         $checksum_a = Core::ourSubstr(
             $bytes,
-            self::KEY_HEADER_SIZE + $config->keyByteSize(),
-            $config->checksumByteSize()
+            self::KEY_HEADER_SIZE + self::KEY_BYTE_SIZE,
+            self::CHECKSUM_BYTE_SIZE
         );
 
         /* Re-compute the checksum. */
-        $checksum_b = \hash($config->checksumHashFunction(), $checked_bytes, true);
+        $checksum_b = \hash(self::CHECKSUM_HASH_ALGO, $checked_bytes, true);
 
         /* Validate it. It *is* important for this to be constant time. */
         if (!Core::hashEquals($checksum_a, $checksum_b)) {
@@ -140,25 +134,18 @@ final class Key
         }
 
         /* Everything checks out. Grab the key and create a Key object. */
-        $key_bytes = Core::ourSubstr($bytes, self::KEY_HEADER_SIZE, $config->keyByteSize());
-        return new Key($version_header, $key_bytes);
-    }
-
-    private function __construct($version_header, $bytes)
-    {
-        $this->key_version_header = $version_header;
-        $this->key_bytes = $bytes;
-        $this->config = self::GetKeyVersionConfigFromKeyHeader($this->key_version_header);
+        $key_bytes = Core::ourSubstr($bytes, self::KEY_HEADER_SIZE, self::KEY_BYTE_SIZE);
+        return new Key($key_bytes);
     }
 
     public function saveToAsciiSafeString()
     {
         return Encoding::binToHex(
-            $this->key_version_header .
+            self::KEY_CURRENT_VERSION .
             $this->key_bytes .
             \hash(
-                $this->config->checksumHashFunction(),
-                $this->key_version_header . $this->key_bytes,
+                self::CHECKSUM_HASH_ALGO,
+                self::KEY_CURRENT_VERSION . $this->key_bytes,
                 true
             )
         );
@@ -166,25 +153,17 @@ final class Key
 
     public function getRawBytes()
     {
-        if (\is_null($this->key_bytes) || Core::ourStrlen($this->key_bytes) < self::MIN_SAFE_KEY_BYTE_SIZE) {
-            throw new CannotPerformOperationException(
-                "An attempt was made to use an uninitialzied or too-short key"
-            );
-        }
         return $this->key_bytes;
     }
 
-    private static function GetKeyVersionConfigFromKeyHeader($key_header) {
-        if ($key_header === self::KEY_CURRENT_VERSION) {
-            return new KeyConfig([
-                'key_byte_size' => 32,
-                'checksum_hash_function' => 'sha256',
-                'checksum_byte_size' => 32
-            ]);
+    private function __construct($bytes)
+    {
+        if (Core::ourStrlen($bytes) !== self::KEY_BYTE_SIZE) {
+            throw new Ex\CannotPerformOperationException(
+                "Bad key length."
+            );
         }
-        throw new Ex\CannotPerformOperationException(
-            "Invalid key version header."
-        );
+        $this->key_bytes = $bytes;
     }
 
     /*
@@ -192,7 +171,7 @@ final class Key
      */
     public static function LoadFromRawBytesForTestingPurposesOnlyInsecure($bytes)
     {
-        return new Key(self::KEY_CURRENT_VERSION, $bytes);
+        return new Key($bytes);
     }
 
 }
