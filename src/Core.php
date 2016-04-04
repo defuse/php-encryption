@@ -3,6 +3,7 @@ namespace Defuse\Crypto;
 
 use \Defuse\Crypto\Exception as Ex;
 use \Defuse\Crypto\Crypto;
+use \Defuse\Crypto\Encoding;
 
 final class Core
 {
@@ -30,6 +31,10 @@ final class Core
     const LEGACY_ENCRYPTION_INFO_STRING = 'DefusePHP|KeyForEncryption';
     const LEGACY_AUTHENTICATION_INFO_STRING = 'DefusePHP|KeyForAuthentication';
 
+    const CHECKSUM_BYTE_SIZE = 32;
+    const CHECKSUM_HASH_ALGO = 'sha256';
+    const SERIALIZE_HEADER_BYTES = 4;
+
     /**
      * Increment a counter (prevent nonce reuse)
      *
@@ -42,10 +47,10 @@ final class Core
     {
         static $ivsize = null;
         if ($ivsize === null) {
-            $ivsize = self::cipherIvLength($cipherMethod);
+            $ivsize = Core::cipherIvLength($cipherMethod);
         }
 
-        if (self::ourStrlen($ctr) !== $ivsize) {
+        if (Core::ourStrlen($ctr) !== $ivsize) {
             throw new Ex\CannotPerformOperationException(
                 "Trying to increment a nonce of the wrong size."
             );
@@ -92,7 +97,7 @@ final class Core
      */
     public static function cipherIvLength($method)
     {
-        self::ensureFunctionExists('openssl_cipher_iv_length');
+        Core::ensureFunctionExists('openssl_cipher_iv_length');
         $ivsize = \openssl_cipher_iv_length($method);
 
         if ($ivsize === false || $ivsize <= 0) {
@@ -130,7 +135,7 @@ final class Core
      */
     public static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
     {
-        $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
+        $digest_length = Core::ourStrlen(\hash_hmac($hash, '', '', true));
 
         // Sanity-check the desired output length.
         if (empty($length) || !\is_int($length) ||
@@ -153,14 +158,14 @@ final class Core
         // HKDF-Expand:
 
         // This check is useless, but it serves as a reminder to the spec.
-        if (self::ourStrlen($prk) < $digest_length) {
+        if (Core::ourStrlen($prk) < $digest_length) {
             throw new Ex\CannotPerformOperationException();
         }
 
         // T(0) = ''
         $t = '';
         $last_block = '';
-        for ($block_index = 1; self::ourStrlen($t) < $length; ++$block_index) {
+        for ($block_index = 1; Core::ourStrlen($t) < $length; ++$block_index) {
             // T(i) = HMAC-Hash(PRK, T(i-1) | info | 0x??)
             $last_block = \hash_hmac(
                 $hash,
@@ -173,7 +178,7 @@ final class Core
         }
 
         // ORM = first L octets of T
-        $orm = self::ourSubstr($t, 0, $length);
+        $orm = Core::ourSubstr($t, 0, $length);
         if ($orm === false) {
             throw new Ex\CannotPerformOperationException();
         }
@@ -207,11 +212,11 @@ final class Core
 
         // NOTE: This leaks information when the strings are not the same
         // length, but they should always be the same length here. Enforce it:
-        if (self::ourStrlen($expected) !== self::ourStrlen($given)) {
+        if (Core::ourStrlen($expected) !== Core::ourStrlen($given)) {
             throw new Ex\CannotPerformOperationException();
         }
 
-        $blind = self::secureRandom(32);
+        $blind = Core::secureRandom(32);
         $message_compare = \hash_hmac('sha256', $given, $blind);
         $correct_compare = \hash_hmac('sha256', $expected, $blind);
         return $correct_compare === $message_compare;
@@ -293,7 +298,7 @@ final class Core
             // 5.3, so we have to find the length ourselves.
             if (!isset($length)) {
                 if ($start >= 0) {
-                    $length = self::ourStrlen($str) - $start;
+                    $length = Core::ourStrlen($str) - $start;
                 } else {
                     $length = -$start;
                 }
@@ -302,11 +307,11 @@ final class Core
             // This is required to make mb_substr behavior identical to substr.
             // Without this, mb_substr() would return false, contra to what the
             // PHP documentation says (it doesn't say it can return false.)
-            if ($start === self::ourStrlen($str) && $length === 0) {
+            if ($start === Core::ourStrlen($str) && $length === 0) {
                 return '';
             }
 
-            if ($start > self::ourStrlen($str)) {
+            if ($start > Core::ourStrlen($str)) {
                 return false;
             }
 
@@ -392,7 +397,7 @@ final class Core
             return \hash_pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output);
         }
 
-        $hash_length = self::ourStrlen(\hash($algorithm, "", true));
+        $hash_length = Core::ourStrlen(\hash($algorithm, "", true));
         $block_count = \ceil($key_length / $hash_length);
 
         $output = "";
@@ -409,10 +414,96 @@ final class Core
         }
 
         if($raw_output) {
-            return self::ourSubstr($output, 0, $key_length);
+            return Core::ourSubstr($output, 0, $key_length);
         } else {
-            return \bin2hex(self::ourSubstr($output, 0, $key_length));
+            return \bin2hex(Core::ourSubstr($output, 0, $key_length));
         }
+    }
+
+    public static function saveBytesToChecksummedAsciiSafeString($header, $bytes)
+    {
+        // Headers must be a constant length to prevent one type's header from
+        // being a prefix of another type's header, leading to ambiguity.
+        if (Core::ourStrlen($header) !== Core::SERIALIZE_HEADER_BYTES) {
+            throw new Ex\CannotPerformOperationException(
+                "Header must be 4 bytes."
+            );
+        }
+
+        return Encoding::binToHex(
+            $header .
+            $bytes .
+            \hash(
+                Core::CHECKSUM_HASH_ALGO,
+                $header . $bytes,
+                true
+            )
+        );
+    }
+
+    public static function loadBytesFromChecksummedAsciiSafeString($expected_header, $string)
+    {
+        // Headers must be a constant length to prevent one type's header from
+        // being a prefix of another type's header, leading to ambiguity.
+        if (Core::ourStrlen($expected_header) !== Core::SERIALIZE_HEADER_BYTES) {
+            throw new Ex\CannotPerformOperationException(
+                "Header must be 4 bytes."
+            );
+        }
+
+        try {
+            $bytes = Encoding::hexToBin($string);
+        } catch (\RangeException $ex) {
+            throw new Ex\CannotPerformOperationException(
+                "String has invalid hex encoding."
+            );
+        }
+
+        /* Make sure we have enough bytes to get the version header and checksum. */
+        if (Core::ourStrlen($bytes) < Core::SERIALIZE_HEADER_BYTES + Core::CHECKSUM_BYTE_SIZE) {
+            throw new Ex\CannotPerformOperationException(
+                "Encoded data is shorter than expected."
+            );
+        }
+
+        /* Grab the version header. */
+        $actual_header = Core::ourSubstr($bytes, 0, Core::SERIALIZE_HEADER_BYTES);
+
+        if ($actual_header !== $expected_header) {
+            throw new Ex\CannotPerformOperationException(
+                "Invalid header."
+            );
+        }
+
+        /* Grab the bytes that are part of the checksum. */
+        $checked_bytes = Core::ourSubstr(
+            $bytes,
+            0,
+            Core::ourStrlen($bytes) - Core::CHECKSUM_BYTE_SIZE
+        );
+
+        /* Grab the included checksum. */
+        $checksum_a = Core::ourSubstr(
+            $bytes,
+            Core::ourStrlen($bytes) - Core::CHECKSUM_BYTE_SIZE,
+            Core::CHECKSUM_BYTE_SIZE
+        );
+
+        /* Re-compute the checksum. */
+        $checksum_b = \hash(Core::CHECKSUM_HASH_ALGO, $checked_bytes, true);
+
+        /* Validate it. It *is* important for this to be constant time. */
+        if (!Core::hashEquals($checksum_a, $checksum_b)) {
+            throw new Ex\CannotPerformOperationException(
+                "Saved key is corrupted -- checksums don't match."
+            );
+        }
+
+        return Core::ourSubstr(
+            $bytes,
+            Core::SERIALIZE_HEADER_BYTES,
+            Core::ourStrlen($bytes) - Core::SERIALIZE_HEADER_BYTES - Core::CHECKSUM_BYTE_SIZE
+        );
     }
 
 }

@@ -7,6 +7,7 @@ use \Defuse\Crypto\Encoding;
 
 final class Salt
 {
+    const SALT_CURRENT_VERSION = "\xDE\xF1\x00\x00";
     const SALT_BYTE_SIZE = 32;
 
     private $salt = null;
@@ -18,22 +19,18 @@ final class Salt
         );
     }
 
-    public static function LoadFromAsciiSafeString($savedKeyString)
+    public static function LoadFromAsciiSafeString($savedSaltString)
     {
-        try {
-            $bytes = Encoding::hexToBin($savedKeyString);
-        } catch (\RangeException $ex) {
-            throw new Ex\CannotPerformOperationException(
-                "Key has invalid hex encoding."
-            );
-        }
-
+        $bytes = Core::loadBytesFromChecksummedAsciiSafeString(self::SALT_CURRENT_VERSION, $savedSaltString);
         return new Salt($bytes);
     }
 
     public function saveToAsciiSafeString()
     {
-        return Encoding::binToHex($this->salt);
+        return Core::saveBytesToChecksummedAsciiSafeString(
+            self::SALT_CURRENT_VERSION,
+            $this->salt
+        );
     }
 
     public function getRawBytes()
