@@ -129,7 +129,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             array(str_repeat("this is not anything that can be decrypted.", 100))
         );
         for ($i = 0; $i < 1024; $i++) {
-            $ciphertexts[] = array(Core::CURRENT_FILE_VERSION . str_repeat("A", $i));
+            $ciphertexts[] = array(Core::CURRENT_VERSION . str_repeat("A", $i));
         }
         return $ciphertexts;
     }
@@ -166,12 +166,33 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     public function testEncryptWithCryptoDecryptWithFile()
     {
-        throw new Exception("Implement me!");
+        $ciphertext_path = self::$TEMP_DIR . "/ciphertext";
+        $plaintext_path = self::$TEMP_DIR . "/plaintext";
+
+        $key = Crypto::createNewRandomKey();
+        $plaintext = "Plaintext!";
+        $ciphertext = Crypto::encrypt($plaintext, $key, true);
+        file_put_contents($ciphertext_path, $ciphertext);
+
+        File::decryptFile($ciphertext_path, $plaintext_path, $key);
+
+        $plaintext_decrypted = file_get_contents($plaintext_path);
+        $this->assertSame($plaintext, $plaintext_decrypted);
     }
 
     public function testEncryptWithFileDecryptWithCrypto()
     {
-        throw new Exception("Implement me!");
+        $ciphertext_path = self::$TEMP_DIR . "/ciphertext";
+        $plaintext_path = self::$TEMP_DIR . "/plaintext";
+
+        $key = Crypto::createNewRandomKey();
+        $plaintext = "Plaintext!";
+        file_put_contents($plaintext_path, $plaintext);
+        File::encryptFile($plaintext_path, $ciphertext_path, $key);
+
+        $ciphertext = file_get_contents($ciphertext_path);
+        $plaintext_decrypted = Crypto::decrypt($ciphertext, $key, true);
+        $this->assertSame($plaintext, $plaintext_decrypted);
     }
 
     /**

@@ -11,10 +11,24 @@ final class Core
 
     const HEADER_MAGIC =            "\xDE\xF5";
     const CURRENT_VERSION =         "\xDE\xF5\x02\x00";
-    const LEGACY_VERSION =          "\xDE\xF5\x01\x00";
 
-    const HEADER_MAGIC_FILE =       "\xDE\xF4";
-    const CURRENT_FILE_VERSION =    "\xDE\xF4\x02\x00";
+    const CIPHER_METHOD = 'aes-256-ctr';
+    const BLOCK_BYTE_SIZE = 16;
+    const KEY_BYTE_SIZE = 32;
+    const SALT_BYTE_SIZE = 32;
+    const MAC_BYTE_SIZE = 32;
+    const HASH_FUNCTION_NAME = 'sha256';
+    const ENCRYPTION_INFO_STRING = 'DefusePHP|V2|KeyForEncryption';
+    const AUTHENTICATION_INFO_STRING = 'DefusePHP|V2|KeyForAuthentication';
+    const BUFFER_BYTE_SIZE = 1048576;
+
+    const LEGACY_CIPHER_METHOD = 'aes-128-cbc';
+    const LEGACY_BLOCK_BYTE_SIZE = 16;
+    const LEGACY_KEY_BYTE_SIZE = 16;
+    const LEGACY_HASH_FUNCTION_NAME = 'sha256';
+    const LEGACY_MAC_BYTE_SIZE = 32;
+    const LEGACY_ENCRYPTION_INFO_STRING = 'DefusePHP|KeyForEncryption';
+    const LEGACY_AUTHENTICATION_INFO_STRING = 'DefusePHP|KeyForAuthentication';
 
     /**
      * Increment a counter (prevent nonce reuse)
@@ -24,11 +38,11 @@ final class Core
      *
      * @return string (raw binary)
      */
-    public static function incrementCounter($ctr, $inc, &$config)
+    public static function incrementCounter($ctr, $inc, $cipherMethod)
     {
         static $ivsize = null;
         if ($ivsize === null) {
-            $ivsize = self::cipherIvLength($config->cipherMethod());
+            $ivsize = self::cipherIvLength($cipherMethod);
         }
 
         if (self::ourStrlen($ctr) !== $ivsize) {
@@ -114,13 +128,10 @@ final class Core
      * @return string
      * @throws Ex\CannotPerformOperationException
      */
-    public static function HKDF($hash, $ikm, $length, $info = '', $salt = null, $config = null)
+    public static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
     {
-        // Find the correct digest length as quickly as we can.
-        $digest_length = $config->macByteSize();
-        if ($hash != $config->hashFunctionName()) {
-            $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
-        }
+        $digest_length = self::ourStrlen(\hash_hmac($hash, '', '', true));
+
         // Sanity-check the desired output length.
         if (empty($length) || !\is_int($length) ||
             $length < 0 || $length > 255 * $digest_length) {

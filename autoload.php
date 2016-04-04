@@ -26,8 +26,6 @@
      * unserialize() -> autoloader -> LFI hardening
      */
     $classmap = array(
-        'Config' =>
-            'Config.php',
         'Core' =>
             'Core.php',
         'Crypto' =>
@@ -38,8 +36,6 @@
             'ExceptionHandler.php',
         'File' =>
             'File.php',
-        'FileConfig' =>
-            'FileConfig.php',
         'Key' =>
             'Key.php',
         'Salt' =>
