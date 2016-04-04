@@ -164,6 +164,16 @@ class FileTest extends \PHPUnit_Framework_TestCase
         File::decryptFile($truncated_path, $plaintext_path, $this->key);
     }
 
+    public function testEncryptWithCryptoDecryptWithFile()
+    {
+        throw new Exception("Implement me!");
+    }
+
+    public function testEncryptWithFileDecryptWithCrypto()
+    {
+        throw new Exception("Implement me!");
+    }
+
     /**
      * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
      * @excpectedExceptionMessage Message Authentication failure; tampering detected.
@@ -197,4 +207,5 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
         return $data;
     }
+
 }
