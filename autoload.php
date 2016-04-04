@@ -41,6 +41,8 @@
             'Key.php',
         'KeyConfig' =>
             'KeyConfig.php',
+        'Salt' =>
+            'Salt.php',
         'RuntimeTests' =>
             'RuntimeTests.php',
         'StreamInterface' =>

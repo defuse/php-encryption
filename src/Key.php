@@ -11,8 +11,8 @@ final class Key
     const KEY_HEADER_SIZE = 4;
     const KEY_MAGIC = "\xDE\xF0";
     const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
-
     const MIN_SAFE_KEY_BYTE_SIZE = 32;
+    const PBKDF2_ITERATIONS = 100000;
 
     /*
      * Format:
@@ -72,8 +72,14 @@ final class Key
     
     public static function CreateKeyBasedOnPassword($password, $salt) 
     {
+        if (!\is_a($salt, "\Defuse\Crypto\Salt")) {
+            throw new Ex\CannotPerformOperationException(
+                "You must provide an instance of the Salt class (not a string)."
+            );
+        }
+
         return Key::CreateKey(function($size) use ($password, $salt) {
-           return hash_pbkdf2('sha256', $password, $salt, 100000, $size, true);
+           return hash_pbkdf2('sha256', $password, $salt->getRawBytes(), self::PBKDF2_ITERATIONS, $size, true);
         });
     }
 
