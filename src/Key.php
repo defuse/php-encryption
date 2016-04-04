@@ -7,14 +7,8 @@ use \Defuse\Crypto\Encoding;
 
 final class Key
 {
-    /* We keep the key versioning independent of the ciphertext versioning. */
-    const KEY_HEADER_SIZE = 4;
-    const KEY_MAGIC = "\xDE\xF0";
     const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
-
     const KEY_BYTE_SIZE = 32;
-    const CHECKSUM_BYTE_SIZE = 32;
-    const CHECKSUM_HASH_ALGO = 'sha256';
     const PBKDF2_ITERATIONS = 100000;
 
     /*
@@ -76,78 +70,15 @@ final class Key
 
     public static function LoadFromAsciiSafeString($savedKeyString)
     {
-        try {
-            $bytes = Encoding::hexToBin($savedKeyString);
-        } catch (\RangeException $ex) {
-            throw new Ex\CannotPerformOperationException(
-                "Key has invalid hex encoding."
-            );
-        }
-
-        /* Make sure we have enough bytes to get the version header. */
-        if (Core::ourStrlen($bytes) < self::KEY_HEADER_SIZE) {
-            throw new Ex\CannotPerformOperationException(
-                "Saved Key is shorter than the version header."
-            );
-        }
-
-        /* Grab the version header. */
-        $version_header = Core::ourSubstr($bytes, 0, self::KEY_HEADER_SIZE);
-
-        if ($version_header !== self::KEY_CURRENT_VERSION) {
-            throw new Ex\CannotPerformOperationException(
-                "Invalid key version header."
-            );
-        }
-
-        /* Now that we know the version, check the length is correct. */
-        if (Core::ourStrlen($bytes) !== self::KEY_HEADER_SIZE +
-                                        self::KEY_BYTE_SIZE +
-                                        self::CHECKSUM_BYTE_SIZE) {
-            throw new Ex\CannotPerformOperationException(
-                "Saved Key is not the correct size."
-            );
-        }
-
-        /* Grab the bytes that are part of the checksum. */
-        $checked_bytes = Core::ourSubstr(
-            $bytes,
-            0,
-            self::KEY_HEADER_SIZE + self::KEY_BYTE_SIZE
-        );
-
-        /* Grab the included checksum. */
-        $checksum_a = Core::ourSubstr(
-            $bytes,
-            self::KEY_HEADER_SIZE + self::KEY_BYTE_SIZE,
-            self::CHECKSUM_BYTE_SIZE
-        );
-
-        /* Re-compute the checksum. */
-        $checksum_b = \hash(self::CHECKSUM_HASH_ALGO, $checked_bytes, true);
-
-        /* Validate it. It *is* important for this to be constant time. */
-        if (!Core::hashEquals($checksum_a, $checksum_b)) {
-            throw new Ex\CannotPerformOperationException(
-                "Saved key is corrupted -- checksums don't match."
-            );
-        }
-
-        /* Everything checks out. Grab the key and create a Key object. */
-        $key_bytes = Core::ourSubstr($bytes, self::KEY_HEADER_SIZE, self::KEY_BYTE_SIZE);
+        $key_bytes = Core::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $savedKeyString);
         return new Key($key_bytes);
     }
 
     public function saveToAsciiSafeString()
     {
-        return Encoding::binToHex(
-            self::KEY_CURRENT_VERSION .
-            $this->key_bytes .
-            \hash(
-                self::CHECKSUM_HASH_ALGO,
-                self::KEY_CURRENT_VERSION . $this->key_bytes,
-                true
-            )
+        return Core::saveBytesToChecksummedAsciiSafeString(
+            self::KEY_CURRENT_VERSION,
+            $this->key_bytes
         );
     }
 

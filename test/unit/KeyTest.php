@@ -39,14 +39,14 @@ class KeyTest extends PHPUnit_Framework_TestCase
     {
         $key = Key::CreateNewRandomKey();
         $str = $key->saveToAsciiSafeString();
-        $str[2*Key::KEY_HEADER_SIZE + 0] = 'f';
-        $str[2*Key::KEY_HEADER_SIZE + 1] = 'f';
-        $str[2*Key::KEY_HEADER_SIZE + 3] = 'f';
-        $str[2*Key::KEY_HEADER_SIZE + 4] = 'f';
-        $str[2*Key::KEY_HEADER_SIZE + 5] = 'f';
-        $str[2*Key::KEY_HEADER_SIZE + 6] = 'f';
-        $str[2*Key::KEY_HEADER_SIZE + 7] = 'f';
-        $str[2*Key::KEY_HEADER_SIZE + 8] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 0] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 1] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 3] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 4] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 5] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 6] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 7] = 'f';
+        $str[2*Core::SERIALIZE_HEADER_BYTES + 8] = 'f';
         Key::LoadFromAsciiSafeString($str);
     }
 
