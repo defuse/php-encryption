@@ -38,7 +38,7 @@ use \Defuse\Crypto\Config;
  */
 class Crypto
 {
-    // Ciphertext format: [____VERSION____][____HMAC____][____IV____][____CIPHERTEXT____].
+    // Ciphertext format: [____VERSION____][____HMAC____][____SALT____][____IV____][____CIPHERTEXT____].
     // Legacy format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
     /**
