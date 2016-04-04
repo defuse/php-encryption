@@ -70,7 +70,7 @@ final class Key
             );
         }
         return new Key(
-            hash_pbkdf2('sha256', $password, $salt->getRawBytes(), self::PBKDF2_ITERATIONS, self::KEY_BYTE_SIZE, true)
+            Core::pbkdf2('sha256', $password, $salt->getRawBytes(), self::PBKDF2_ITERATIONS, self::KEY_BYTE_SIZE, true)
         );
     }
 
