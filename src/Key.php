@@ -1,20 +1,19 @@
 <?php
+
 namespace Defuse\Crypto;
 
-use \Defuse\Crypto\Exception as Ex;
-use \Defuse\Crypto\Core;
-use \Defuse\Crypto\Encoding;
+use Defuse\Crypto\Exception as Ex;
 
 final class Key
 {
     const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
-    const KEY_BYTE_SIZE = 32;
-    const PBKDF2_ITERATIONS = 100000;
+    const KEY_BYTE_SIZE       = 32;
+    const PBKDF2_ITERATIONS   = 100000;
 
     /*
      * Format:
      * bin2hex([__HEADER__][____KEY BYTES___][___CHECKSUM___])
-     * 
+     *
      * HEADER:      The 4-byte version header.
      * KEY BYTES:   The raw key bytes (length may depend on version).
      * CHECKSUM:    SHA256(HEADER . KEY BYTES).
@@ -22,7 +21,7 @@ final class Key
      * The checksum field is for detecting accidental corruption *only*. It
      * provides no cryptographic functionality.
      *
-     * SECURITY NOTE: 
+     * SECURITY NOTE:
      *
      *      The checksum introduces a potential security weakness.
      *
@@ -31,7 +30,7 @@ final class Key
      *      The adversary has exhausted all options, and can't get remote code
      *      execution.
      *
-     *      If they can overwrite a byte of the key, then force the checksum 
+     *      If they can overwrite a byte of the key, then force the checksum
      *      validation to run, then determine (possibly through a side channel)
      *      whether or not the checksum was correct, they learn whether their
      *      guess for that byte was correct or not. They can recover the key
@@ -51,17 +50,40 @@ final class Key
 
     private $key_bytes = null;
 
-    public static function CreateNewRandomKey()
+    /**
+     * Create new random key.
+     *
+     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     *
+     * @return \Defuse\Crypto\Key
+     */
+    public static function createNewRandomKey()
     {
         return new Key(Core::secureRandom(self::KEY_BYTE_SIZE));
     }
 
-    public static function LoadFromAsciiSafeString($savedKeyString)
+    /**
+     * Load a key from ascii safe string.
+     *
+     * @param $savedKeyString
+     *
+     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     *
+     * @return \Defuse\Crypto\Key
+     */
+    public static function loadFromAsciiSafeString($savedKeyString)
     {
         $key_bytes = Core::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $savedKeyString);
         return new Key($key_bytes);
     }
 
+    /**
+     * Save to ascii safe string.
+     *
+     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     *
+     * @return string
+     */
     public function saveToAsciiSafeString()
     {
         return Core::saveBytesToChecksummedAsciiSafeString(
@@ -70,27 +92,45 @@ final class Key
         );
     }
 
+    /**
+     * Gets raw bytes
+     *
+     * @return mixed
+     */
     public function getRawBytes()
     {
         return $this->key_bytes;
     }
 
+    /**
+     * Constructs a new Key object.
+     *
+     *
+     * @param $bytes
+     *
+     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     */
     private function __construct($bytes)
     {
         if (Core::ourStrlen($bytes) !== self::KEY_BYTE_SIZE) {
             throw new Ex\CannotPerformOperationException(
-                "Bad key length."
+                'Bad key length.'
             );
         }
         $this->key_bytes = $bytes;
     }
 
-    /*
-     * NEVER use this, exept for testing.
+    /**
+     * NEVER use this, except for testing.
+     *
+     * @param $bytes
+     *
+     * @return \Defuse\Crypto\Key
+     *
+     * @internal
      */
-    public static function LoadFromRawBytesForTestingPurposesOnlyInsecure($bytes)
+    public static function loadFromRawBytesForTestingPurposesOnlyInsecure($bytes)
     {
         return new Key($bytes);
     }
-
 }
