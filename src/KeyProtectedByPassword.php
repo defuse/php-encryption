@@ -1,31 +1,26 @@
 <?php
+
 namespace Defuse\Crypto;
-
-use \Defuse\Crypto\Exception as Ex;
-
-use \Defuse\Crypto\Key;
-use \Defuse\Crypto\Crypto;
 
 final class KeyProtectedByPassword
 {
     const PASSWORD_KEY_CURRENT_VERSION = "\xDE\xF1\x00\x00";
-    const PBKDF2_ITERATIONS = 100000;
-    const SALT_BYTE_SIZE = 32;
+    const PBKDF2_ITERATIONS            = 100000;
+    const SALT_BYTE_SIZE               = 32;
 
-    private $salt = null;
+    private $salt          = null;
     private $encrypted_key = null;
-
 
     // TODO: reuse the "single use" password encryption to implement this class,
     // after it's done (then we don't need a salt!)
 
-    public static function CreateRandomPasswordProtectedKey($password)
+    public static function createRandomPasswordProtectedKey($password)
     {
         /* Create a new random key. */
         $inner_key = Key::CreateNewRandomKey();
 
         /* Encrypt that key with the password and a random salt. */
-        $salt = Core::secureRandom(self::SALT_BYTE_SIZE);
+        $salt      = Core::secureRandom(self::SALT_BYTE_SIZE);
         $outer_key = Key::LoadFromRawBytesForTestingPurposesOnlyInsecure(
             Core::pbkdf2('sha256', $password, $salt, self::PBKDF2_ITERATIONS, Key::KEY_BYTE_SIZE, true)
         );
@@ -38,13 +33,13 @@ final class KeyProtectedByPassword
         return new KeyProtectedByPassword($salt, $encrypted_key);
     }
 
-    public static function LoadFromAsciiSafeString($savedKeyString)
+    public static function loadFromAsciiSafeString($savedKeyString)
     {
         $salt_and_encrypted_key = Core::loadBytesFromChecksummedAsciiSafeString(
             self::PASSWORD_KEY_CURRENT_VERSION,
             $savedKeyString
         );
-        $salt = Core::ourSubstr($salt_and_encrypted_key, 0, self::SALT_BYTE_SIZE);
+        $salt          = Core::ourSubstr($salt_and_encrypted_key, 0, self::SALT_BYTE_SIZE);
         $encrypted_key = Core::ourSubstr($salt_and_encrypted_key, self::SALT_BYTE_SIZE);
         return new KeyProtectedByPassword($salt, $encrypted_key);
     }
@@ -72,7 +67,7 @@ final class KeyProtectedByPassword
 
     private function __construct($salt, $encrypted_key)
     {
-        $this->salt = $salt;
+        $this->salt          = $salt;
         $this->encrypted_key = $encrypted_key;
     }
 }
