@@ -30,6 +30,8 @@
             'Core.php',
         'Crypto' =>
             'Crypto.php',
+        'DerivedKeys' =>
+            'DerivedKeys.php',
         'Encoding' =>
             'Encoding.php',
         'ExceptionHandler' =>
@@ -38,6 +40,8 @@
             'File.php',
         'Key' =>
             'Key.php',
+        'KeyOrPassword' =>
+            'KeyOrPassword.php',
         'KeyProtectedByPassword' =>
             'KeyProtectedByPassword.php',
         'Salt' =>

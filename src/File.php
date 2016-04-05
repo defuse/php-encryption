@@ -34,6 +34,15 @@ final class File implements StreamInterface
      */
     public static function encryptFile($inputFilename, $outputFilename, Key $key)
     {
+        return self::encryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
+    {
         if (! \is_string($inputFilename)) {
             throw new Ex\InvalidInput(
                 'Input filename must be a string!'
@@ -74,7 +83,7 @@ final class File implements StreamInterface
          * Use encryptResource() to actually write the encrypted data to $of
          */
         try {
-            $encrypted = self::encryptResource($if, $of, $key);
+            $encrypted = self::encryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
             \fclose($if);
             \fclose($of);
@@ -112,6 +121,15 @@ final class File implements StreamInterface
      * @return bool
      */
     public static function decryptFile($inputFilename, $outputFilename, Key $key)
+    {
+        return self::decryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
         if (! \is_string($inputFilename)) {
             throw new Ex\InvalidInput(
@@ -153,7 +171,7 @@ final class File implements StreamInterface
          * Use decryptResource() to actually write the decrypted data to $of
          */
         try {
-            $decrypted = self::decryptResource($if, $of, $key);
+            $decrypted = self::decryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
             \fclose($if);
             \fclose($of);
@@ -196,6 +214,15 @@ final class File implements StreamInterface
      */
     public static function encryptResource($inputHandle, $outputHandle, Key $key)
     {
+        return self::encryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    private static function encryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
+    {
         // Because we don't have strict typing in PHP 5
         if (! \is_resource($inputHandle)) {
             throw new Ex\InvalidInput(
@@ -214,24 +241,9 @@ final class File implements StreamInterface
          *  Let's split our keys
          */
         $file_salt = Core::secureRandom(Core::SALT_BYTE_SIZE);
-
-        // $ekey -- Encryption Key -- used for AES
-        $ekey = Core::HKDF(
-            Core::HASH_FUNCTION_NAME,
-            $key->getRawBytes(),
-            Core::KEY_BYTE_SIZE,
-            Core::ENCRYPTION_INFO_STRING,
-            $file_salt
-        );
-
-        // $akey -- Authentication Key -- used for HMAC
-        $akey = Core::HKDF(
-            Core::HASH_FUNCTION_NAME,
-            $key->getRawBytes(),
-            Core::KEY_BYTE_SIZE,
-            Core::AUTHENTICATION_INFO_STRING,
-            $file_salt
-        );
+        $keys = $secret->deriveKeys($file_salt);
+        $ekey = $keys->getEncryptionKey();
+        $akey = $keys->getAuthenticationKey();
 
         /**
          *  Generate a random initialization vector.
@@ -357,6 +369,15 @@ final class File implements StreamInterface
      */
     public static function decryptResource($inputHandle, $outputHandle, Key $key)
     {
+        return self::decryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
+    {
         // Because we don't have strict typing in PHP 5
         if (! \is_resource($inputHandle)) {
             throw new Ex\InvalidInput(
@@ -397,24 +418,9 @@ final class File implements StreamInterface
          *
          * $ekey -- Encryption Key -- used for AES
          */
-        $ekey = Core::HKDF(
-            Core::HASH_FUNCTION_NAME,
-            $key->getRawBytes(),
-            Core::KEY_BYTE_SIZE,
-            Core::ENCRYPTION_INFO_STRING,
-            $file_salt
-        );
-
-        /**
-         * $akey -- Authentication Key -- used for HMAC
-         */
-        $akey = Core::HKDF(
-            Core::HASH_FUNCTION_NAME,
-            $key->getRawBytes(),
-            Core::KEY_BYTE_SIZE,
-            Core::AUTHENTICATION_INFO_STRING,
-            $file_salt
-        );
+        $keys = $secret->deriveKeys($file_salt);
+        $ekey = $keys->getEncryptionKey();
+        $akey = $keys->getAuthenticationKey();
 
         /**
          * Grab our IV from the encrypted message
