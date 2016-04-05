@@ -56,18 +56,6 @@ final class Key
         return new Key(Core::secureRandom(self::KEY_BYTE_SIZE));
     }
 
-    public static function CreateKeyBasedOnPassword($password, $salt) 
-    {
-        if (!\is_a($salt, "\Defuse\Crypto\Salt")) {
-            throw new Ex\CannotPerformOperationException(
-                "You must provide an instance of the Salt class (not a string)."
-            );
-        }
-        return new Key(
-            Core::pbkdf2('sha256', $password, $salt->getRawBytes(), self::PBKDF2_ITERATIONS, self::KEY_BYTE_SIZE, true)
-        );
-    }
-
     public static function LoadFromAsciiSafeString($savedKeyString)
     {
         $key_bytes = Core::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $savedKeyString);

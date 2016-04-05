@@ -35,6 +35,8 @@
             'File.php',
         'Key' =>
             'Key.php',
+        'KeyProtectedByPassword' =>
+            'KeyProtectedByPassword.php',
         'Salt' =>
             'Salt.php',
         'RuntimeTests' =>
