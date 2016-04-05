@@ -5,7 +5,7 @@ namespace Defuse\Crypto;
 final class KeyProtectedByPassword
 {
     const PASSWORD_KEY_CURRENT_VERSION = "\xDE\xF1\x00\x00";
-    const PBKDF2_ITERATIONS            = 100000;
+    const PBKDF2_ITERATIONS            = 100000; // TODO: remove me
     const SALT_BYTE_SIZE               = 32;
 
     private $salt          = null;
