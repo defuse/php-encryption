@@ -41,6 +41,15 @@ final class File implements StreamInterface
         );
     }
 
+    public static function encryptFileWithPassword($inputFilename, $outputFilename, $password)
+    {
+        return self::encryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
         if (! \is_string($inputFilename)) {
@@ -126,6 +135,15 @@ final class File implements StreamInterface
             $inputFilename,
             $outputFilename,
             KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function decryptFileWithPassword($inputFilename, $outputFilename, $password)
+    {
+        return self::decryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromPassword($password)
         );
     }
 
@@ -218,6 +236,15 @@ final class File implements StreamInterface
             $inputHandle,
             $outputHandle,
             KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function encryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    {
+        return self::encryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromPassword($password)
         );
     }
 
@@ -373,6 +400,15 @@ final class File implements StreamInterface
             $inputHandle,
             $outputHandle,
             KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function decryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    {
+        return self::decryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromPassword($password)
         );
     }
 

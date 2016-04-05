@@ -45,7 +45,7 @@ final class KeyOrPassword
                 $salt
             );
             return new DerivedKeys($akey, $ekey);
-        } elseif ($this->secret_type === SECRET_TYPE_PASSWORD) {
+        } elseif ($this->secret_type === self::SECRET_TYPE_PASSWORD) {
             $prekey = Core::pbkdf2(
                 'sha256',
                 $this->secret,
