@@ -1,21 +1,21 @@
 <?php
 
-use \Defuse\Crypto\Key;
 use \Defuse\Crypto\Core;
+use \Defuse\Crypto\Key;
 
 class KeyTest extends PHPUnit_Framework_TestCase
 {
-    function testCreateNewRandomKey()
+    public function testCreateNewRandomKey()
     {
-        $key = Key::CreateNewRandomKey();
+        $key = Key::createNewRandomKey();
         $this->assertSame(32, Core::ourStrlen($key->getRawBytes()));
     }
 
-    function testSaveAndLoadKey()
+    public function testSaveAndLoadKey()
     {
-        $key1 = Key::CreateNewRandomKey();
-        $str = $key1->saveToAsciiSafeString();
-        $key2 = Key::LoadFromAsciiSafeString($str);
+        $key1 = Key::createNewRandomKey();
+        $str  = $key1->saveToAsciiSafeString();
+        $key2 = Key::loadFromAsciiSafeString($str);
         $this->assertSame($key1->getRawBytes(), $key2->getRawBytes());
     }
 
@@ -23,22 +23,22 @@ class KeyTest extends PHPUnit_Framework_TestCase
      * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
      * @excpectedExceptionMessage key version header
      */
-    function testIncorrectHeader()
+    public function testIncorrectHeader()
     {
-        $key = Key::CreateNewRandomKey();
-        $str = $key->saveToAsciiSafeString();
+        $key    = Key::createNewRandomKey();
+        $str    = $key->saveToAsciiSafeString();
         $str[0] = 'f';
-        Key::LoadFromAsciiSafeString($str);
+        Key::loadFromAsciiSafeString($str);
     }
 
     /**
      * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
      * @expectedExceptionMessage  checksums don't match
      */
-    function testIncorrectChecksum()
+    public function testIncorrectChecksum()
     {
-        $key = Key::CreateNewRandomKey();
-        $str = $key->saveToAsciiSafeString();
+        $key                                     = Key::createNewRandomKey();
+        $str                                     = $key->saveToAsciiSafeString();
         $str[2*Core::SERIALIZE_HEADER_BYTES + 0] = 'f';
         $str[2*Core::SERIALIZE_HEADER_BYTES + 1] = 'f';
         $str[2*Core::SERIALIZE_HEADER_BYTES + 3] = 'f';
@@ -47,18 +47,18 @@ class KeyTest extends PHPUnit_Framework_TestCase
         $str[2*Core::SERIALIZE_HEADER_BYTES + 6] = 'f';
         $str[2*Core::SERIALIZE_HEADER_BYTES + 7] = 'f';
         $str[2*Core::SERIALIZE_HEADER_BYTES + 8] = 'f';
-        Key::LoadFromAsciiSafeString($str);
+        Key::loadFromAsciiSafeString($str);
     }
 
     /**
      * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
      * @expectedExceptionMessage invalid hex encoding
      */
-    function testBadHexEncoding()
+    public function testBadHexEncoding()
     {
-        $key = Key::CreateNewRandomKey();
-        $str = $key->saveToAsciiSafeString();
-        $str[0] = "Z";
-        Key::LoadFromAsciiSafeString($str);
+        $key    = Key::createNewRandomKey();
+        $str    = $key->saveToAsciiSafeString();
+        $str[0] = 'Z';
+        Key::loadFromAsciiSafeString($str);
     }
 }
