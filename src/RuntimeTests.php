@@ -96,12 +96,21 @@ class RuntimeTests extends Crypto
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
-        // Modifying the ciphertext: Changing an IV byte.
-        try {
-            $ciphertext[4] = \chr((\ord($ciphertext[4]) + 1) % 256);
-            Crypto::decrypt($ciphertext, $key, true);
-            throw new Ex\CryptoTestFailedException();
-        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
+        // Modifying the ciphertext: Changing an HMAC byte.
+        $indices_to_change = [
+            0, // The header.
+            Core::HEADER_VERSION_SIZE + 1, // the salt
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + 1, // the IV
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + Core::BLOCK_BYTE_SIZE + 1 // the ciphertext
+        ];
+
+        foreach ($indices_to_change as $index) {
+            try {
+                $ciphertext[$index] = \chr((\ord($ciphertext[$index]) + 1) % 256);
+                Crypto::decrypt($ciphertext, $key, true);
+                throw new Ex\CryptoTestFailedException();
+            } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
+            }
         }
 
         // Decrypting with the wrong key.
@@ -115,9 +124,9 @@ class RuntimeTests extends Crypto
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
-        // Ciphertext too small (shorter than HMAC).
+        // Ciphertext too small.
         $key        = Key::createNewRandomKey();
-        $ciphertext = \str_repeat('A', Core::MAC_BYTE_SIZE - 1);
+        $ciphertext = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
         try {
             Crypto::decrypt($ciphertext, $key, true);
             throw new Ex\CryptoTestFailedException();

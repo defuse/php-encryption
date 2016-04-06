@@ -48,12 +48,21 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
-        // Modifying the ciphertext: Changing an IV byte.
-        try {
-            $ciphertext[4] = \chr((\ord($ciphertext[4]) + 1) % 256);
-            Crypto::decryptWithPassword($ciphertext, $password, true);
-            throw new Ex\CryptoTestFailedException();
-        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
+        // Modifying the ciphertext: Changing an HMAC byte.
+        $indices_to_change = [
+            0, // The header.
+            Core::HEADER_VERSION_SIZE + 1, // the salt
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + 1, // the IV
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + Core::BLOCK_BYTE_SIZE + 1 // the ciphertext
+        ];
+
+        foreach ($indices_to_change as $index) {
+            try {
+                $ciphertext[$index] = \chr((\ord($ciphertext[$index]) + 1) % 256);
+                Crypto::decryptWithPassword($ciphertext, $password, true);
+                throw new Ex\CryptoTestFailedException();
+            } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
+            }
         }
 
         // Decrypting with the wrong password.
@@ -67,9 +76,9 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
-        // Ciphertext too small (shorter than HMAC).
-        $password   = "password";
-        $ciphertext = \str_repeat('A', Core::MAC_BYTE_SIZE - 1);
+        // Ciphertext too small.
+        $password        = Key::createNewRandomKey();
+        $ciphertext = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
         try {
             Crypto::decryptWithPassword($ciphertext, $password, true);
             throw new Ex\CryptoTestFailedException();
