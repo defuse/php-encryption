@@ -27,7 +27,7 @@ class Crypto
      * You MUST catch exceptions thrown by this function. Read the docs.
      *
      * @param string $plaintext
-     * @param string $key
+     * @param string $key // TODO: this is wrong
      * @param bool   $raw_binary
      *
      * @throws Ex\CannotPerformOperationException
@@ -35,41 +35,39 @@ class Crypto
      *
      * @return string
      */
-    public static function encrypt($plaintext, $key, $raw_binary = false)
+    public static function encrypt($plaintext, Key $key, $raw_binary = false)
     {
-        RuntimeTests::runtimeTest();
-
-        /* Attempt to validate that the key was generated safely. */
+        // TODO: is this redundant? Do we need to add it to File?
         if (! \is_a($key, "\Defuse\Crypto\Key")) {
             throw new Ex\CannotPerformOperationException(
                 'The given key is not a valid Key object.'
             );
         }
-        /** @var \Defuse\Crypto\Key $key */
-        $key = $key->getRawBytes();
 
-        if (Core::ourStrlen($key) !== Core::KEY_BYTE_SIZE) {
-            throw new Ex\CannotPerformOperationException('Key is the wrong size.');
-        }
+        return self::encryptInternal(
+            $plaintext,
+            KeyOrPassword::createFromKey($key),
+            $raw_binary
+        );
+    }
+
+    public static function encryptWithPassword($plaintext, $password, $raw_binary = false)
+    {
+        return self::encryptInternal(
+            $plaintext,
+            KeyOrPassword::createFromPassword($password),
+            $raw_binary
+        );
+    }
+
+    private static function encryptInternal($plaintext, KeyOrPassword $secret, $raw_binary)
+    {
+        RuntimeTests::runtimeTest();
+
         $salt = Core::secureRandom(Core::SALT_BYTE_SIZE);
-
-        // Generate a sub-key for encryption.
-        $ekey = Core::HKDF(
-            Core::HASH_FUNCTION_NAME,
-            $key,
-            Core::KEY_BYTE_SIZE,
-            Core::ENCRYPTION_INFO_STRING,
-            $salt
-        );
-
-        // Generate a sub-key for authentication and apply the HMAC.
-        $akey = Core::HKDF(
-            Core::HASH_FUNCTION_NAME,
-            $key,
-            Core::KEY_BYTE_SIZE,
-            Core::AUTHENTICATION_INFO_STRING,
-            $salt
-        );
+        $keys = $secret->deriveKeys($salt);
+        $ekey = $keys->getEncryptionKey();
+        $akey = $keys->getAuthenticationKey();
 
         // Generate a random initialization vector.
         $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
@@ -103,18 +101,34 @@ class Crypto
      *
      * @return string
      */
-    public static function decrypt($ciphertext, $key, $raw_binary = false)
+    public static function decrypt($ciphertext, Key $key, $raw_binary = false)
     {
-        RuntimeTests::runtimeTest();
-
-        /* Attempt to validate that the key was generated safely. */
+        // TODO: is this redundant? Do we need to add it to File?
         if (! \is_a($key, "\Defuse\Crypto\Key")) {
             throw new Ex\CannotPerformOperationException(
                 'The given key is not a valid Key object.'
             );
         }
-        /** @var \Defuse\Crypto\Key $key */
-        $key = $key->getRawBytes();
+
+        return self::decryptInternal(
+            $ciphertext,
+            KeyOrPassword::createFromKey($key),
+            $raw_binary
+        );
+    }
+
+    public static function decryptWithPassword($ciphertext, $password, $raw_binary = false)
+    {
+        return self::decryptInternal(
+            $ciphertext,
+            KeyOrPassword::createFromPassword($password),
+            $raw_binary
+        );
+    }
+
+    private static function decryptInternal($ciphertext, KeyOrPassword $secret, $raw_binary)
+    {
+        RuntimeTests::runtimeTest();
 
         if (! $raw_binary) {
             try {
@@ -169,13 +183,9 @@ class Crypto
             throw new Ex\CannotPerformOperationException();
         }
 
-        // Regenerate the same authentication sub-key.
-        $akey = Core::HKDF(Core::HASH_FUNCTION_NAME, $key, Core::KEY_BYTE_SIZE, Core::AUTHENTICATION_INFO_STRING, $salt);
+        $keys = $secret->deriveKeys($salt);
 
-        if (self::verifyHMAC($hmac, $header . $salt . $ciphertext, $akey)) {
-            // Regenerate the same encryption sub-key.
-            $ekey = Core::HKDF(Core::HASH_FUNCTION_NAME, $key, Core::KEY_BYTE_SIZE, Core::ENCRYPTION_INFO_STRING, $salt);
-
+        if (self::verifyHMAC($hmac, $header . $salt . $ciphertext, $keys->getAuthenticationKey())) {
             // Extract the initialization vector from the ciphertext.
             $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
             if (Core::ourStrlen($ciphertext) < $ivsize) {
@@ -192,7 +202,7 @@ class Crypto
                 throw new Ex\CannotPerformOperationException();
             }
 
-            $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv, Core::CIPHER_METHOD);
+            $plaintext = self::plainDecrypt($ciphertext, $keys->getEncryptionKey(), $iv, Core::CIPHER_METHOD);
 
             return $plaintext;
         } else {
