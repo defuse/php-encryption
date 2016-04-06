@@ -23,22 +23,24 @@
      * unserialize() -> autoloader -> LFI hardening
      */
     $classmap = array(
-        'Config' =>
-            'Config.php',
         'Core' =>
             'Core.php',
         'Crypto' =>
             'Crypto.php',
+        'DerivedKeys' =>
+            'DerivedKeys.php',
         'Encoding' =>
             'Encoding.php',
         'ExceptionHandler' =>
             'ExceptionHandler.php',
         'File' =>
             'File.php',
-        'FileConfig' =>
-            'FileConfig.php',
         'Key' =>
             'Key.php',
+        'KeyOrPassword' =>
+            'KeyOrPassword.php',
+        'KeyProtectedByPassword' =>
+            'KeyProtectedByPassword.php',
         'Salt' =>
             'Salt.php',
         'RuntimeTests' =>
@@ -52,10 +54,10 @@
             'Exception/CryptoException.php',
         'Exception\\CryptoTestFailedException' =>
             'Exception/CryptoTestFailedException.php',
-        'Exception\\InvalidCiphertextException' =>
-            'Exception/InvalidCiphertextException.php',
         'Exception\\InvalidInput' =>
             'Exception/InvalidInput.php',
+        'Exception\\WrongKeyOrModifiedCiphertextException' =>
+            'Exception/WrongKeyOrModifiedCiphertextException.php',
     );
     foreach ($classmap as $classname => $file) {
         if ($classname === $relative_class) {

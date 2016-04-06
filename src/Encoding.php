@@ -1,16 +1,15 @@
 <?php
+
 namespace Defuse\Crypto;
 
-use \Defuse\Crypto\Exception as Ex;
-use \Defuse\Crypto\Core;
-
-final class Encoding {
-
+final class Encoding
+{
     /**
-     * Convert a binary string into a hexadecimal string without cache-timing 
+     * Convert a binary string into a hexadecimal string without cache-timing
      * leaks
      *
      * @param string $bin_string (raw binary)
+     *
      * @return string
      */
     public static function binToHex($bin_string)
@@ -30,25 +29,26 @@ final class Encoding {
     }
 
     /**
-     * Convert a hexadecimal string into a binary string without cache-timing 
+     * Convert a hexadecimal string into a binary string without cache-timing
      * leaks
      *
      * @param string $hex_string
+     *
      * @return string (raw binary)
      */
     public static function hexToBin($hex_string)
     {
         $hex_pos = 0;
-        $bin = '';
+        $bin     = '';
         $hex_len = Core::ourStrlen($hex_string);
-        $state = 0;
-        $c_acc = 0;
+        $state   = 0;
+        $c_acc   = 0;
 
         while ($hex_pos < $hex_len) {
-            $c = \ord($hex_string[$hex_pos]);
-            $c_num = $c ^ 48;
-            $c_num0 = ($c_num - 10) >> 8;
-            $c_alpha = ($c & ~32) - 55;
+            $c        = \ord($hex_string[$hex_pos]);
+            $c_num    = $c ^ 48;
+            $c_num0   = ($c_num - 10) >> 8;
+            $c_alpha  = ($c & ~32) - 55;
             $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
             if (($c_num0 | $c_alpha0) === 0) {
                 throw new \RangeException(
