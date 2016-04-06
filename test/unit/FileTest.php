@@ -37,13 +37,13 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src = self::$FILE_DIR . '/' . $srcName;
 
         $dest1  = self::$TEMP_DIR . '/ff1';
-        $result = File::encryptFile($src, $dest1, $this->key);
+        $result = Crypto::encryptFile($src, $dest1, $this->key);
         $this->assertTrue($result,
             sprintf('File "%s" did not encrypt successfully.', $src));
         $this->assertFileExists($dest1, 'destination file not created.');
 
         $reverse1 = self::$TEMP_DIR . '/rv1';
-        $result   = File::decryptFile($dest1, $reverse1, $this->key);
+        $result   = Crypto::decryptFile($dest1, $reverse1, $this->key);
         $this->assertTrue($result,
             sprintf('File "%s" did not decrypt successfully.', $dest1));
         $this->assertFileExists($reverse1);
@@ -51,7 +51,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             'File and encrypted-decrypted file do not match.');
 
         $dest2  = self::$TEMP_DIR . '/ff2';
-        $result = File::encryptFile($reverse1, $dest2, $this->key);
+        $result = Crypto::encryptFile($reverse1, $dest2, $this->key);
         $this->assertFileExists($dest2);
         $this->assertTrue($result,
             sprintf('File "%s" did not re-encrypt successfully.', $reverse1));
@@ -60,7 +60,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             'First and second encryption produced identical files.');
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
-        $result   = File::decryptFile($dest2, $reverse2, $this->key);
+        $result   = Crypto::decryptFile($dest2, $reverse2, $this->key);
         $this->assertTrue($result,
             sprintf('File "%s" did not re-decrypt successfully.', $dest1));
         $this->assertSame(md5_file($src), md5_file($reverse2),
@@ -79,13 +79,13 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src = self::$FILE_DIR . '/' . $srcName;
 
         $dest1  = self::$TEMP_DIR . '/ff1';
-        $result = File::encryptFileWithPassword($src, $dest1, "password");
+        $result = Crypto::encryptFileWithPassword($src, $dest1, "password");
         $this->assertTrue($result,
             sprintf('File "%s" did not encrypt successfully.', $src));
         $this->assertFileExists($dest1, 'destination file not created.');
 
         $reverse1 = self::$TEMP_DIR . '/rv1';
-        $result   = File::decryptFileWithPassword($dest1, $reverse1, "password");
+        $result   = Crypto::decryptFileWithPassword($dest1, $reverse1, "password");
         $this->assertTrue($result,
             sprintf('File "%s" did not decrypt successfully.', $dest1));
         $this->assertFileExists($reverse1);
@@ -93,7 +93,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             'File and encrypted-decrypted file do not match.');
 
         $dest2  = self::$TEMP_DIR . '/ff2';
-        $result = File::encryptFileWithPassword($reverse1, $dest2, "password");
+        $result = Crypto::encryptFileWithPassword($reverse1, $dest2, "password");
         $this->assertFileExists($dest2);
         $this->assertTrue($result,
             sprintf('File "%s" did not re-encrypt successfully.', $reverse1));
@@ -102,7 +102,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             'First and second encryption produced identical files.');
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
-        $result   = File::decryptFileWithPassword($dest2, $reverse2, "password");
+        $result   = Crypto::decryptFileWithPassword($dest2, $reverse2, "password");
         $this->assertTrue($result,
             sprintf('File "%s" did not re-decrypt successfully.', $dest1));
         $this->assertSame(md5_file($src), md5_file($reverse2),
@@ -121,7 +121,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src      = fopen($srcName, 'r');
         $dest     = fopen($destName, 'w');
 
-        $success = File::encryptResource($src, $dest, $this->key);
+        $success = Crypto::encryptResource($src, $dest, $this->key);
         $this->assertTrue($success, 'File did not encrypt successfully.');
 
         fclose($src);
@@ -130,7 +130,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src2  = fopen($destName, 'r');
         $dest2 = fopen(self::$TEMP_DIR . '/dest2', 'w');
 
-        $success = File::decryptResource($src2, $dest2, $this->key);
+        $success = Crypto::decryptResource($src2, $dest2, $this->key);
         $this->assertTrue($success, 'File did not decrypt successfully.');
         fclose($src2);
         fclose($dest2);
@@ -151,7 +151,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src      = fopen($srcName, 'r');
         $dest     = fopen($destName, 'w');
 
-        $success = File::encryptResourceWithPassword($src, $dest, "password");
+        $success = Crypto::encryptResourceWithPassword($src, $dest, "password");
         $this->assertTrue($success, 'File did not encrypt successfully.');
 
         fclose($src);
@@ -160,7 +160,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src2  = fopen($destName, 'r');
         $dest2 = fopen(self::$TEMP_DIR . '/dest2', 'w');
 
-        $success = File::decryptResourceWithPassword($src2, $dest2, "password");
+        $success = Crypto::decryptResourceWithPassword($src2, $dest2, "password");
         $this->assertTrue($success, 'File did not decrypt successfully.');
         fclose($src2);
         fclose($dest2);
@@ -177,7 +177,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, 'This file does not have the right magic number.');
-        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        Crypto::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
     /**
@@ -188,7 +188,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, $ciphertext);
-        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        Crypto::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
     public function garbageCiphertextProvider()
@@ -209,7 +209,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, '');
-        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        Crypto::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
     /**
@@ -223,13 +223,13 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $truncated_path  = self::$TEMP_DIR . '/truncated';
 
         file_put_contents($plaintext_path, str_repeat('A', 1024));
-        File::encryptFile($plaintext_path, $ciphertext_path, $this->key);
+        Crypto::encryptFile($plaintext_path, $ciphertext_path, $this->key);
 
         $ciphertext = file_get_contents($ciphertext_path);
         $truncated  = substr($ciphertext, 0, 64);
         file_put_contents($truncated_path, $truncated);
 
-        File::decryptFile($truncated_path, $plaintext_path, $this->key);
+        Crypto::decryptFile($truncated_path, $plaintext_path, $this->key);
     }
 
     public function testEncryptWithCryptoDecryptWithFile()
@@ -242,7 +242,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $ciphertext = Crypto::encrypt($plaintext, $key, true);
         file_put_contents($ciphertext_path, $ciphertext);
 
-        File::decryptFile($ciphertext_path, $plaintext_path, $key);
+        Crypto::decryptFile($ciphertext_path, $plaintext_path, $key);
 
         $plaintext_decrypted = file_get_contents($plaintext_path);
         $this->assertSame($plaintext, $plaintext_decrypted);
@@ -256,7 +256,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $key       = Key::createNewRandomKey();
         $plaintext = 'Plaintext!';
         file_put_contents($plaintext_path, $plaintext);
-        File::encryptFile($plaintext_path, $ciphertext_path, $key);
+        Crypto::encryptFile($plaintext_path, $ciphertext_path, $key);
 
         $ciphertext          = file_get_contents($ciphertext_path);
         $plaintext_decrypted = Crypto::decrypt($ciphertext, $key, true);
@@ -272,11 +272,11 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
         $dest = self::$TEMP_DIR . '/err';
 
-        File::encryptFile($src, $dest, $this->key);
+        Crypto::encryptFile($src, $dest, $this->key);
 
         file_put_contents($dest, str_repeat('A', 2048), FILE_APPEND);
 
-        File::decryptFile($dest, $dest . '.jpg', $this->key);
+        Crypto::decryptFile($dest, $dest . '.jpg', $this->key);
     }
 
     public function testFileCreateRandomKey()
