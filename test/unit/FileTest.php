@@ -16,7 +16,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
             mkdir(self::$TEMP_DIR);
         }
 
-        $this->key = File::createNewRandomKey();
+        $this->key = Key::createNewRandomKey();
     }
 
     public function tearDown()
@@ -237,7 +237,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $ciphertext_path = self::$TEMP_DIR . '/ciphertext';
         $plaintext_path  = self::$TEMP_DIR . '/plaintext';
 
-        $key        = Crypto::createNewRandomKey();
+        $key        = Key::createNewRandomKey();
         $plaintext  = 'Plaintext!';
         $ciphertext = Crypto::encrypt($plaintext, $key, true);
         file_put_contents($ciphertext_path, $ciphertext);
@@ -253,7 +253,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $ciphertext_path = self::$TEMP_DIR . '/ciphertext';
         $plaintext_path  = self::$TEMP_DIR . '/plaintext';
 
-        $key       = Crypto::createNewRandomKey();
+        $key       = Key::createNewRandomKey();
         $plaintext = 'Plaintext!';
         file_put_contents($plaintext_path, $plaintext);
         File::encryptFile($plaintext_path, $ciphertext_path, $key);
@@ -281,7 +281,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     public function testFileCreateRandomKey()
     {
-        $result = File::createNewRandomKey();
+        $result = Key::createNewRandomKey();
         $this->assertInstanceOf('\Defuse\Crypto\Key', $result);
     }
 

@@ -28,7 +28,7 @@ Generating a Key
 
 ```php
 try {
-    $key = \Defuse\Crypto\Crypto::createNewRandomKey();
+    $key = \Defuse\Crypto\Key::createNewRandomKey();
     // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
     // they may leak the key to the attacker through side channels.
     // 
