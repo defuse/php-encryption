@@ -37,13 +37,6 @@ class Crypto
      */
     public static function encrypt($plaintext, Key $key, $raw_binary = false)
     {
-        // TODO: is this redundant? Do we need to add it to File?
-        if (! \is_a($key, "\Defuse\Crypto\Key")) {
-            throw new Ex\CannotPerformOperationException(
-                'The given key is not a valid Key object.'
-            );
-        }
-
         return self::encryptInternal(
             $plaintext,
             KeyOrPassword::createFromKey($key),
@@ -76,7 +69,6 @@ class Crypto
         $ciphertext = Core::CURRENT_VERSION . $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv);
         $auth       = \hash_hmac(Core::HASH_FUNCTION_NAME, $ciphertext, $akey, true);
 
-        // We're now appending the header as of 2.00
         $ciphertext = $ciphertext . $auth;
 
         if ($raw_binary) {
@@ -103,13 +95,6 @@ class Crypto
      */
     public static function decrypt($ciphertext, Key $key, $raw_binary = false)
     {
-        // TODO: is this redundant? Do we need to add it to File?
-        if (! \is_a($key, "\Defuse\Crypto\Key")) {
-            throw new Ex\CannotPerformOperationException(
-                'The given key is not a valid Key object.'
-            );
-        }
-
         return self::decryptInternal(
             $ciphertext,
             KeyOrPassword::createFromKey($key),
