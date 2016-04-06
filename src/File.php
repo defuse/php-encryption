@@ -9,16 +9,6 @@ final class File implements StreamInterface
     // File ciphertext format: [____VERSION____][____SALT____][____IV____][____CIPHERTEXT____][____HMAC____].
 
     /**
-     * Use this to generate a random encryption key.
-     *
-     * @return Key
-     */
-    public static function createNewRandomKey()
-    {
-        return Key::createNewRandomKey();
-    }
-
-    /**
      * Encrypt the contents at $inputFilename, storing the result in
      * $outputFilename using HKDF of $key to perform authenticated encryption
      *

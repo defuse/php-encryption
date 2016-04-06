@@ -6,7 +6,7 @@ use \Defuse\Crypto\Exception as Ex;
 require_once 'autoload.php';
 
 try {
-    $key = Crypto::createNewRandomKey();
+    $key = Key::createNewRandomKey();
     // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
     // they may leak the key to the attacker through side channels.
 } catch (Ex\CryptoTestFailedException $ex) {

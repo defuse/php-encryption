@@ -28,7 +28,7 @@ Generating a Key
 
 ```php
 try {
-    $key = \Defuse\Crypto\File::createNewRandomKey();
+    $key = \Defuse\Crypto\Key::createNewRandomKey();
     // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
     // they may leak the key to the attacker through side channels.
     // 
@@ -50,7 +50,7 @@ Encrypting a File
 ```php
 /* 
   // Don't forget to generate a random key
-  $key = \Defuse\Crypto\File::createNewRandomKey();
+  $key = \Defuse\Crypto\Key::createNewRandomKey();
 */
 
 $inputFilename = 'image.jpg';
@@ -75,7 +75,7 @@ Decrypting a File
 ```php
 /* 
   // Don't forget to generate a random key
-  $key = \Defuse\Crypto\File::createNewRandomKey();
+  $key = \Defuse\Crypto\Key::createNewRandomKey();
 */
 
 $inputFilename = 'image.enc.jpg';
@@ -100,7 +100,7 @@ Encrypting a File Resource
 ```php
 /* 
   // Don't forget to generate a random key
-  $key = \Defuse\Crypto\File::createNewRandomKey();
+  $key = \Defuse\Crypto\Key::createNewRandomKey();
 */
 
 $iFile = \fopen('image2.jpg', 'rb');
@@ -121,7 +121,7 @@ Decrypting a File Resource
 ```php
 /* 
   // Don't forget to generate a random key
-  $key = \Defuse\Crypto\File::createNewRandomKey();
+  $key = \Defuse\Crypto\Key::createNewRandomKey();
 */
 
 $iFile = \fopen('image2.enc.jpg', 'rb');

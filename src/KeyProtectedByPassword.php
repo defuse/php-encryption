@@ -11,7 +11,7 @@ final class KeyProtectedByPassword
     public static function createRandomPasswordProtectedKey($password)
     {
         /* Create a new random key. */
-        $inner_key = Key::CreateNewRandomKey();
+        $inner_key = Key::createNewRandomKey();
         $encrypted_key = Crypto::encryptWithPassword(
             $inner_key->saveToAsciiSafeString(),
             $password,

@@ -16,7 +16,7 @@ function showResults($type, $start, $end, $count)
 
 $start = \microtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    $key = Crypto::createNewRandomKey();
+    $key = Key::createNewRandomKey();
 }
 $end = \microtime(true);
 \showResults('createNewRandomKey()', $start, $end, 1000);

@@ -53,7 +53,7 @@ class RuntimeTests extends Crypto
             RuntimeTests::HKDFTestVector();
 
             RuntimeTests::testEncryptDecrypt();
-            if (Core::ourStrlen(Crypto::createNewRandomKey()->getRawBytes()) != Core::KEY_BYTE_SIZE) {
+            if (Core::ourStrlen(Key::createNewRandomKey()->getRawBytes()) != Core::KEY_BYTE_SIZE) {
                 throw new Ex\CryptoTestFailedException();
             }
 
@@ -72,7 +72,7 @@ class RuntimeTests extends Crypto
 
     private static function testEncryptDecrypt()
     {
-        $key  = Crypto::createNewRandomKey();
+        $key  = Key::createNewRandomKey();
         $data = "EnCrYpT EvErYThInG\x00\x00";
 
         // Make sure encrypting then decrypting doesn't change the message.
@@ -105,10 +105,10 @@ class RuntimeTests extends Crypto
         }
 
         // Decrypting with the wrong key.
-        $key        = Crypto::createNewRandomKey();
+        $key        = Key::createNewRandomKey();
         $data       = 'abcdef';
         $ciphertext = Crypto::encrypt($data, $key, true);
-        $wrong_key  = Crypto::createNewRandomKey();
+        $wrong_key  = Key::createNewRandomKey();
         try {
             Crypto::decrypt($ciphertext, $wrong_key, true);
             throw new Ex\CryptoTestFailedException();
@@ -116,7 +116,7 @@ class RuntimeTests extends Crypto
         }
 
         // Ciphertext too small (shorter than HMAC).
-        $key        = Crypto::createNewRandomKey();
+        $key        = Key::createNewRandomKey();
         $ciphertext = \str_repeat('A', Core::MAC_BYTE_SIZE - 1);
         try {
             Crypto::decrypt($ciphertext, $key, true);

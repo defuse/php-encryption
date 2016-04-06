@@ -10,16 +10,6 @@ class Crypto
     // Legacy format: [____HMAC____][____IV____][____CIPHERTEXT____].
 
     /**
-     * Use this to generate a random encryption key.
-     *
-     * @return Key
-     */
-    public static function createNewRandomKey()
-    {
-        return Key::createNewRandomKey();
-    }
-
-    /**
      * Encrypts a message.
      *
      * $plaintext is the message to encrypt.
