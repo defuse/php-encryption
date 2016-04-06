@@ -170,7 +170,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      * @excpectedExceptionMessage Ciphertext file has a bad magic number.
      */
     public function testDecryptBadMagicNumber()
@@ -182,7 +182,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider garbageCiphertextProvider
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
     public function testDecryptGarbage($ciphertext)
     {
@@ -203,7 +203,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
     public function testDecryptEmptyFile()
     {
@@ -213,7 +213,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
     public function testDecryptTruncatedCiphertext()
     {
@@ -264,7 +264,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      * @excpectedExceptionMessage Message Authentication failure; tampering detected.
      */
     public function testExtraData()

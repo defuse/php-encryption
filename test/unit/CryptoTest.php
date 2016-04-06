@@ -31,7 +31,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         $ciphertext = Crypto::encryptWithPassword($data, $password, true);
         try {
             $decrypted = Crypto::decryptWithPassword($ciphertext, $password, true);
-        } catch (Ex\InvalidCiphertextException $ex) {
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $ex) {
             // It's important to catch this and change it into a
             // Ex\CryptoTestFailedException, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
@@ -45,7 +45,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         try {
             Crypto::decryptWithPassword($ciphertext . 'a', $password, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
         // Modifying the ciphertext: Changing an IV byte.
@@ -53,7 +53,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
             $ciphertext[4] = \chr((\ord($ciphertext[4]) + 1) % 256);
             Crypto::decryptWithPassword($ciphertext, $password, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
         // Decrypting with the wrong password.
@@ -64,7 +64,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         try {
             Crypto::decryptWithPassword($ciphertext, $wrong_password, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
         // Ciphertext too small (shorter than HMAC).
@@ -73,7 +73,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         try {
             Crypto::decryptWithPassword($ciphertext, $password, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
     }
 }

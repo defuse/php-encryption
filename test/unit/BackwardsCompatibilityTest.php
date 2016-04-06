@@ -7,7 +7,7 @@ use \Defuse\Crypto\Key;
 class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      * @expectedExceptionMessage invalid hex encoding
      */
     public function testDecryptLegacyWithWrongMethodStraightUpHex()
@@ -32,7 +32,7 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      * @expectedExceptionMessage Bad version header
      */
     public function testDecryptLegacyWithWrongMethodStraightUpBinary()

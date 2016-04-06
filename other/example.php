@@ -26,7 +26,7 @@ try {
 
 try {
     $decrypted = Crypto::decrypt($ciphertext, $key);
-} catch (Ex\InvalidCiphertextException $ex) { // VERY IMPORTANT
+} catch (Ex\WrongKeyOrModifiedCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or

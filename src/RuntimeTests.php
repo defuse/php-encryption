@@ -79,7 +79,7 @@ class RuntimeTests extends Crypto
         $ciphertext = Crypto::encrypt($data, $key, true);
         try {
             $decrypted = Crypto::decrypt($ciphertext, $key, true);
-        } catch (Ex\InvalidCiphertextException $ex) {
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $ex) {
             // It's important to catch this and change it into a
             // Ex\CryptoTestFailedException, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
@@ -93,7 +93,7 @@ class RuntimeTests extends Crypto
         try {
             Crypto::decrypt($ciphertext . 'a', $key, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
         // Modifying the ciphertext: Changing an IV byte.
@@ -101,7 +101,7 @@ class RuntimeTests extends Crypto
             $ciphertext[4] = \chr((\ord($ciphertext[4]) + 1) % 256);
             Crypto::decrypt($ciphertext, $key, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
         // Decrypting with the wrong key.
@@ -112,7 +112,7 @@ class RuntimeTests extends Crypto
         try {
             Crypto::decrypt($ciphertext, $wrong_key, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
         // Ciphertext too small (shorter than HMAC).
@@ -121,7 +121,7 @@ class RuntimeTests extends Crypto
         try {
             Crypto::decrypt($ciphertext, $key, true);
             throw new Ex\CryptoTestFailedException();
-        } catch (Ex\InvalidCiphertextException $e) { /* expected */
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
     }
 
