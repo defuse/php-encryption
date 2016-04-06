@@ -6,21 +6,21 @@ use Defuse\Crypto\Exception as Ex;
 
 final class Core
 {
-    const HEADER_VERSION_SIZE = 4;  /* This must never change. */
-    const MINIMUM_FILE_SIZE   = 84;   /* Absolute minimum */
+    const HEADER_VERSION_SIZE               = 4;  /* This must never change. */
+    const MINIMUM_CIPHERTEXT_SIZE           = 84; /* Absolute minimum */
 
-    const HEADER_MAGIC    =            "\xDE\xF5";
-    const CURRENT_VERSION =         "\xDE\xF5\x02\x00";
+    const HEADER_MAGIC                      = "\xDE\xF5";
+    const CURRENT_VERSION                   = "\xDE\xF5\x02\x00";
 
-    const CIPHER_METHOD              = 'aes-256-ctr';
-    const BLOCK_BYTE_SIZE            = 16;
-    const KEY_BYTE_SIZE              = 32;
-    const SALT_BYTE_SIZE             = 32;
-    const MAC_BYTE_SIZE              = 32;
-    const HASH_FUNCTION_NAME         = 'sha256';
-    const ENCRYPTION_INFO_STRING     = 'DefusePHP|V2|KeyForEncryption';
-    const AUTHENTICATION_INFO_STRING = 'DefusePHP|V2|KeyForAuthentication';
-    const BUFFER_BYTE_SIZE           = 1048576;
+    const CIPHER_METHOD                     = 'aes-256-ctr';
+    const BLOCK_BYTE_SIZE                   = 16;
+    const KEY_BYTE_SIZE                     = 32;
+    const SALT_BYTE_SIZE                    = 32;
+    const MAC_BYTE_SIZE                     = 32;
+    const HASH_FUNCTION_NAME                = 'sha256';
+    const ENCRYPTION_INFO_STRING            = 'DefusePHP|V2|KeyForEncryption';
+    const AUTHENTICATION_INFO_STRING        = 'DefusePHP|V2|KeyForAuthentication';
+    const BUFFER_BYTE_SIZE                  = 1048576;
 
     const LEGACY_CIPHER_METHOD              = 'aes-128-cbc';
     const LEGACY_BLOCK_BYTE_SIZE            = 16;

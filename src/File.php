@@ -416,7 +416,7 @@ final class File implements StreamInterface
             );
         }
         $stat = \fstat($inputHandle);
-        if ($stat['size'] < Core::MINIMUM_FILE_SIZE) {
+        if ($stat['size'] < Core::MINIMUM_CIPHERTEXT_SIZE) {
             throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Input file is too small to have been created by this library.'
             );
