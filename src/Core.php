@@ -331,7 +331,14 @@ final class Core
                 return false;
             }
 
-            return \mb_substr($str, $start, $length, '8bit');
+            $substr = \mb_substr($str, $start, $length, '8bit');
+            if (Core::ourStrlen($substr) !== $length) {
+                throw new CannotPerformOperationException(
+                    "Your version of PHP has bug #66797. Its implementation of
+                    mb_substr() is incorrect. See the details here:
+                    https://bugs.php.net/bug.php?id=66797"
+                );
+            }
         }
 
         // Unlike mb_substr(), substr() doesn't accept NULL for length
