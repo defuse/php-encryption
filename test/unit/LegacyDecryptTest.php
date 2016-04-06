@@ -24,7 +24,7 @@ class LegacyDecryptTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
     public function testDecryptLegacyCiphertextWrongKey()
     {

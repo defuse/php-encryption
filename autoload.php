@@ -57,10 +57,10 @@
             'Exception/CryptoException.php',
         'Exception\\CryptoTestFailedException' =>
             'Exception/CryptoTestFailedException.php',
-        'Exception\\InvalidCiphertextException' =>
-            'Exception/InvalidCiphertextException.php',
         'Exception\\InvalidInput' =>
             'Exception/InvalidInput.php',
+        'Exception\\WrongKeyOrModifiedCiphertextException' =>
+            'Exception/WrongKeyOrModifiedCiphertextException.php',
     );
     foreach ($classmap as $classname => $file) {
         if ($classname === $relative_class) {

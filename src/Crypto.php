@@ -89,7 +89,7 @@ class Crypto
      *
      * @throws Ex\CannotPerformOperationException
      * @throws Ex\CryptoTestFailedException
-     * @throws Ex\InvalidCiphertextException
+     * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
      * @return string
      */
@@ -119,7 +119,7 @@ class Crypto
             try {
                 $ciphertext = Encoding::hexToBin($ciphertext);
             } catch (\RangeException $ex) {
-                throw new Ex\InvalidCiphertextException(
+                throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'Ciphertext has invalid hex encoding.'
                 );
             }
@@ -128,7 +128,7 @@ class Crypto
         // Grab the header tag
         $header = Core::ourSubstr($ciphertext, 0, Core::HEADER_VERSION_SIZE);
         if ($header !== Core::CURRENT_VERSION) {
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Bad version header.'
             );
         }
@@ -138,7 +138,7 @@ class Crypto
 
         // Extract the HMAC from the front of the ciphertext.
         if (Core::ourStrlen($ciphertext) < Core::MAC_BYTE_SIZE) {
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Ciphertext is too short.'
             );
         }
@@ -174,7 +174,7 @@ class Crypto
             // Extract the initialization vector from the ciphertext.
             $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
             if (Core::ourStrlen($ciphertext) < $ivsize) {
-                throw new Ex\InvalidCiphertextException(
+                throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'Ciphertext is too short.'
                 );
             }
@@ -196,7 +196,7 @@ class Crypto
              * a script that doesn't handle this condition to CRASH, instead
              * of thinking the ciphertext decrypted to the value false.
              */
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Integrity check failed.'
             );
         }
@@ -214,7 +214,7 @@ class Crypto
      *
      * @throws Ex\CannotPerformOperationException
      * @throws Ex\CryptoTestFailedException
-     * @throws Ex\InvalidCiphertextException
+     * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
      * @return string
      */
@@ -224,7 +224,7 @@ class Crypto
 
         // Extract the HMAC from the front of the ciphertext.
         if (Core::ourStrlen($ciphertext) <= Core::LEGACY_MAC_BYTE_SIZE) {
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Ciphertext is too short.'
             );
         }
@@ -259,7 +259,7 @@ class Crypto
             // Extract the initialization vector from the ciphertext.
             $ivsize = Core::cipherIvLength(Core::LEGACY_CIPHER_METHOD);
             if (Core::ourStrlen($ciphertext) <= $ivsize) {
-                throw new Ex\InvalidCiphertextException(
+                throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'Ciphertext is too short.'
                 );
             }
@@ -281,7 +281,7 @@ class Crypto
              * a script that doesn't handle this condition to CRASH, instead
              * of thinking the ciphertext decrypted to the value false.
              */
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Integrity check failed.'
             );
         }

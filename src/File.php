@@ -225,7 +225,7 @@ final class File implements StreamInterface
      * @param Key      $key
      *
      * @throws Exception\CannotPerformOperationException
-     * @throws Exception\InvalidCiphertextException
+     * @throws Exception\WrongKeyOrModifiedCiphertextException
      * @throws Exception\InvalidInput
      *
      * @return bool
@@ -389,7 +389,7 @@ final class File implements StreamInterface
      * @param Key      $key
      *
      * @throws Exception\CannotPerformOperationException
-     * @throws Exception\InvalidCiphertextException
+     * @throws Exception\WrongKeyOrModifiedCiphertextException
      * @throws Exception\InvalidInput
      *
      * @return bool
@@ -427,7 +427,7 @@ final class File implements StreamInterface
         }
         $stat = \fstat($inputHandle);
         if ($stat['size'] < Core::MINIMUM_FILE_SIZE) {
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Input file is too small to have been created by this library.'
             );
         }
@@ -435,7 +435,7 @@ final class File implements StreamInterface
         // Parse the header.
         $header = self::readBytes($inputHandle, Core::HEADER_VERSION_SIZE);
         if ($header !== Core::CURRENT_VERSION) {
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Bad version header.'
             );
         }
@@ -589,7 +589,7 @@ final class File implements StreamInterface
          * 3. Did we match?
          */
         if (! Core::hashEquals($finalHMAC, $stored_mac)) {
-            throw new Ex\InvalidCiphertextException(
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Message Authentication failure; tampering detected.'
             );
         }
@@ -656,11 +656,11 @@ final class File implements StreamInterface
             $calc = \hash_final($calcMAC);
 
             if (empty($macs)) {
-                throw new Ex\InvalidCiphertextException(
+                throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'File was modified after MAC verification'
                 );
             } elseif (! Core::hashEquals(\array_shift($macs), $calc)) {
-                throw new Ex\InvalidCiphertextException(
+                throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'File was modified after MAC verification'
                 );
             }

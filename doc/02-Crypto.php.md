@@ -64,7 +64,7 @@ Decrypting a Message
 ```php
 try {
     $decrypted = self::Decrypt($ciphertext, $key);
-} catch (\Defuse\Crypto\Exception\InvalidCiphertextException $ex) { // VERY IMPORTANT
+} catch (\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or
@@ -86,7 +86,7 @@ Decrypting a Message Encrypted with version 1 of this Library
 ```php
 try {
     $decrypted = self::legacyDecrypt($ciphertext, $key);
-} catch (\Defuse\Crypto\Exception\InvalidCiphertextException $ex) { // VERY IMPORTANT
+} catch (\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or
