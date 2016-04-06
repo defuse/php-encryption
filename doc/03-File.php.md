@@ -57,7 +57,7 @@ $inputFilename = 'image.jpg';
 $outputFilename = 'image.enc.jpg';
 
 try {
-    \Defuse\Crypto\File::encryptFile(
+    \Defuse\Crypto\Crypto::encryptFile(
         $inputFilename,
         $outputFilename,
         $key
@@ -82,7 +82,7 @@ $inputFilename = 'image.enc.jpg';
 $outputFilename = 'image.dec.jpg';
 
 try {
-    \Defuse\Crypto\File::decryptFile(
+    \Defuse\Crypto\Crypto::decryptFile(
         $inputFilename,
         $outputFilename,
         $key
@@ -107,7 +107,7 @@ $iFile = \fopen('image2.jpg', 'rb');
 $oFile = \fopen('image2.enc.jpg', 'wb');
 
 try {
-    \Defuse\Crypto\File::encryptResource($iFile, $oFile, $key);
+    \Defuse\Crypto\Crypto::encryptResource($iFile, $oFile, $key);
 } catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
     die('Cannot safely perform encryption');
 } catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
@@ -128,7 +128,7 @@ $iFile = \fopen('image2.enc.jpg', 'rb');
 $oFile = \fopen('image2.dec.jpg', 'wb');
 
 try {
-    \Defuse\Crypto\File::decryptResource($iFile, $oFile, $key);
+    \Defuse\Crypto\Crypto::decryptResource($iFile, $oFile, $key);
 } catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
     die('Cannot safely perform decryption');
 } catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {

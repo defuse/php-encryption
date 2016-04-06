@@ -36,8 +36,6 @@
             'Encoding.php',
         'ExceptionHandler' =>
             'ExceptionHandler.php',
-        'File' =>
-            'File.php',
         'Key' =>
             'Key.php',
         'KeyOrPassword' =>
