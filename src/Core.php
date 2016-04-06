@@ -346,6 +346,7 @@ final class Core
                     https://bugs.php.net/bug.php?id=66797"
                 );
             }
+            return $substr;
         }
 
         // Unlike mb_substr(), substr() doesn't accept NULL for length
