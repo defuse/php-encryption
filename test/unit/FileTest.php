@@ -285,6 +285,74 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Defuse\Crypto\Key', $result);
     }
 
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadSourcePathEncrypt()
+    {
+        File::encryptFile("./i-do-not-exist", "output-file", $this->key);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadSourcePathDecrypt()
+    {
+        File::decryptFile("./i-do-not-exist", "output-file", $this->key);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadSourcePathEncryptWithPassword()
+    {
+        File::encryptFileWithPassword("./i-do-not-exist", "output-file", "password");
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadSourcePathDecryptWithPassword()
+    {
+        File::decryptFileWithPassword("./i-do-not-exist", "output-file", "password");
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadDestinationPathEncrypt()
+    {
+        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        File::encryptFile($src, "./", $this->key);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadDestinationPathDecrypt()
+    {
+        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        File::decryptFile($src, "./", $this->key);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadDestinationPathEncryptWithPassword()
+    {
+        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        File::encryptFileWithPassword($src, "./", "password");
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     */
+    public function testBadDestinationPathDecryptWithPassword()
+    {
+        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        File::decryptFileWithPassword($src, "./", "password");
+    }
+
     public function fileToFileProvider()
     {
         $data = [];
