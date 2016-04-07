@@ -58,9 +58,9 @@ final class File implements StreamInterface
             /**
              * Input file handle
              */
-            $if = \fopen($inputFilename, 'rb');
+            $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                     'Cannot open input file for encrypting'
                 );
         }
@@ -69,10 +69,10 @@ final class File implements StreamInterface
             /**
              * Output file handle
              */
-            $of = \fopen($outputFilename, 'wb');
+            $of = @\fopen($outputFilename, 'wb');
         if ($of === false) {
             \fclose($if);
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                     'Cannot open output file for encrypting'
                 );
         }
@@ -93,12 +93,12 @@ final class File implements StreamInterface
          * Close handles
          */
         if (\fclose($if) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for encrypting'
             );
         }
         if (\fclose($of) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for encrypting'
             );
         }
@@ -155,9 +155,9 @@ final class File implements StreamInterface
             /**
              * Input file handle
              */
-            $if = \fopen($inputFilename, 'rb');
+            $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                     'Cannot open input file for decrypting'
                 );
         }
@@ -166,10 +166,10 @@ final class File implements StreamInterface
             /**
              * Output file handle
              */
-            $of = \fopen($outputFilename, 'wb');
+            $of = @\fopen($outputFilename, 'wb');
         if ($of === false) {
             \fclose($if);
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                     'Cannot open output file for decrypting'
                 );
         }
@@ -190,12 +190,12 @@ final class File implements StreamInterface
          * Close handles
          */
         if (\fclose($if) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for decrypting'
             );
         }
         if (\fclose($of) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for decrypting'
             );
         }
@@ -467,7 +467,7 @@ final class File implements StreamInterface
          * It should be the last N blocks of the file (N = 32)
          */
         if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot seek to beginning of MAC within input file'
             );
         }
@@ -475,7 +475,7 @@ final class File implements StreamInterface
         // Grab our last position of ciphertext before we read the MAC
         $cipher_end = \ftell($inputHandle);
         if ($cipher_end === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot read input file'
             );
         }
@@ -498,7 +498,7 @@ final class File implements StreamInterface
          * Reset file pointer to the beginning of the file after the header
          */
         if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot read seek within input file'
             );
         }
@@ -507,8 +507,8 @@ final class File implements StreamInterface
          * Set it to the first non-salt and non-IV byte
          */
         if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize, SEEK_CUR) === false) {
-            throw new Ex\CannotPerformOperationException(
-                'Cannot read seek input file to beginning of ciphertext'
+            throw new Ex\IOException(
+                'Cannot seek input file to beginning of ciphertext'
             );
         }
         /**
@@ -529,7 +529,7 @@ final class File implements StreamInterface
              */
             $pos = \ftell($inputHandle);
             if ($pos === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\IOException(
                     'Could not get current position in input file during decryption'
                 );
             }
@@ -551,7 +551,7 @@ final class File implements StreamInterface
                 );
             }
             if ($read === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\IOException(
                     'Could not read input file during decryption'
                 );
             }
@@ -590,7 +590,7 @@ final class File implements StreamInterface
          * Return file pointer to the first non-header, non-IV byte in the file
          */
         if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Could not move the input file pointer during decryption'
             );
         }
@@ -609,7 +609,7 @@ final class File implements StreamInterface
              */
             $pos = \ftell($inputHandle);
             if ($pos === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\IOException(
                     'Could not get current position in input file during decryption'
                 );
             }
@@ -696,7 +696,7 @@ final class File implements StreamInterface
      * @param int      $num
      *
      * @throws \RangeException
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\IOException
      *
      * @return string
      */
@@ -715,7 +715,7 @@ final class File implements StreamInterface
             $read = \fread($stream, $remaining);
 
             if ($read === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\IOException(
                     'Could not read from the file'
                 );
             }
@@ -723,7 +723,7 @@ final class File implements StreamInterface
             $remaining -= Core::ourStrlen($read);
         }
         if (Core::ourStrlen($buf) !== $num) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Tried to read past the end of the file'
             );
         }
@@ -737,7 +737,7 @@ final class File implements StreamInterface
      * @param string   $buf
      * @param int      $num    (number of bytes)
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\IOException
      *
      * @return string
      */
@@ -748,12 +748,12 @@ final class File implements StreamInterface
             $num = $bufSize;
         }
         if ($num > $bufSize) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Trying to write more bytes than the buffer contains.'
             );
         }
         if ($num < 0) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Tried to write less than 0 bytes'
             );
         }
@@ -761,7 +761,7 @@ final class File implements StreamInterface
         while ($remaining > 0) {
             $written = \fwrite($stream, $buf, $remaining);
             if ($written === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\IOException(
                     'Could not write to the file'
                 );
             }
