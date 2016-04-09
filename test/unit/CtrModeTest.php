@@ -133,7 +133,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public function testIncrementByNegativeValue()
     {
@@ -155,7 +155,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider allNonZeroByteValuesProvider
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public function testIncrementCausingOverflowInFirstByte($lsb)
     {
@@ -166,7 +166,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public function testIncrementWithShortIvLength()
     {
@@ -178,7 +178,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public function testIncrementWithLongIvLength()
     {
@@ -190,7 +190,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public function testIncrementByNonInteger()
     {

@@ -41,7 +41,7 @@ final class Core
      * @param int    $inc - how much?
      * @param $cipherMethod
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -53,19 +53,19 @@ final class Core
         }
 
         if (Core::ourStrlen($ctr) !== $ivsize) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
               'Trying to increment a nonce of the wrong size.'
             );
         }
 
         if (! \is_int($inc)) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
               'Trying to increment nonce by a non-integer.'
             );
         }
 
         if ($inc < 0) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
               'Trying to increment nonce by a negative amount.'
             );
         }
@@ -79,7 +79,7 @@ final class Core
 
             /* Detect integer overflow and fail. */
             if (! \is_int($sum)) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\EnvironmentIsBrokenException(
                   'Integer overflow in CTR mode nonce increment.'
                 );
             }
@@ -95,7 +95,7 @@ final class Core
      *
      * @param string $method
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return int
      */
@@ -105,7 +105,7 @@ final class Core
         $ivsize = \openssl_cipher_iv_length($method);
 
         if ($ivsize === false || $ivsize <= 0) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Could not get the IV length from OpenSSL'
             );
         }
@@ -118,7 +118,7 @@ final class Core
      *
      * @param int $octets
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string (raw binary)
      */
@@ -137,7 +137,7 @@ final class Core
      * @param string $info   What sort of key are we deriving?
      * @param string $salt
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -148,7 +148,7 @@ final class Core
         // Sanity-check the desired output length.
         if (empty($length) || ! \is_int($length) ||
             $length < 0 || $length > 255 * $digest_length) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Bad output length requested of HKDF.'
             );
         }
@@ -167,7 +167,7 @@ final class Core
 
         // This check is useless, but it serves as a reminder to the spec.
         if (Core::ourStrlen($prk) < $digest_length) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         // T(0) = ''
@@ -188,7 +188,7 @@ final class Core
         // ORM = first L octets of T
         $orm = Core::ourSubstr($t, 0, $length);
         if ($orm === false) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
         return $orm;
     }
@@ -201,7 +201,7 @@ final class Core
      * @param string $expected string (raw binary)
      * @param string $given    string (raw binary)
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return bool
      */
@@ -224,7 +224,7 @@ final class Core
         // NOTE: This leaks information when the strings are not the same
         // length, but they should always be the same length here. Enforce it:
         if (Core::ourStrlen($expected) !== Core::ourStrlen($given)) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         $blind           = Core::secureRandom(32);
@@ -237,12 +237,12 @@ final class Core
      *
      * @param string $name
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      */
     public static function ensureConstantExists($name)
     {
         if (! \defined($name)) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
     }
 
@@ -251,12 +251,12 @@ final class Core
      *
      * @param string $name Function name
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      */
     public static function ensureFunctionExists($name)
     {
         if (! \function_exists($name)) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
     }
 
@@ -271,7 +271,7 @@ final class Core
      *
      * @param string $str
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return int
      */
@@ -284,7 +284,7 @@ final class Core
         if ($exists) {
             $length = \mb_strlen($str, '8bit');
             if ($length === false) {
-                throw new Ex\CannotPerformOperationException();
+                throw new Ex\EnvironmentIsBrokenException();
             }
             return $length;
         } else {
@@ -333,7 +333,7 @@ final class Core
 
             $substr = \mb_substr($str, $start, $length, '8bit');
             if (Core::ourStrlen($substr) !== $length) {
-                throw new CannotPerformOperationException(
+                throw new EnvironmentIsBrokenException(
                     "Your version of PHP has bug #66797. Its implementation of
                     mb_substr() is incorrect. See the details here:
                     https://bugs.php.net/bug.php?id=66797"
@@ -362,7 +362,7 @@ final class Core
      * @param $key_length - The length of the derived key in bytes.
      * @param bool $raw_output - If true, the key is returned in raw binary format. Hex encoded otherwise.
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string - A $key_length-byte key derived from the password and salt.
      *
@@ -395,7 +395,7 @@ final class Core
 
         $algorithm = \strtolower($algorithm);
         if (! \in_array($algorithm, \hash_algos(), true)) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Invalid or unsupported hash algorithm.'
             );
         }
@@ -406,13 +406,13 @@ final class Core
             'ripemd160', 'ripemd256', 'ripemd320', 'whirlpool',
         ];
         if (! \in_array($algorithm, $ok_algorithms, true)) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Algorithm is not a secure cryptographic hash function.'
             );
         }
 
         if ($count <= 0 || $key_length <= 0) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Invalid PBKDF2 parameters.'
             );
         }
@@ -454,7 +454,7 @@ final class Core
      * @param $header
      * @param $bytes
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -463,7 +463,7 @@ final class Core
         // Headers must be a constant length to prevent one type's header from
         // being a prefix of another type's header, leading to ambiguity.
         if (Core::ourStrlen($header) !== Core::SERIALIZE_HEADER_BYTES) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Header must be 4 bytes.'
             );
         }
@@ -485,7 +485,7 @@ final class Core
      * @param $expected_header
      * @param $string
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      * @throws \Defuse\Crypto\Exception\BadFormatException
      *
      * @return string
@@ -495,7 +495,7 @@ final class Core
         // Headers must be a constant length to prevent one type's header from
         // being a prefix of another type's header, leading to ambiguity.
         if (Core::ourStrlen($expected_header) !== Core::SERIALIZE_HEADER_BYTES) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Header must be 4 bytes.'
             );
         }

@@ -52,7 +52,7 @@ final class Key
     /**
      * Create new random key.
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return \Defuse\Crypto\Key
      */
@@ -66,7 +66,7 @@ final class Key
      *
      * @param $savedKeyString
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return \Defuse\Crypto\Key
      */
@@ -79,7 +79,7 @@ final class Key
     /**
      * Save to ascii safe string.
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -107,12 +107,12 @@ final class Key
      *
      * @param $bytes
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     private function __construct($bytes)
     {
         if (Core::ourStrlen($bytes) !== self::KEY_BYTE_SIZE) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Bad key length.'
             );
         }

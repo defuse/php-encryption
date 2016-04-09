@@ -53,8 +53,8 @@
         // Exceptions:
         'Exception\\BadFormatException' =>
             'Exception/BadFormatException.php',
-        'Exception\\CannotPerformOperationException' =>
-            'Exception/CannotPerformOperationException.php',
+        'Exception\\EnvironmentIsBrokenException' =>
+            'Exception/EnvironmentIsBrokenException.php',
         'Exception\\CryptoException' =>
             'Exception/CryptoException.php',
         'Exception\\IOException' =>

@@ -26,7 +26,7 @@ final class KeyOrPassword
     public function deriveKeys($salt)
     {
         if (Core::ourStrlen($salt) !== Core::SALT_BYTE_SIZE) {
-            throw new Ex\CannotPerformOperationException("Bad salt.");
+            throw new Ex\EnvironmentIsBrokenException("Bad salt.");
         }
 
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
@@ -71,7 +71,7 @@ final class KeyOrPassword
             );
             return new DerivedKeys($akey, $ekey);
         } else {
-            throw new Ex\CannotPerformOperationException("Bad secret type.");
+            throw new Ex\EnvironmentIsBrokenException("Bad secret type.");
         }
     }
 

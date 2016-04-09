@@ -20,7 +20,7 @@ class Crypto
      * @param string $key // TODO: this is wrong
      * @param bool   $raw_binary
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -76,7 +76,7 @@ class Crypto
      * @param string $key
      * @param bool   $raw_binary
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
      * @return string
@@ -136,7 +136,7 @@ class Crypto
             Core::MAC_BYTE_SIZE
         );
         if ($hmac === false) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
         $salt = Core::ourSubstr(
             $ciphertext,
@@ -144,7 +144,7 @@ class Crypto
             Core::SALT_BYTE_SIZE
         );
         if ($salt === false) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         $ciphertext = Core::ourSubstr(
@@ -153,7 +153,7 @@ class Crypto
             Core::ourStrlen($ciphertext) - Core::MAC_BYTE_SIZE - Core::SALT_BYTE_SIZE
         );
         if ($ciphertext === false) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         $keys = $secret->deriveKeys($salt);
@@ -168,11 +168,11 @@ class Crypto
             }
             $iv = Core::ourSubstr($ciphertext, 0, $ivsize);
             if ($iv === false) {
-                throw new Ex\CannotPerformOperationException();
+                throw new Ex\EnvironmentIsBrokenException();
             }
             $ciphertext = Core::ourSubstr($ciphertext, $ivsize);
             if ($ciphertext === false) {
-                throw new Ex\CannotPerformOperationException();
+                throw new Ex\EnvironmentIsBrokenException();
             }
 
             $plaintext = self::plainDecrypt($ciphertext, $keys->getEncryptionKey(), $iv, Core::CIPHER_METHOD);
@@ -200,7 +200,7 @@ class Crypto
      * @param string $ciphertext
      * @param string $key
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
      * @return string
@@ -217,11 +217,11 @@ class Crypto
         }
         $hmac = Core::ourSubstr($ciphertext, 0, Core::LEGACY_MAC_BYTE_SIZE);
         if ($hmac === false) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
         $ciphertext = Core::ourSubstr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
         if ($ciphertext === false) {
-            throw new Ex\CannotPerformOperationException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         // Regenerate the same authentication sub-key.
@@ -252,11 +252,11 @@ class Crypto
             }
             $iv = Core::ourSubstr($ciphertext, 0, $ivsize);
             if ($iv === false) {
-                throw new Ex\CannotPerformOperationException();
+                throw new Ex\EnvironmentIsBrokenException();
             }
             $ciphertext = Core::ourSubstr($ciphertext, $ivsize);
             if ($ciphertext === false) {
-                throw new Ex\CannotPerformOperationException();
+                throw new Ex\EnvironmentIsBrokenException();
             }
 
             $plaintext = self::plainDecrypt($ciphertext, $ekey, $iv, Core::LEGACY_CIPHER_METHOD);
@@ -283,7 +283,7 @@ class Crypto
      * @param string $key
      * @param string $iv
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -300,7 +300,7 @@ class Crypto
         );
 
         if ($ciphertext === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'openssl_encrypt() failed.'
             );
         }
@@ -318,7 +318,7 @@ class Crypto
      * @param string $iv
      * @param string $cipherMethod
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -334,7 +334,7 @@ class Crypto
             $iv
         );
         if ($plaintext === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'openssl_decrypt() failed.'
             );
         }
@@ -349,7 +349,7 @@ class Crypto
      * @param string $message      Ciphertext (raw binary)
      * @param string $key          Authentication key (raw binary)
      *
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return bool
      */

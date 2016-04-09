@@ -16,7 +16,7 @@ final class File implements StreamInterface
      * @param string $outputFilename
      * @param Key    $key
      *
-     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      * @throws \Defuse\Crypto\Exception\CryptoException
      *
      * @return bool
@@ -217,7 +217,7 @@ final class File implements StreamInterface
      * @param resource $outputHandle
      * @param Key      $key
      *
-     * @throws Exception\CannotPerformOperationException
+     * @throws Exception\EnvironmentIsBrokenException
      * @throws Exception\WrongKeyOrModifiedCiphertextException
      *
      * @return bool
@@ -285,7 +285,7 @@ final class File implements StreamInterface
          */
         $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
         if ($hmac === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Cannot initialize a hash context'
             );
         }
@@ -346,7 +346,7 @@ final class File implements StreamInterface
              * Check that the encryption was performed successfully
              */
             if ($encrypted === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\EnvironmentIsBrokenException(
                     'OpenSSL encryption error'
                 );
             }
@@ -380,7 +380,7 @@ final class File implements StreamInterface
      * @param resource $outputHandle
      * @param Key      $key
      *
-     * @throws Exception\CannotPerformOperationException
+     * @throws Exception\EnvironmentIsBrokenException
      * @throws Exception\WrongKeyOrModifiedCiphertextException
      *
      * @return bool
@@ -490,7 +490,7 @@ final class File implements StreamInterface
          */
         $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
         if ($hmac === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Cannot initialize a hash context'
             );
         }
@@ -562,7 +562,7 @@ final class File implements StreamInterface
              */
             $chunkMAC = \hash_copy($hmac);
             if ($chunkMAC === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\EnvironmentIsBrokenException(
                     'Cannot duplicate a hash context'
                 );
             }
@@ -636,7 +636,7 @@ final class File implements StreamInterface
             \hash_update($hmac2, $read);
             $calcMAC = \hash_copy($hmac2);
             if ($calcMAC === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\EnvironmentIsBrokenException(
                     'Cannot duplicate a hash context'
                 );
             }
@@ -669,7 +669,7 @@ final class File implements StreamInterface
              * Test for decryption faulure
              */
             if ($decrypted === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\EnvironmentIsBrokenException(
                     'OpenSSL decryption error'
                 );
             }
