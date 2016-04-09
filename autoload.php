@@ -59,8 +59,6 @@
             'Exception/CryptoException.php',
         'Exception\\IOException' =>
             'Exception/IOException.php',
-        'Exception\\InvalidInput' =>
-            'Exception/InvalidInput.php',
         'Exception\\WrongKeyOrModifiedCiphertextException' =>
             'Exception/WrongKeyOrModifiedCiphertextException.php',
     );

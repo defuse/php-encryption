@@ -18,7 +18,6 @@ final class File implements StreamInterface
      *
      * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
      * @throws \Defuse\Crypto\Exception\CryptoException
-     * @throws \Defuse\Crypto\Exception\InvalidInput
      *
      * @return bool
      */
@@ -43,12 +42,12 @@ final class File implements StreamInterface
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
         if (! \is_string($inputFilename)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Input filename must be a string!'
             );
         }
         if (! \is_string($outputFilename)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Output filename must be a string!'
             );
         }
@@ -142,12 +141,12 @@ final class File implements StreamInterface
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
         if (! \is_string($inputFilename)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Input filename must be a string!'
             );
         }
         if (! \is_string($outputFilename)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Output filename must be a string!'
             );
         }
@@ -220,7 +219,6 @@ final class File implements StreamInterface
      *
      * @throws Exception\CannotPerformOperationException
      * @throws Exception\WrongKeyOrModifiedCiphertextException
-     * @throws Exception\InvalidInput
      *
      * @return bool
      */
@@ -246,12 +244,12 @@ final class File implements StreamInterface
     {
         // Because we don't have strict typing in PHP 5
         if (! \is_resource($inputHandle)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Input handle must be a resource!'
             );
         }
         if (! \is_resource($outputHandle)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Output handle must be a resource!'
             );
         }
@@ -384,7 +382,6 @@ final class File implements StreamInterface
      *
      * @throws Exception\CannotPerformOperationException
      * @throws Exception\WrongKeyOrModifiedCiphertextException
-     * @throws Exception\InvalidInput
      *
      * @return bool
      */
@@ -410,12 +407,12 @@ final class File implements StreamInterface
     {
         // Because we don't have strict typing in PHP 5
         if (! \is_resource($inputHandle)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Input handle must be a resource!'
             );
         }
         if (! \is_resource($outputHandle)) {
-            throw new Ex\InvalidInput(
+            throw new Ex\IOException(
                 'Output handle must be a resource!'
             );
         }
