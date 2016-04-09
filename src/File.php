@@ -4,7 +4,7 @@ namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 
-final class File implements StreamInterface
+final class File
 {
     // File ciphertext format: [____VERSION____][____SALT____][____IV____][____CIPHERTEXT____][____HMAC____].
 

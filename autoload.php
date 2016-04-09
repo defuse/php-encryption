@@ -48,8 +48,6 @@
             'Salt.php',
         'RuntimeTests' =>
             'RuntimeTests.php',
-        'StreamInterface' =>
-            'StreamInterface.php',
         // Exceptions:
         'Exception\\BadFormatException' =>
             'Exception/BadFormatException.php',
