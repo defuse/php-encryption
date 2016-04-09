@@ -17,7 +17,9 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
             '2ff94760e6d39c186adb1290d6c47e35' .
             '821e262673c5631c42ebbaf70774d6ef' .
             '29aa5eee0e412d646ae380e08189c85d' .
-            '024b5e2009106870f1db25d8b85fd01f'
+            '024b5e2009106870f1db25d8b85fd01f' .
+            /* Make it longer than the minimum length. */
+            '00000000000000000000000000000000'
         );
 
         /* Make it try to parse the binary as hex. */
@@ -42,7 +44,9 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
             '2ff94760e6d39c186adb1290d6c47e35' .
             '821e262673c5631c42ebbaf70774d6ef' .
             '29aa5eee0e412d646ae380e08189c85d' .
-            '024b5e2009106870f1db25d8b85fd01f'
+            '024b5e2009106870f1db25d8b85fd01f' .
+            /* Make it longer than the minimum length. */
+            '00000000000000000000000000000000'
         );
 
         /* This time, treat the binary as binary. */

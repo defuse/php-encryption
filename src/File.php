@@ -6,8 +6,6 @@ use Defuse\Crypto\Exception as Ex;
 
 final class File
 {
-    // File ciphertext format: [____VERSION____][____SALT____][____IV____][____CIPHERTEXT____][____HMAC____].
-
     /**
      * Encrypt the contents at $inputFilename, storing the result in
      * $outputFilename using HKDF of $key to perform authenticated encryption
@@ -267,7 +265,7 @@ final class File
         /**
          *  Generate a random initialization vector.
          */
-        $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
+        $ivsize = Core::BLOCK_BYTE_SIZE;
         $iv     = Core::secureRandom($ivsize);
 
         /**
@@ -454,7 +452,7 @@ final class File
          *
          * It should be the first N blocks of the file (N = 16)
          */
-        $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
+        $ivsize = Core::BLOCK_BYTE_SIZE;
         $iv     = self::readBytes($inputHandle, $ivsize);
 
         // How much do we increase the counter after each buffered encryption to prevent nonce reuse

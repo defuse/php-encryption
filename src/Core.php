@@ -34,6 +34,13 @@ final class Core
     const CHECKSUM_HASH_ALGO     = 'sha256';
     const SERIALIZE_HEADER_BYTES = 4;
 
+    /*
+     * V2.0 Format: VERSION (4 bytes) || SALT (32 bytes) || IV (16 bytes) ||
+     *              CIPHERTEXT (varies) || HMAC (32 bytes)
+     *
+     * V1.0 Format: HMAC (32 bytes) || IV (16 bytes) || CIPHERTEXT (varies).
+     */
+
     /**
      * Increment a counter (prevent nonce reuse)
      *
@@ -47,12 +54,7 @@ final class Core
      */
     public static function incrementCounter($ctr, $inc, $cipherMethod)
     {
-        static $ivsize = null;
-        if ($ivsize === null) {
-            $ivsize = Core::cipherIvLength($cipherMethod);
-        }
-
-        if (Core::ourStrlen($ctr) !== $ivsize) {
+        if (Core::ourStrlen($ctr) !== Core::BLOCK_BYTE_SIZE) {
             throw new Ex\EnvironmentIsBrokenException(
               'Trying to increment a nonce of the wrong size.'
             );
@@ -74,7 +76,7 @@ final class Core
          * We start at the rightmost byte (big-endian)
          * So, too, does OpenSSL: http://stackoverflow.com/a/3146214/2224584
          */
-        for ($i = $ivsize - 1; $i >= 0; --$i) {
+        for ($i = Core::BLOCK_BYTE_SIZE - 1; $i >= 0; --$i) {
             $sum = \ord($ctr[$i]) + $inc;
 
             /* Detect integer overflow and fail. */
@@ -88,29 +90,6 @@ final class Core
             $inc     = $sum >> 8;
         }
         return $ctr;
-    }
-
-    /**
-     * Returns the cipher initialization vector (iv) length.
-     *
-     * @param string $method
-     *
-     * @throws Ex\EnvironmentIsBrokenException
-     *
-     * @return int
-     */
-    public static function cipherIvLength($method)
-    {
-        Core::ensureFunctionExists('openssl_cipher_iv_length');
-        $ivsize = \openssl_cipher_iv_length($method);
-
-        if ($ivsize === false || $ivsize <= 0) {
-            throw new Ex\EnvironmentIsBrokenException(
-                'Could not get the IV length from OpenSSL'
-            );
-        }
-
-        return $ivsize;
     }
 
     /**
