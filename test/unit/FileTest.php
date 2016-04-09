@@ -287,6 +287,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage No such file or directory
      */
     public function testBadSourcePathEncrypt()
     {
@@ -295,6 +296,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage No such file or directory
      */
     public function testBadSourcePathDecrypt()
     {
@@ -303,6 +305,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage No such file or directory
      */
     public function testBadSourcePathEncryptWithPassword()
     {
@@ -311,6 +314,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage No such file or directory
      */
     public function testBadSourcePathDecryptWithPassword()
     {
@@ -319,6 +323,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage Is a directory
      */
     public function testBadDestinationPathEncrypt()
     {
@@ -328,6 +333,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage Is a directory
      */
     public function testBadDestinationPathDecrypt()
     {
@@ -337,6 +343,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage Is a directory
      */
     public function testBadDestinationPathEncryptWithPassword()
     {
@@ -346,6 +353,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage Is a directory
      */
     public function testBadDestinationPathDecryptWithPassword()
     {

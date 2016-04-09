@@ -61,8 +61,9 @@ final class File implements StreamInterface
             $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
-                    'Cannot open input file for encrypting'
-                );
+                'Cannot open input file for encrypting: ' .
+                self::getLastErrorMessage()
+            );
         }
         \stream_set_read_buffer($if, 0);
 
@@ -73,8 +74,9 @@ final class File implements StreamInterface
         if ($of === false) {
             \fclose($if);
             throw new Ex\IOException(
-                    'Cannot open output file for encrypting'
-                );
+                'Cannot open output file for encrypting: ' .
+                self::getLastErrorMessage()
+            );
         }
         \stream_set_write_buffer($of, 0);
 
@@ -158,8 +160,9 @@ final class File implements StreamInterface
             $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
-                    'Cannot open input file for decrypting'
-                );
+                'Cannot open input file for decrypting: ' .
+                self::getLastErrorMessage()
+            );
         }
         \stream_set_read_buffer($if, 0);
 
@@ -170,8 +173,9 @@ final class File implements StreamInterface
         if ($of === false) {
             \fclose($if);
             throw new Ex\IOException(
-                    'Cannot open output file for decrypting'
-                );
+                'Cannot open output file for decrypting: ' .
+                self::getLastErrorMessage()
+            );
         }
         \stream_set_write_buffer($of, 0);
 
@@ -550,11 +554,7 @@ final class File implements StreamInterface
                     Core::BUFFER_BYTE_SIZE
                 );
             }
-            if ($read === false) {
-                throw new Ex\IOException(
-                    'Could not read input file during decryption'
-                );
-            }
+
             /**
              * We're updating our HMAC and nothing else
              */
@@ -769,5 +769,15 @@ final class File implements StreamInterface
             $remaining -= $written;
         }
         return $num;
+    }
+
+    private static function getLastErrorMessage()
+    {
+        $error = error_get_last();
+        if ($error === NULL) {
+            return "[no PHP error]";
+        } else {
+            return $error['message'];
+        }
     }
 }
