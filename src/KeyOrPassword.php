@@ -54,7 +54,6 @@ final class KeyOrPassword
                 Core::KEY_BYTE_SIZE,
                 true
             );
-            // TODO: Is reusing the same $salt between PBKDF2 and HKDF acceptable?
             $akey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $prekey,

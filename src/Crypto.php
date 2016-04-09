@@ -17,7 +17,7 @@ class Crypto
      * You MUST catch exceptions thrown by this function. Read the docs.
      *
      * @param string $plaintext
-     * @param string $key // TODO: this is wrong
+     * @param Key    $key
      * @param bool   $raw_binary
      *
      * @throws Ex\EnvironmentIsBrokenException

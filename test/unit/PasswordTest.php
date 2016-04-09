@@ -24,5 +24,4 @@ class PasswordTest extends PHPUnit_Framework_TestCase
         $key1 = $pkey->unlockKey('wrongpassword');
     }
 
-    // TODO more tests (of the checksummed encoding, etc.)
 }
