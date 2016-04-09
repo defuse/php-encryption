@@ -21,7 +21,6 @@ class Crypto
      * @param bool   $raw_binary
      *
      * @throws Ex\CannotPerformOperationException
-     * @throws Ex\CryptoTestFailedException
      *
      * @return string
      */
@@ -78,7 +77,6 @@ class Crypto
      * @param bool   $raw_binary
      *
      * @throws Ex\CannotPerformOperationException
-     * @throws Ex\CryptoTestFailedException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
      * @return string
@@ -203,7 +201,6 @@ class Crypto
      * @param string $key
      *
      * @throws Ex\CannotPerformOperationException
-     * @throws Ex\CryptoTestFailedException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
      * @return string

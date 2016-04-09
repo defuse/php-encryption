@@ -33,18 +33,18 @@ class CryptoTest extends PHPUnit_Framework_TestCase
             $decrypted = Crypto::decryptWithPassword($ciphertext, $password, true);
         } catch (Ex\WrongKeyOrModifiedCiphertextException $ex) {
             // It's important to catch this and change it into a
-            // Ex\CryptoTestFailedException, otherwise a test failure could trick
+            // Ex\CannotPerformOperationException, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\CannotPerformOperationException();
         }
         if ($decrypted !== $data) {
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\CannotPerformOperationException();
         }
 
         // Modifying the ciphertext: Appending a string.
         try {
             Crypto::decryptWithPassword($ciphertext . 'a', $password, true);
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\CannotPerformOperationException();
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
@@ -60,7 +60,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
             try {
                 $ciphertext[$index] = \chr((\ord($ciphertext[$index]) + 1) % 256);
                 Crypto::decryptWithPassword($ciphertext, $password, true);
-                throw new Ex\CryptoTestFailedException();
+                throw new Ex\CannotPerformOperationException();
             } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
             }
         }
@@ -72,7 +72,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         $wrong_password = "wrong_password";
         try {
             Crypto::decryptWithPassword($ciphertext, $wrong_password, true);
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\CannotPerformOperationException();
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
@@ -81,7 +81,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         $ciphertext = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
         try {
             Crypto::decryptWithPassword($ciphertext, $password, true);
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\CannotPerformOperationException();
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
     }
