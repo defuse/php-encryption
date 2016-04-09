@@ -75,11 +75,6 @@ final class KeyOrPassword
         }
     }
 
-    public static function deriveKeysFromPassword($password)
-    {
-        $salt = Core::secureRandom(Core::SALT_BYTE_SIZE);
-    }
-
     private function __construct($secret_type, $secret)
     {
         $this->secret_type = $secret_type;

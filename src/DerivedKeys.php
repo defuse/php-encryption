@@ -9,11 +9,6 @@ final class DerivedKeys
     private $akey = null;
     private $ekey = null;
 
-    public function getSalt()
-    {
-        return $this->salt;
-    }
-
     public function getAuthenticationKey()
     {
         return $this->akey;
