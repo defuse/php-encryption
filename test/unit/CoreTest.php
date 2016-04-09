@@ -1,18 +1,19 @@
 <?php
+
 use \Defuse\Crypto\Core;
 
 class CoreTest extends PHPUnit_Framework_TestCase
 {
-    // The specific bug the following two tests check for did not fail when 
-    // mbstring.func_overload=0 so it is crucial to run these tests with 
+    // The specific bug the following two tests check for did not fail when
+    // mbstring.func_overload=0 so it is crucial to run these tests with
     // mbstring.func_overload=7 as well.
 
     public function testOurSubstrTrailingEmptyStringBugWeird()
     {
-        $str = hex2bin("4d8ab774261977e13049c42b4996f2c4");
+        $str = hex2bin('4d8ab774261977e13049c42b4996f2c4');
         $this->assertSame(16, Core::ourStrlen($str));
 
-        if (ini_get("mbstring.func_overload") == 7) {
+        if (ini_get('mbstring.func_overload') == 7) {
             // This checks that the above hex string is indeed "weird."
             // Edit: Er... at least, on PHP 5.6.0 and above it's weird.
             //  I DON'T KNOW WHY THE LENGTH OF A STRING DEPENDS ON THE VERSION
@@ -30,21 +31,21 @@ class CoreTest extends PHPUnit_Framework_TestCase
             if (version_compare(phpversion(), '7.0.0', '>=')) {
                 $this->assertSame(
                     '',
-                    substr("ABC", 3, 0)
+                    substr('ABC', 3, 0)
                 );
                 $this->assertSame(
                     '',
-                    substr("ABC", 3)
+                    substr('ABC', 3)
                 );
             } else {
                 // The behavior was changed for PHP 7. It used to be...
                 $this->assertSame(
                     false,
-                    substr("ABC", 3, 0)
+                    substr('ABC', 3, 0)
                 );
                 $this->assertSame(
                     false,
-                    substr("ABC", 3)
+                    substr('ABC', 3)
                 );
             }
             // Seriously, fuck this shit. Don't use PHP. ╯‵Д′)╯彡┻━┻
@@ -55,14 +56,13 @@ class CoreTest extends PHPUnit_Framework_TestCase
             '',
             Core::ourSubstr($str, 16)
         );
-
     }
 
     public function testOurSubstrTrailingEmptyStringBugNormal()
     {
         // Same as above but with a non-weird string.
-        $str = "AAAAAAAAAAAAAAAA";
-        if (ini_get("mbstring.func_overload") == 7) {
+        $str = 'AAAAAAAAAAAAAAAA';
+        if (ini_get('mbstring.func_overload') == 7) {
             $this->assertSame(16, strlen($str));
         } else {
             $this->assertSame(16, strlen($str));
@@ -86,7 +86,7 @@ class CoreTest extends PHPUnit_Framework_TestCase
 
         // Confirm that mb_substr does not have that behavior.
         if (function_exists('mb_substr')) {
-            if (ini_get("mbstring.func_overload") == 0) {
+            if (ini_get('mbstring.func_overload') == 0) {
                 $this->assertSame(
                     '',
                     \mb_substr('abc', 5, 2)
@@ -105,6 +105,5 @@ class CoreTest extends PHPUnit_Framework_TestCase
             false,
             Core::ourSubstr('abc', 5, 2)
         );
-
     }
 }

@@ -1,24 +1,12 @@
 <?php
+
 namespace Defuse\Crypto;
 
-use \Defuse\Crypto\Exception as Ex;
-
-use \Defuse\Crypto\Core;
-use \Defuse\Crypto\FileConfig;
+use Defuse\Crypto\Exception as Ex;
 
 final class File implements StreamInterface
 {
     // File ciphertext format: [____VERSION____][____SALT____][____IV____][____CIPHERTEXT____][____HMAC____].
-
-    /**
-     * Use this to generate a random encryption key.
-     *
-     * @return Key
-     */
-    public static function createNewRandomKey()
-    {
-        return Key::CreateNewRandomKey();
-    }
 
     /**
      * Encrypt the contents at $inputFilename, storing the result in
@@ -26,52 +14,75 @@ final class File implements StreamInterface
      *
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param Key $key
-     * @return boolean
+     * @param Key    $key
+     *
+     * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\CryptoException
+     * @throws \Defuse\Crypto\Exception\InvalidInput
+     *
+     * @return bool
      */
     public static function encryptFile($inputFilename, $outputFilename, Key $key)
     {
-        if (!\is_string($inputFilename)) {
+        return self::encryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function encryptFileWithPassword($inputFilename, $outputFilename, $password)
+    {
+        return self::encryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
+    private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
+    {
+        if (! \is_string($inputFilename)) {
             throw new Ex\InvalidInput(
                 'Input filename must be a string!'
             );
         }
-        if (!\is_string($outputFilename)) {
+        if (! \is_string($outputFilename)) {
             throw new Ex\InvalidInput(
                 'Output filename must be a string!'
             );
         }
 
-        /** Open the file handles **/
+            /** Open the file handles **/
 
             /**
              * Input file handle
              */
-            $if = \fopen($inputFilename, 'rb');
-            if ($if === false) {
-                throw new Ex\CannotPerformOperationException(
+            $if = @\fopen($inputFilename, 'rb');
+        if ($if === false) {
+            throw new Ex\IOException(
                     'Cannot open input file for encrypting'
                 );
-            }
-            \stream_set_read_buffer($if, 0);
+        }
+        \stream_set_read_buffer($if, 0);
 
             /**
              * Output file handle
              */
-            $of = \fopen($outputFilename, 'wb');
-            if ($of === false) {
-                \fclose($if);
-                throw new Ex\CannotPerformOperationException(
+            $of = @\fopen($outputFilename, 'wb');
+        if ($of === false) {
+            \fclose($if);
+            throw new Ex\IOException(
                     'Cannot open output file for encrypting'
                 );
-            }
-            \stream_set_write_buffer($of, 0);
+        }
+        \stream_set_write_buffer($of, 0);
 
         /**
          * Use encryptResource() to actually write the encrypted data to $of
          */
         try {
-            $encrypted = self::encryptResource($if, $of, $key);
+            $encrypted = self::encryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
             \fclose($if);
             \fclose($of);
@@ -82,12 +93,12 @@ final class File implements StreamInterface
          * Close handles
          */
         if (\fclose($if) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for encrypting'
             );
         }
         if (\fclose($of) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for encrypting'
             );
         }
@@ -104,52 +115,71 @@ final class File implements StreamInterface
      *
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param Key $key
-     * @return boolean
+     * @param Key    $key
+     *
+     * @return bool
      */
     public static function decryptFile($inputFilename, $outputFilename, Key $key)
     {
-        if (!\is_string($inputFilename)) {
+        return self::decryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function decryptFileWithPassword($inputFilename, $outputFilename, $password)
+    {
+        return self::decryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
+    private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
+    {
+        if (! \is_string($inputFilename)) {
             throw new Ex\InvalidInput(
                 'Input filename must be a string!'
             );
         }
-        if (!\is_string($outputFilename)) {
+        if (! \is_string($outputFilename)) {
             throw new Ex\InvalidInput(
                 'Output filename must be a string!'
             );
         }
 
-        /** Open the file handles **/
+            /** Open the file handles **/
 
             /**
              * Input file handle
              */
-            $if = \fopen($inputFilename, 'rb');
-            if ($if === false) {
-                throw new Ex\CannotPerformOperationException(
+            $if = @\fopen($inputFilename, 'rb');
+        if ($if === false) {
+            throw new Ex\IOException(
                     'Cannot open input file for decrypting'
                 );
-            }
-            \stream_set_read_buffer($if, 0);
+        }
+        \stream_set_read_buffer($if, 0);
 
             /**
              * Output file handle
              */
-            $of = \fopen($outputFilename, 'wb');
-            if ($of === false) {
-                \fclose($if);
-                throw new Ex\CannotPerformOperationException(
+            $of = @\fopen($outputFilename, 'wb');
+        if ($of === false) {
+            \fclose($if);
+            throw new Ex\IOException(
                     'Cannot open output file for decrypting'
                 );
-            }
-            \stream_set_write_buffer($of, 0);
+        }
+        \stream_set_write_buffer($of, 0);
 
         /**
          * Use decryptResource() to actually write the decrypted data to $of
          */
         try {
-            $decrypted = self::decryptResource($if, $of, $key);
+            $decrypted = self::decryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
             \fclose($if);
             \fclose($of);
@@ -160,12 +190,12 @@ final class File implements StreamInterface
          * Close handles
          */
         if (\fclose($if) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for decrypting'
             );
         }
         if (\fclose($of) === false) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Cannot close input file for decrypting'
             );
         }
@@ -182,85 +212,76 @@ final class File implements StreamInterface
      *
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param Key $key
-     * @return boolean
+     * @param Key      $key
      *
      * @throws Exception\CannotPerformOperationException
-     * @throws Exception\InvalidCiphertextException
+     * @throws Exception\WrongKeyOrModifiedCiphertextException
      * @throws Exception\InvalidInput
+     *
+     * @return bool
      */
     public static function encryptResource($inputHandle, $outputHandle, Key $key)
     {
+        return self::encryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function encryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    {
+        return self::encryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
+    private static function encryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
+    {
         // Because we don't have strict typing in PHP 5
-        if (!\is_resource($inputHandle)) {
+        if (! \is_resource($inputHandle)) {
             throw new Ex\InvalidInput(
                 'Input handle must be a resource!'
             );
         }
-        if (!\is_resource($outputHandle)) {
+        if (! \is_resource($outputHandle)) {
             throw new Ex\InvalidInput(
                 'Output handle must be a resource!'
             );
         }
-        $config = self::getFileVersionConfigFromHeader(
-            Core::CURRENT_FILE_VERSION,
-            Core::CURRENT_FILE_VERSION
-        );
         $inputStat = \fstat($inputHandle);
         $inputSize = $inputStat['size'];
-
-        // Let's add this check before anything
-        if (!\in_array($config->hashFunctionName(), \hash_algos())) {
-            throw new Ex\CannotPerformOperationException(
-                'The specified hash function does not exist'
-            );
-        }
 
         /**
          *  Let's split our keys
          */
-        $file_salt = Core::secureRandom($config->saltByteSize());
-
-        // $ekey -- Encryption Key -- used for AES
-        $ekey = Core::HKDF(
-            $config->hashFunctionName(),
-            $key->getRawBytes(),
-            $config->keyByteSize(),
-            $config->encryptionInfoString(),
-            $file_salt,
-            $config
-        );
-
-        // $akey -- Authentication Key -- used for HMAC
-        $akey = Core::HKDF(
-            $config->hashFunctionName(),
-            $key->getRawBytes(),
-            $config->keyByteSize(),
-            $config->authenticationInfoString(),
-            $file_salt,
-            $config
-        );
+        $file_salt = Core::secureRandom(Core::SALT_BYTE_SIZE);
+        $keys = $secret->deriveKeys($file_salt);
+        $ekey = $keys->getEncryptionKey();
+        $akey = $keys->getAuthenticationKey();
 
         /**
          *  Generate a random initialization vector.
          */
-        $ivsize = Core::cipherIvLength($config->cipherMethod());
-        $iv = Core::secureRandom($ivsize);
+        $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
+        $iv     = Core::secureRandom($ivsize);
 
         /**
          * First let's write our header, file salt, and IV to the first N blocks of the output file
          */
         self::writeBytes(
             $outputHandle,
-            Core::CURRENT_FILE_VERSION . $file_salt . $iv, 
-            Core::HEADER_VERSION_SIZE + $config->saltByteSize() + $ivsize
+            Core::CURRENT_VERSION . $file_salt . $iv,
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + $ivsize
         );
 
         /**
          * We're going to initialize a HMAC-SHA256 with the given $akey
          * and update it with each ciphertext chunk
          */
-        $hmac = \hash_init($config->hashFunctionName(), HASH_HMAC, $akey);
+        $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
         if ($hmac === false) {
             throw new Ex\CannotPerformOperationException(
                 'Cannot initialize a hash context'
@@ -277,12 +298,12 @@ final class File implements StreamInterface
          * How much do we increase the counter after each buffered encryption to
          * prevent nonce reuse?
          */
-        $inc = $config->bufferByteSize() / $config->blockByteSize();
+        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
 
         /**
          * Let's MAC our salt and IV/nonce
          */
-        \hash_update($hmac, Core::CURRENT_FILE_VERSION);
+        \hash_update($hmac, Core::CURRENT_VERSION);
         \hash_update($hmac, $file_salt);
         \hash_update($hmac, $iv);
 
@@ -290,9 +311,9 @@ final class File implements StreamInterface
          * Iterate until we reach the end of the input file
          */
         $breakR = false;
-        while (!\feof($inputHandle)) {
+        while (! \feof($inputHandle)) {
             $pos = \ftell($inputHandle);
-            if ($pos + $config->bufferByteSize() >= $inputSize) {
+            if ($pos + Core::BUFFER_BYTE_SIZE >= $inputSize) {
                 $breakR = true;
                 // We need to break after this loop iteration
                 $read = self::readBytes(
@@ -302,21 +323,23 @@ final class File implements StreamInterface
             } else {
                 $read = self::readBytes(
                     $inputHandle,
-                    $config->bufferByteSize()
+                    Core::BUFFER_BYTE_SIZE
                 );
             }
-            $thisIv = Core::incrementCounter($thisIv, $inc, $config);
 
             /**
              * Perform the AES encryption. Encrypts the plaintext.
              */
             $encrypted = \openssl_encrypt(
                 $read,
-                $config->cipherMethod(),
+                Core::CIPHER_METHOD,
                 $ekey,
                 OPENSSL_RAW_DATA,
                 $thisIv
             );
+
+            $thisIv = Core::incrementCounter($thisIv, $inc, Core::CIPHER_METHOD);
+
             /**
              * Check that the encryption was performed successfully
              */
@@ -343,7 +366,7 @@ final class File implements StreamInterface
         // Now let's get our HMAC and append it
         $finalHMAC = \hash_final($hmac, true);
 
-        self::writeBytes($outputHandle, $finalHMAC, $config->macByteSize());
+        self::writeBytes($outputHandle, $finalHMAC, CORE::MAC_BYTE_SIZE);
         return true;
     }
 
@@ -353,400 +376,329 @@ final class File implements StreamInterface
      *
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param Key $key
-     * @return boolean
+     * @param Key      $key
      *
      * @throws Exception\CannotPerformOperationException
-     * @throws Exception\InvalidCiphertextException
+     * @throws Exception\WrongKeyOrModifiedCiphertextException
      * @throws Exception\InvalidInput
+     *
+     * @return bool
      */
     public static function decryptResource($inputHandle, $outputHandle, Key $key)
     {
+        return self::decryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    public static function decryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    {
+        return self::decryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
+    public static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
+    {
         // Because we don't have strict typing in PHP 5
-        if (!\is_resource($inputHandle)) {
+        if (! \is_resource($inputHandle)) {
             throw new Ex\InvalidInput(
                 'Input handle must be a resource!'
             );
         }
-        if (!\is_resource($outputHandle)) {
+        if (! \is_resource($outputHandle)) {
             throw new Ex\InvalidInput(
                 'Output handle must be a resource!'
             );
         }
         $stat = \fstat($inputHandle);
-        if ($stat['size'] < Core::MINIMUM_FILE_SIZE) {
-            throw new Ex\InvalidCiphertextException(
+        if ($stat['size'] < Core::MINIMUM_CIPHERTEXT_SIZE) {
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Input file is too small to have been created by this library.'
             );
         }
 
         // Parse the header.
         $header = self::readBytes($inputHandle, Core::HEADER_VERSION_SIZE);
-        $config = self::getFileVersionConfigFromHeader(
-            $header,
-            Core::CURRENT_FILE_VERSION
-        );
-
-        // Let's add this check before anything
-        if (!\in_array($config->hashFunctionName(), \hash_algos())) {
-            throw new Ex\CannotPerformOperationException(
-                'The specified hash function does not exist'
+        if ($header !== Core::CURRENT_VERSION) {
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
+                'Bad version header.'
             );
         }
-        
+
         // Let's grab the file salt.
-        $file_salt = self::readBytes($inputHandle, $config->saltByteSize());
-            
+        $file_salt = self::readBytes($inputHandle, Core::SALT_BYTE_SIZE);
+
         // For storing MACs of each buffer chunk
         $macs = [];
 
         /**
          * 1. We need to decode some values from our files
          */
-            /**
-             * Let's split our keys
-             *
-             * $ekey -- Encryption Key -- used for AES
-             */
-            $ekey = Core::HKDF(
-                $config->hashFunctionName(),
-                $key->getRawBytes(),
-                $config->keyByteSize(),
-                $config->encryptionInfoString(),
-                $file_salt,
-                $config
+        /**
+         * Let's split our keys
+         *
+         * $ekey -- Encryption Key -- used for AES
+         */
+        $keys = $secret->deriveKeys($file_salt);
+        $ekey = $keys->getEncryptionKey();
+        $akey = $keys->getAuthenticationKey();
+
+        /**
+         * Grab our IV from the encrypted message
+         *
+         * It should be the first N blocks of the file (N = 16)
+         */
+        $ivsize = Core::cipherIvLength(Core::CIPHER_METHOD);
+        $iv     = self::readBytes($inputHandle, $ivsize);
+
+        // How much do we increase the counter after each buffered encryption to prevent nonce reuse
+        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
+
+        $thisIv = $iv;
+
+        /**
+         * Let's grab our MAC
+         *
+         * It should be the last N blocks of the file (N = 32)
+         */
+        if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === false) {
+            throw new Ex\IOException(
+                'Cannot seek to beginning of MAC within input file'
             );
+        }
 
-            /**
-             * $akey -- Authentication Key -- used for HMAC
-             */
-            $akey = Core::HKDF(
-                $config->hashFunctionName(),
-                $key->getRawBytes(),
-                $config->keyByteSize(),
-                $config->authenticationInfoString(),
-                $file_salt,
-                $config
+        // Grab our last position of ciphertext before we read the MAC
+        $cipher_end = \ftell($inputHandle);
+        if ($cipher_end === false) {
+            throw new Ex\IOException(
+                'Cannot read input file'
             );
+        }
+        --$cipher_end; // We need to subtract one
 
-            /**
-             * Grab our IV from the encrypted message
-             *
-             * It should be the first N blocks of the file (N = 16)
-             */
-            $ivsize = Core::cipherIvLength($config->cipherMethod());
-            $iv = self::readBytes($inputHandle, $ivsize);
+        // We keep our MAC stored in this variable
+        $stored_mac = self::readBytes($inputHandle, Core::MAC_BYTE_SIZE);
 
-            // How much do we increase the counter after each buffered encryption to prevent nonce reuse
-            $inc = $config->bufferByteSize() / $config->blockByteSize();
+        /**
+         * We begin recalculating the HMAC for the entire file...
+         */
+        $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
+        if ($hmac === false) {
+            throw new Ex\CannotPerformOperationException(
+                'Cannot initialize a hash context'
+            );
+        }
 
-            $thisIv = $iv;
+        /**
+         * Reset file pointer to the beginning of the file after the header
+         */
+        if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+            throw new Ex\IOException(
+                'Cannot read seek within input file'
+            );
+        }
 
-            /**
-             * Let's grab our MAC
-             *
-             * It should be the last N blocks of the file (N = 32)
-             */
-            if (\fseek($inputHandle, (-1 * $config->macByteSize()), SEEK_END) === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot seek to beginning of MAC within input file'
-                );
-            }
-
-            // Grab our last position of ciphertext before we read the MAC
-            $cipher_end = \ftell($inputHandle);
-            if ($cipher_end === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot read input file'
-                );
-            }
-            --$cipher_end; // We need to subtract one
-
-            // We keep our MAC stored in this variable
-            $stored_mac = self::readBytes($inputHandle, $config->macByteSize());
-
-            /**
-             * We begin recalculating the HMAC for the entire file...
-             */
-            $hmac = \hash_init($config->hashFunctionName(), HASH_HMAC, $akey);
-            if ($hmac === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot initialize a hash context'
-                );
-            }
-
-            /**
-             * Reset file pointer to the beginning of the file after the header
-             */
-            if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot read seek within input file'
-                );
-            }
-
-            /**
-             * Set it to the first non-salt and non-IV byte
-             */
-            if (\fseek($inputHandle, $config->saltByteSize() + $ivsize, SEEK_CUR) === false) {
-                throw new Ex\CannotPerformOperationException(
-                    'Cannot read seek input file to beginning of ciphertext'
-                );
-            }
+        /**
+         * Set it to the first non-salt and non-IV byte
+         */
+        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize, SEEK_CUR) === false) {
+            throw new Ex\IOException(
+                'Cannot seek input file to beginning of ciphertext'
+            );
+        }
         /**
          * 2. Let's recalculate the MAC
          */
+        /**
+         * Let's initialize our $hmac hasher with our Salt and IV
+         */
+        \hash_update($hmac, $header);
+        \hash_update($hmac, $file_salt);
+        \hash_update($hmac, $iv);
+        $hmac2 = \hash_copy($hmac);
+
+        $break = false;
+        while (! $break) {
             /**
-             * Let's initialize our $hmac hasher with our Salt and IV
+             * First, grab the current position
              */
-            \hash_update($hmac, $header);
-            \hash_update($hmac, $file_salt);
-            \hash_update($hmac, $iv);
-            $hmac2 = \hash_copy($hmac);
+            $pos = \ftell($inputHandle);
+            if ($pos === false) {
+                throw new Ex\IOException(
+                    'Could not get current position in input file during decryption'
+                );
+            }
 
-            $break = false;
-            while (!$break) {
-                /**
-                 * First, grab the current position
-                 */
-                $pos = \ftell($inputHandle);
-                if ($pos === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'Could not get current position in input file during decryption'
-                    );
-                }
-
-                /**
-                 * Would a full DBUFFER read put it past the end of the
-                 * ciphertext? If so, only return a portion of the file.
-                 */
-                if ($pos + $config->bufferByteSize() >= $cipher_end) {
-                    $break = true;
-                    $read = self::readBytes(
-                        $inputHandle,
-                        $cipher_end - $pos + 1
-                    );
-                } else {
-                    $read = self::readBytes(
-                        $inputHandle,
-                        $config->bufferByteSize()
-                    );
-                }
-                if ($read === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'Could not read input file during decryption'
-                    );
-                }
-                /**
-                 * We're updating our HMAC and nothing else
-                 */
-                \hash_update($hmac, $read);
-
-                /**
-                 * Store a MAC of each chunk
-                 */
-                $chunkMAC = \hash_copy($hmac);
-                if ($chunkMAC === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'Cannot duplicate a hash context'
-                    );
-                }
-                $macs []= \hash_final($chunkMAC);
+            /**
+             * Would a full DBUFFER read put it past the end of the
+             * ciphertext? If so, only return a portion of the file.
+             */
+            if ($pos + Core::BUFFER_BYTE_SIZE >= $cipher_end) {
+                $break = true;
+                $read  = self::readBytes(
+                    $inputHandle,
+                    $cipher_end - $pos + 1
+                );
+            } else {
+                $read = self::readBytes(
+                    $inputHandle,
+                    Core::BUFFER_BYTE_SIZE
+                );
+            }
+            if ($read === false) {
+                throw new Ex\IOException(
+                    'Could not read input file during decryption'
+                );
             }
             /**
-             * We should now have enough data to generate an identical HMAC
+             * We're updating our HMAC and nothing else
              */
-            $finalHMAC = \hash_final($hmac, true);
+            \hash_update($hmac, $read);
+
+            /**
+             * Store a MAC of each chunk
+             */
+            $chunkMAC = \hash_copy($hmac);
+            if ($chunkMAC === false) {
+                throw new Ex\CannotPerformOperationException(
+                    'Cannot duplicate a hash context'
+                );
+            }
+            $macs []= \hash_final($chunkMAC);
+        }
+        /**
+         * We should now have enough data to generate an identical HMAC
+         */
+        $finalHMAC = \hash_final($hmac, true);
         /**
          * 3. Did we match?
          */
-            if (!Core::hashEquals($finalHMAC, $stored_mac)) {
-                throw new Ex\InvalidCiphertextException(
-                    'Message Authentication failure; tampering detected.'
-                );
-            }
+        if (! Core::hashEquals($finalHMAC, $stored_mac)) {
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
+                'Message Authentication failure; tampering detected.'
+            );
+        }
         /**
          * 4. Okay, let's begin decrypting
          */
+        /**
+         * Return file pointer to the first non-header, non-IV byte in the file
+         */
+        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+            throw new Ex\IOException(
+                'Could not move the input file pointer during decryption'
+            );
+        }
+
+        /**
+         * Should we break the writing?
+         */
+        $breakW = false;
+
+        /**
+         * This loop writes plaintext to the destination file:
+         */
+        while (! $breakW) {
             /**
-             * Return file pointer to the first non-header, non-IV byte in the file
+             * Get the current position
              */
-            if (\fseek($inputHandle, $config->saltByteSize() + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+            $pos = \ftell($inputHandle);
+            if ($pos === false) {
+                throw new Ex\IOException(
+                    'Could not get current position in input file during decryption'
+                );
+            }
+
+            /**
+             * Would a full BUFFER read put it past the end of the
+             * ciphertext? If so, only return a portion of the file.
+             */
+            if ($pos + Core::BUFFER_BYTE_SIZE >= $cipher_end) {
+                $breakW = true;
+                $read   = self::readBytes(
+                    $inputHandle,
+                    $cipher_end - $pos + 1
+                );
+            } else {
+                $read = self::readBytes(
+                    $inputHandle,
+                    Core::BUFFER_BYTE_SIZE
+                );
+            }
+
+            /**
+             * Recalculate the MAC, compare with the one stored in the $macs
+             * array to ensure attackers couldn't tamper with the file
+             * after MAC verification
+             */
+            \hash_update($hmac2, $read);
+            $calcMAC = \hash_copy($hmac2);
+            if ($calcMAC === false) {
                 throw new Ex\CannotPerformOperationException(
-                    'Could not move the input file pointer during decryption'
+                    'Cannot duplicate a hash context'
+                );
+            }
+            $calc = \hash_final($calcMAC);
+
+            if (empty($macs)) {
+                throw new Ex\WrongKeyOrModifiedCiphertextException(
+                    'File was modified after MAC verification'
+                );
+            } elseif (! Core::hashEquals(\array_shift($macs), $calc)) {
+                throw new Ex\WrongKeyOrModifiedCiphertextException(
+                    'File was modified after MAC verification'
                 );
             }
 
             /**
-             * Should we break the writing?
+             * Perform the AES decryption. Decrypts the message.
              */
-            $breakW = false;
+            $decrypted = \openssl_decrypt(
+                $read,
+                Core::CIPHER_METHOD,
+                $ekey,
+                OPENSSL_RAW_DATA,
+                $thisIv
+            );
+
+            $thisIv = Core::incrementCounter($thisIv, $inc, Core::CIPHER_METHOD);
 
             /**
-             * This loop writes plaintext to the destination file:
+             * Test for decryption faulure
              */
-            while (!$breakW) {
-                /**
-                 * Get the current position
-                 */
-                $pos = \ftell($inputHandle);
-                if ($pos === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'Could not get current position in input file during decryption'
-                    );
-                }
-
-                /**
-                 * Would a full BUFFER read put it past the end of the
-                 * ciphertext? If so, only return a portion of the file.
-                 */
-                if ($pos + $config->bufferByteSize() >= $cipher_end) {
-                    $breakW = true;
-                    $read = self::readBytes(
-                        $inputHandle,
-                        $cipher_end - $pos + 1
-                    );
-                } else {
-                    $read = self::readBytes(
-                        $inputHandle,
-                        $config->bufferByteSize()
-                    );
-                }
-
-                /**
-                 * Recalculate the MAC, compare with the one stored in the $macs
-                 * array to ensure attackers couldn't tamper with the file
-                 * after MAC verification
-                 */
-                \hash_update($hmac2, $read);
-                $calcMAC = \hash_copy($hmac2);
-                if ($calcMAC === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'Cannot duplicate a hash context'
-                    );
-                }
-                $calc = \hash_final($calcMAC);
-
-                if (empty($macs)) {
-                    throw new Ex\InvalidCiphertextException(
-                        'File was modified after MAC verification'
-                    );
-                } elseif (!Core::hashEquals(\array_shift($macs), $calc)) {
-                    throw new Ex\InvalidCiphertextException(
-                        'File was modified after MAC verification'
-                    );
-                }
-
-                $thisIv = Core::incrementCounter($thisIv, $inc, $config);
-
-                /**
-                 * Perform the AES decryption. Decrypts the message.
-                 */
-                $decrypted = \openssl_decrypt(
-                    $read,
-                    $config->cipherMethod(),
-                    $ekey,
-                    OPENSSL_RAW_DATA,
-                    $thisIv
-                );
-
-                /**
-                 * Test for decryption faulure
-                 */
-                if ($decrypted === false) {
-                    throw new Ex\CannotPerformOperationException(
-                        'OpenSSL decryption error'
-                    );
-                }
-
-                /**
-                 * Write the plaintext out to the output file
-                 */
-                self::writeBytes(
-                    $outputHandle,
-                    $decrypted,
-                    Core::ourStrlen($decrypted)
+            if ($decrypted === false) {
+                throw new Ex\CannotPerformOperationException(
+                    'OpenSSL decryption error'
                 );
             }
+
+            /**
+             * Write the plaintext out to the output file
+             */
+            self::writeBytes(
+                $outputHandle,
+                $decrypted,
+                Core::ourStrlen($decrypted)
+            );
+        }
         return true;
-    }
-
-    /**
-     * Get the encryption configuration based on the version in a header.
-     *
-     * @param string $header The header to read the version number from.
-     * @param string $min_ver_header The header of the minimum version number allowed.
-     * @return array
-     * @throws Ex\InvalidCiphertextException
-     */
-    private static function getFileVersionConfigFromHeader($header, $min_ver_header)
-    {
-        if (Core::ourSubstr($header, 0, 2) !== Core::ourSubstr(Core::HEADER_MAGIC_FILE, 0, 2)) {
-            throw new Ex\InvalidCiphertextException(
-                "Ciphertext file has a bad magic number."
-            );
-        }
-
-        $major = \ord($header[2]);
-        $minor = \ord($header[3]);
-
-        $min_major = \ord($min_ver_header[2]);
-        $min_minor = \ord($min_ver_header[3]);
-
-        if ($major < $min_major || ($major === $min_major && $minor < $min_minor)) {
-            throw new Ex\InvalidCiphertextException(
-                "Ciphertext is requesting an insecure fallback."
-            );
-        }
-
-        $config = self::getFileVersionConfigFromMajorMinor($major, $minor);
-
-        return $config;
-    }
-
-    /**
-     *
-     * @param int $major The major version number.
-     * @param int $minor The minor version number.
-     * @return array
-     * @throws Ex\InvalidCiphertextException
-     */
-    private static function getFileVersionConfigFromMajorMinor($major, $minor)
-    {
-        if ($major === 2) {
-            switch ($minor) {
-            case 0:
-                return new FileConfig([
-                    'cipher_method' => 'aes-256-ctr',
-                    'block_byte_size' => 16,
-                    'key_byte_size' => 32,
-                    'salt_byte_size' => 32,
-                    'hash_function_name' => 'sha256',
-                    'mac_byte_size' => 32,
-                    'encryption_info_string' => 'DefusePHP|V2File|KeyForEncryption',
-                    'authentication_info_string' => 'DefusePHP|V2File|KeyForAuthentication',
-                    'buffer_byte_size' => 1048576
-                ]);
-            default:
-                throw new Ex\InvalidCiphertextException(
-                    "Unsupported file ciphertext version."
-                );
-            }
-        } else {
-            throw new Ex\InvalidCiphertextException(
-                "Unsupported file ciphertext version."
-            );
-        }
     }
 
     /**
      * Read from a stream; prevent partial reads
      *
      * @param resource $stream
-     * @param int $num
-     * @return string
+     * @param int      $num
      *
      * @throws \RangeException
-     * @throws Ex\CannotPerformOperationException
+     * @throws Ex\IOException
+     *
+     * @return string
      */
     final public static function readBytes($stream, $num)
     {
@@ -757,13 +709,13 @@ final class File implements StreamInterface
         } elseif ($num === 0) {
             return '';
         }
-        $buf = '';
+        $buf       = '';
         $remaining = $num;
-        while ($remaining > 0 && !\feof($stream)) {
+        while ($remaining > 0 && ! \feof($stream)) {
             $read = \fread($stream, $remaining);
-            
+
             if ($read === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\IOException(
                     'Could not read from the file'
                 );
             }
@@ -771,7 +723,7 @@ final class File implements StreamInterface
             $remaining -= Core::ourStrlen($read);
         }
         if (Core::ourStrlen($buf) !== $num) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Tried to read past the end of the file'
             );
         }
@@ -782,10 +734,12 @@ final class File implements StreamInterface
      * Write to a stream; prevent partial writes
      *
      * @param resource $stream
-     * @param string $buf
-     * @param int $num (number of bytes)
+     * @param string   $buf
+     * @param int      $num    (number of bytes)
+     *
+     * @throws Ex\IOException
+     *
      * @return string
-     * @throws Ex\CannotPerformOperationException
      */
     final public static function writeBytes($stream, $buf, $num = null)
     {
@@ -794,12 +748,12 @@ final class File implements StreamInterface
             $num = $bufSize;
         }
         if ($num > $bufSize) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Trying to write more bytes than the buffer contains.'
             );
         }
         if ($num < 0) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\IOException(
                 'Tried to write less than 0 bytes'
             );
         }
@@ -807,7 +761,7 @@ final class File implements StreamInterface
         while ($remaining > 0) {
             $written = \fwrite($stream, $buf, $remaining);
             if ($written === false) {
-                throw new Ex\CannotPerformOperationException(
+                throw new Ex\IOException(
                     'Could not write to the file'
                 );
             }

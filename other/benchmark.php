@@ -1,4 +1,5 @@
 <?php
+
 use \Defuse\Crypto\Crypto;
 
 require_once 'autoload.php';
@@ -15,27 +16,27 @@ function showResults($type, $start, $end, $count)
 
 $start = \microtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    $key = Crypto::createNewRandomKey();
+    $key = Key::createNewRandomKey();
 }
 $end = \microtime(true);
-\showResults("createNewRandomKey()", $start, $end, 1000);
+\showResults('createNewRandomKey()', $start, $end, 1000);
 
 $start = \microtime(true);
 for ($i = 0; $i < 100; $i++) {
     $ciphertext = Crypto::encrypt(
-        \str_repeat("A", 1024*1024),
-        \str_repeat("B", 16)
+        \str_repeat('A', 1024*1024),
+        \str_repeat('B', 16)
     );
 }
 $end = \microtime(true);
-\showResults("encrypt(1MB)", $start, $end, 100);
+\showResults('encrypt(1MB)', $start, $end, 100);
 
 $start = \microtime(true);
 for ($i = 0; $i < 1000; $i++) {
     $ciphertext = Crypto::encrypt(
-        \str_repeat("A", 1024),
-        \str_repeat("B", 16)
+        \str_repeat('A', 1024),
+        \str_repeat('B', 16)
     );
 }
 $end = \microtime(true);
-\showResults("encrypt(1KB)", $start, $end, 1000);
+\showResults('encrypt(1KB)', $start, $end, 1000);

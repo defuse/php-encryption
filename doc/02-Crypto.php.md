@@ -28,7 +28,7 @@ Generating a Key
 
 ```php
 try {
-    $key = \Defuse\Crypto\Crypto::createNewRandomKey();
+    $key = \Defuse\Crypto\Key::createNewRandomKey();
     // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
     // they may leak the key to the attacker through side channels.
     // 
@@ -64,7 +64,7 @@ Decrypting a Message
 ```php
 try {
     $decrypted = self::Decrypt($ciphertext, $key);
-} catch (\Defuse\Crypto\Exception\InvalidCiphertextException $ex) { // VERY IMPORTANT
+} catch (\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or
@@ -86,7 +86,7 @@ Decrypting a Message Encrypted with version 1 of this Library
 ```php
 try {
     $decrypted = self::legacyDecrypt($ciphertext, $key);
-} catch (\Defuse\Crypto\Exception\InvalidCiphertextException $ex) { // VERY IMPORTANT
+} catch (\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or

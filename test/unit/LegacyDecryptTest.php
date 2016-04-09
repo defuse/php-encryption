@@ -5,13 +5,13 @@ use \Defuse\Crypto\Encoding;
 
 class LegacyDecryptTest extends PHPUnit_Framework_TestCase
 {
-    function testDecryptLegacyCiphertext()
+    public function testDecryptLegacyCiphertext()
     {
         $cipher = Encoding::hexToBin(
-            'cfdad83ebd506d2c9ada8d48030d0bca'.
-            '2ff94760e6d39c186adb1290d6c47e35'.
-            '821e262673c5631c42ebbaf70774d6ef'.
-            '29aa5eee0e412d646ae380e08189c85d'.
+            'cfdad83ebd506d2c9ada8d48030d0bca' .
+            '2ff94760e6d39c186adb1290d6c47e35' .
+            '821e262673c5631c42ebbaf70774d6ef' .
+            '29aa5eee0e412d646ae380e08189c85d' .
             '024b5e2009106870f1db25d8b85fd01f'
         );
 
@@ -24,15 +24,15 @@ class LegacyDecryptTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\InvalidCiphertextException
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
-    function testDecryptLegacyCiphertextWrongKey()
+    public function testDecryptLegacyCiphertextWrongKey()
     {
         $cipher = Encoding::hexToBin(
-            'cfdad83ebd506d2c9ada8d48030d0bca'.
-            '2ff94760e6d39c186adb1290d6c47e35'.
-            '821e262673c5631c42ebbaf70774d6ef'.
-            '29aa5eee0e412d646ae380e08189c85d'.
+            'cfdad83ebd506d2c9ada8d48030d0bca' .
+            '2ff94760e6d39c186adb1290d6c47e35' .
+            '821e262673c5631c42ebbaf70774d6ef' .
+            '29aa5eee0e412d646ae380e08189c85d' .
             '024b5e2009106870f1db25d8b85fd01f'
         );
 

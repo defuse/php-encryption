@@ -6,7 +6,7 @@ use \Defuse\Crypto\Exception as Ex;
 require_once 'autoload.php';
 
 try {
-    $key = Crypto::createNewRandomKey();
+    $key = Key::createNewRandomKey();
     // WARNING: Do NOT encode $key with bin2hex() or base64_encode(),
     // they may leak the key to the attacker through side channels.
 } catch (Ex\CryptoTestFailedException $ex) {
@@ -15,7 +15,7 @@ try {
     die('Cannot safely create a key');
 }
 
-$message = "ATTACK AT DAWN";
+$message = 'ATTACK AT DAWN';
 try {
     $ciphertext = Crypto::encrypt($message, $key);
 } catch (Ex\CryptoTestFailedException $ex) {
@@ -26,7 +26,7 @@ try {
 
 try {
     $decrypted = Crypto::decrypt($ciphertext, $key);
-} catch (Ex\InvalidCiphertextException $ex) { // VERY IMPORTANT
+} catch (Ex\WrongKeyOrModifiedCiphertextException $ex) { // VERY IMPORTANT
     // Either:
     //   1. The ciphertext was modified by the attacker,
     //   2. The key is wrong, or
