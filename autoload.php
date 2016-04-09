@@ -51,6 +51,8 @@
         'StreamInterface' =>
             'StreamInterface.php',
         // Exceptions:
+        'Exception\\BadFormatException' =>
+            'Exception/BadFormatException.php',
         'Exception\\CannotPerformOperationException' =>
             'Exception/CannotPerformOperationException.php',
         'Exception\\CryptoException' =>

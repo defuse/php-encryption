@@ -20,7 +20,7 @@ class KeyTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedException \Defuse\Crypto\Exception\BadFormatException
      * @excpectedExceptionMessage key version header
      */
     public function testIncorrectHeader()
@@ -32,8 +32,8 @@ class KeyTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
-     * @expectedExceptionMessage  checksums don't match
+     * @expectedException \Defuse\Crypto\Exception\BadFormatException
+     * @expectedExceptionMessage checksum doesn't match
      */
     public function testIncorrectChecksum()
     {
@@ -51,7 +51,7 @@ class KeyTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @expectedException \Defuse\Crypto\Exception\BadFormatException
      * @expectedExceptionMessage invalid hex encoding
      */
     public function testBadHexEncoding()

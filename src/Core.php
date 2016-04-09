@@ -486,6 +486,7 @@ final class Core
      * @param $string
      *
      * @throws \Defuse\Crypto\Exception\CannotPerformOperationException
+     * @throws \Defuse\Crypto\Exception\BadFormatException
      *
      * @return string
      */
@@ -502,14 +503,14 @@ final class Core
         try {
             $bytes = Encoding::hexToBin($string);
         } catch (\RangeException $ex) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\BadFormatException(
                 'String has invalid hex encoding.'
             );
         }
 
         /* Make sure we have enough bytes to get the version header and checksum. */
         if (Core::ourStrlen($bytes) < Core::SERIALIZE_HEADER_BYTES + Core::CHECKSUM_BYTE_SIZE) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\BadFormatException(
                 'Encoded data is shorter than expected.'
             );
         }
@@ -518,7 +519,7 @@ final class Core
         $actual_header = Core::ourSubstr($bytes, 0, Core::SERIALIZE_HEADER_BYTES);
 
         if ($actual_header !== $expected_header) {
-            throw new Ex\CannotPerformOperationException(
+            throw new Ex\BadFormatException(
                 'Invalid header.'
             );
         }
@@ -542,8 +543,8 @@ final class Core
 
         /* Validate it. It *is* important for this to be constant time. */
         if (! Core::hashEquals($checksum_a, $checksum_b)) {
-            throw new Ex\CannotPerformOperationException(
-                "Saved key is corrupted -- checksums don't match."
+            throw new Ex\BadFormatException(
+                "Data is corrupted, the checksum doesn't match"
             );
         }
 
