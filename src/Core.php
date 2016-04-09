@@ -125,7 +125,13 @@ final class Core
     public static function secureRandom($octets)
     {
         self::ensureFunctionExists('random_bytes');
-        return \random_bytes($octets);
+        try {
+            return \random_bytes($octets);
+        } catch (Exception $ex) {
+            throw new Ex\EnvironmentIsBrokenException(
+                'Your system does not have a secure random number generator.'
+            );
+        }
     }
     /**
      * Use HKDF to derive multiple keys from one.
