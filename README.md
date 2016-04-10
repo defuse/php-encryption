@@ -18,6 +18,14 @@ ecosystem. Secondly, this library is "difficult to misuse." Like
 [libsodium](https://github.com/jedisct1/libsodium), its API is designed to be
 easy to use in a secure way and hard to use in an insecure way.
 
+Dependencies
+------------
+
+This library requres no special dependencies except for a version of PHP 5.4 or
+newer with the OpenSSL extensions enabled (the default). It comes bundled with
+[random\_compat](https://github.com/paragonie/random_compat) so that your users
+will not need to follow any special installation steps.
+
 Docmentation
 -------------
 
