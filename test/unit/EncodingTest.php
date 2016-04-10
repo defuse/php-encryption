@@ -1,5 +1,6 @@
 <?php
 
+use Defuse\Crypto\Core;
 use \Defuse\Crypto\Encoding;
 
 class EncodingTest extends PHPUnit_Framework_TestCase
@@ -24,4 +25,42 @@ class EncodingTest extends PHPUnit_Framework_TestCase
             }
         }
     }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\BadFormatException
+     * @expectedExceptionMessage checksum doesn't match
+     */
+    public function testIncorrectChecksum()
+    {
+        $header = Core::secureRandom(Core::HEADER_VERSION_SIZE);
+        $str = Encoding::saveBytesToChecksummedAsciiSafeString(
+            $header,
+            Core::secureRandom(Core::KEY_BYTE_SIZE)
+        );
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 0] = 'f';
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 1] = 'f';
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 3] = 'f';
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 4] = 'f';
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 5] = 'f';
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 6] = 'f';
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 7] = 'f';
+        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 8] = 'f';
+        Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\BadFormatException
+     * @expectedExceptionMessage not a hex string
+     */
+    public function testBadHexEncoding()
+    {
+        $header = Core::secureRandom(Core::HEADER_VERSION_SIZE);
+        $str = Encoding::saveBytesToChecksummedAsciiSafeString(
+            $header,
+            Core::secureRandom(Core::KEY_BYTE_SIZE)
+        );
+        $str[0] = 'Z';
+        Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
+    }
+
 }
