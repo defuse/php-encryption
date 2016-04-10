@@ -182,6 +182,7 @@ final class File
      */
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
+        /* Open the input file. */
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
@@ -191,6 +192,7 @@ final class File
         }
         \stream_set_read_buffer($if, 0);
 
+        /* Open the output file. */
         $of = @\fopen($outputFilename, 'wb');
         if ($of === false) {
             \fclose($if);
@@ -201,6 +203,7 @@ final class File
         }
         \stream_set_write_buffer($of, 0);
 
+        /* Perform the encryption. */
         try {
             self::encryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
@@ -209,12 +212,15 @@ final class File
             throw $ex;
         }
 
+        /* Close the input file. */
         if (\fclose($if) === false) {
             \fclose($of);
             throw new Ex\IOException(
                 'Cannot close input file after encrypting'
             );
         }
+
+        /* Close the output file. */
         if (\fclose($of) === false) {
             throw new Ex\IOException(
                 'Cannot close output file after encrypting'
@@ -235,6 +241,7 @@ final class File
      */
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
+        /* Open the input file. */
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
@@ -244,6 +251,7 @@ final class File
         }
         \stream_set_read_buffer($if, 0);
 
+        /* Open the output file. */
         $of = @\fopen($outputFilename, 'wb');
         if ($of === false) {
             \fclose($if);
@@ -254,6 +262,7 @@ final class File
         }
         \stream_set_write_buffer($of, 0);
 
+        /* Perform the decryption. */
         try {
             self::decryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
@@ -262,12 +271,15 @@ final class File
             throw $ex;
         }
 
+        /* Close the input file. */
         if (\fclose($if) === false) {
             \fclose($of);
             throw new Ex\IOException(
                 'Cannot close input file after decrypting'
             );
         }
+
+        /* Close the output file. */
         if (\fclose($of) === false) {
             throw new Ex\IOException(
                 'Cannot close output file after decrypting'
@@ -287,7 +299,6 @@ final class File
      */
     private static function encryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
     {
-        // Because we don't have strict typing in PHP 5
         if (! \is_resource($inputHandle)) {
             throw new Ex\IOException(
                 'Input handle must be a resource!'
@@ -429,7 +440,6 @@ final class File
      */
     public static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
     {
-        // Because we don't have strict typing in PHP 5
         if (! \is_resource($inputHandle)) {
             throw new Ex\IOException(
                 'Input handle must be a resource!'

@@ -379,6 +379,50 @@ class FileTest extends \PHPUnit_Framework_TestCase
         File::decryptFile($src, array(), $this->key);
     }
 
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage must be a resource
+     */
+    public function testNonResourceInputEncrypt()
+    {
+        $resource = fopen("php://memory", "wb");
+        File::encryptResource("not a resource", $resource, $this->key);
+        fclose($resource);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage must be a resource
+     */
+    public function testNonResourceOutputEncrypt()
+    {
+        $resource = fopen("php://memory", "wb");
+        File::encryptResource($resource, "not a resource", $this->key);
+        fclose($resource);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage must be a resource
+     */
+    public function testNonResourceInputDecrypt()
+    {
+        $resource = fopen("php://memory", "wb");
+        File::decryptResource("not a resource", $resource, $this->key);
+        fclose($resource);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage must be a resource
+     */
+    public function testNonResourceOutputDecrypt()
+    {
+        $resource = fopen("php://memory", "wb");
+        File::decryptResource($resource, "not a resource", $this->key);
+        fclose($resource);
+    }
+
     public function fileToFileProvider()
     {
         $data = [];
