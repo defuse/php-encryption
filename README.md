@@ -62,3 +62,8 @@ library for PHP.
 
 If you use this library as a part of your business and would like to help fund
 a formal audit, please [contact Taylor Hornby](https://defuse.ca/contact.htm).
+
+Public Keys
+------------
+
+TODO: put links (and fingerprints) for the developers' public keys here.
