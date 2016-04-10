@@ -78,7 +78,6 @@ final class Encoding
         return $bin;
     }
 
-
     /*
      * SECURITY NOTE ON APPLYING CHECKSUMS TO SECRETS:
      *

@@ -71,24 +71,24 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src = self::$FILE_DIR . '/' . $srcName;
 
         $dest1  = self::$TEMP_DIR . '/ff1';
-        File::encryptFileWithPassword($src, $dest1, "password");
+        File::encryptFileWithPassword($src, $dest1, 'password');
         $this->assertFileExists($dest1, 'destination file not created.');
 
         $reverse1 = self::$TEMP_DIR . '/rv1';
-        File::decryptFileWithPassword($dest1, $reverse1, "password");
+        File::decryptFileWithPassword($dest1, $reverse1, 'password');
         $this->assertFileExists($reverse1);
         $this->assertSame(md5_file($src), md5_file($reverse1),
             'File and encrypted-decrypted file do not match.');
 
         $dest2  = self::$TEMP_DIR . '/ff2';
-        File::encryptFileWithPassword($reverse1, $dest2, "password");
+        File::encryptFileWithPassword($reverse1, $dest2, 'password');
         $this->assertFileExists($dest2);
 
         $this->assertNotEquals(md5_file($dest1), md5_file($dest2),
             'First and second encryption produced identical files.');
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
-        File::decryptFileWithPassword($dest2, $reverse2, "password");
+        File::decryptFileWithPassword($dest2, $reverse2, 'password');
         $this->assertSame(md5_file($src), md5_file($reverse2),
             'File and encrypted-decrypted file do not match.');
     }
@@ -133,7 +133,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src      = fopen($srcName, 'r');
         $dest     = fopen($destName, 'w');
 
-        File::encryptResourceWithPassword($src, $dest, "password");
+        File::encryptResourceWithPassword($src, $dest, 'password');
 
         fclose($src);
         fclose($dest);
@@ -141,7 +141,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src2  = fopen($destName, 'r');
         $dest2 = fopen(self::$TEMP_DIR . '/dest2', 'w');
 
-        File::decryptResourceWithPassword($src2, $dest2, "password");
+        File::decryptResourceWithPassword($src2, $dest2, 'password');
         fclose($src2);
         fclose($dest2);
 
@@ -271,7 +271,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testBadSourcePathEncrypt()
     {
-        File::encryptFile("./i-do-not-exist", "output-file", $this->key);
+        File::encryptFile('./i-do-not-exist', 'output-file', $this->key);
     }
 
     /**
@@ -280,7 +280,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testBadSourcePathDecrypt()
     {
-        File::decryptFile("./i-do-not-exist", "output-file", $this->key);
+        File::decryptFile('./i-do-not-exist', 'output-file', $this->key);
     }
 
     /**
@@ -289,7 +289,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testBadSourcePathEncryptWithPassword()
     {
-        File::encryptFileWithPassword("./i-do-not-exist", "output-file", "password");
+        File::encryptFileWithPassword('./i-do-not-exist', 'output-file', 'password');
     }
 
     /**
@@ -298,7 +298,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testBadSourcePathDecryptWithPassword()
     {
-        File::decryptFileWithPassword("./i-do-not-exist", "output-file", "password");
+        File::decryptFileWithPassword('./i-do-not-exist', 'output-file', 'password');
     }
 
     /**
@@ -308,7 +308,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     public function testBadDestinationPathEncrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::encryptFile($src, "./", $this->key);
+        File::encryptFile($src, './', $this->key);
     }
 
     /**
@@ -318,7 +318,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     public function testBadDestinationPathDecrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::decryptFile($src, "./", $this->key);
+        File::decryptFile($src, './', $this->key);
     }
 
     /**
@@ -328,7 +328,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     public function testBadDestinationPathEncryptWithPassword()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::encryptFileWithPassword($src, "./", "password");
+        File::encryptFileWithPassword($src, './', 'password');
     }
 
     /**
@@ -338,7 +338,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     public function testBadDestinationPathDecryptWithPassword()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::decryptFileWithPassword($src, "./", "password");
+        File::decryptFileWithPassword($src, './', 'password');
     }
 
     /**
@@ -347,7 +347,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testNonStringSourcePathEncrypt()
     {
-        File::encryptFile(array(), "output-file", $this->key);
+        File::encryptFile([], 'output-file', $this->key);
     }
 
     /**
@@ -357,7 +357,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     public function testNonStringDestinationPathEncrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::encryptFile($src, array(), $this->key);
+        File::encryptFile($src, [], $this->key);
     }
 
     /**
@@ -366,7 +366,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testNonStringSourcePathDecrypt()
     {
-        File::decryptFile(array(), "output-file", $this->key);
+        File::decryptFile([], 'output-file', $this->key);
     }
 
     /**
@@ -376,7 +376,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     public function testNonStringDestinationPathDecrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::decryptFile($src, array(), $this->key);
+        File::decryptFile($src, [], $this->key);
     }
 
     /**
@@ -385,8 +385,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testNonResourceInputEncrypt()
     {
-        $resource = fopen("php://memory", "wb");
-        File::encryptResource("not a resource", $resource, $this->key);
+        $resource = fopen('php://memory', 'wb');
+        File::encryptResource('not a resource', $resource, $this->key);
         fclose($resource);
     }
 
@@ -396,8 +396,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testNonResourceOutputEncrypt()
     {
-        $resource = fopen("php://memory", "wb");
-        File::encryptResource($resource, "not a resource", $this->key);
+        $resource = fopen('php://memory', 'wb');
+        File::encryptResource($resource, 'not a resource', $this->key);
         fclose($resource);
     }
 
@@ -407,8 +407,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testNonResourceInputDecrypt()
     {
-        $resource = fopen("php://memory", "wb");
-        File::decryptResource("not a resource", $resource, $this->key);
+        $resource = fopen('php://memory', 'wb');
+        File::decryptResource('not a resource', $resource, $this->key);
         fclose($resource);
     }
 
@@ -418,8 +418,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     public function testNonResourceOutputDecrypt()
     {
-        $resource = fopen("php://memory", "wb");
-        File::decryptResource($resource, "not a resource", $this->key);
+        $resource = fopen('php://memory', 'wb');
+        File::decryptResource($resource, 'not a resource', $this->key);
         fclose($resource);
     }
 

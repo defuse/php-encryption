@@ -23,5 +23,4 @@ class PasswordTest extends PHPUnit_Framework_TestCase
         $pkey = KeyProtectedByPassword::createRandomPasswordProtectedKey('rightpassword');
         $key1 = $pkey->unlockKey('wrongpassword');
     }
-
 }

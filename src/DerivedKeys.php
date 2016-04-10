@@ -2,8 +2,6 @@
 
 namespace Defuse\Crypto;
 
-use Defuse\Crypto\Exception as Ex;
-
 final class DerivedKeys
 {
     private $akey = null;

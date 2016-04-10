@@ -6,7 +6,6 @@ use Defuse\Crypto\Exception as Ex;
 
 class Crypto
 {
-
     /**
      * Encrypts a string with a Key.
      *
@@ -289,7 +288,6 @@ class Crypto
             );
         }
     }
-
 
     /**
      * Raw unauthenticated encryption (insecure on its own).

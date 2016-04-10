@@ -1,10 +1,9 @@
 <?php
 
-use Defuse\Crypto\Exception as Ex;
-
 use \Defuse\Crypto\Core;
 use \Defuse\Crypto\Crypto;
 use \Defuse\Crypto\Key;
+use Defuse\Crypto\Exception as Ex;
 
 class CryptoTest extends PHPUnit_Framework_TestCase
 {
@@ -25,7 +24,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
     public function testEncryptDecryptWithPassword()
     {
         $data = "EnCrYpT EvErYThInG\x00\x00";
-        $password = "password";
+        $password = 'password';
 
         // Make sure encrypting then decrypting doesn't change the message.
         $ciphertext = Crypto::encryptWithPassword($data, $password, true);
@@ -53,7 +52,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
             0, // The header.
             Core::HEADER_VERSION_SIZE + 1, // the salt
             Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + 1, // the IV
-            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + Core::BLOCK_BYTE_SIZE + 1 // the ciphertext
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + Core::BLOCK_BYTE_SIZE + 1, // the ciphertext
         ];
 
         foreach ($indices_to_change as $index) {
@@ -66,10 +65,10 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         }
 
         // Decrypting with the wrong password.
-        $password       = "password";
+        $password       = 'password';
         $data           = 'abcdef';
         $ciphertext     = Crypto::encryptWithPassword($data, $password, true);
-        $wrong_password = "wrong_password";
+        $wrong_password = 'wrong_password';
         try {
             Crypto::decryptWithPassword($ciphertext, $wrong_password, true);
             throw new Ex\EnvironmentIsBrokenException();

@@ -50,7 +50,7 @@ final class KeyOrPassword
     public function deriveKeys($salt)
     {
         if (Core::ourStrlen($salt) !== Core::SALT_BYTE_SIZE) {
-            throw new Ex\EnvironmentIsBrokenException("Bad salt.");
+            throw new Ex\EnvironmentIsBrokenException('Bad salt.');
         }
 
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
@@ -94,15 +94,15 @@ final class KeyOrPassword
             );
             return new DerivedKeys($akey, $ekey);
         } else {
-            throw new Ex\EnvironmentIsBrokenException("Bad secret type.");
+            throw new Ex\EnvironmentIsBrokenException('Bad secret type.');
         }
     }
 
     /**
      * Constructor for KeyOrPassword.
      *
-     * @param int    $secret_type
-     * @param mixed  $secret        (either a Key or a password string)
+     * @param int   $secret_type
+     * @param mixed $secret      (either a Key or a password string)
      */
     private function __construct($secret_type, $secret)
     {

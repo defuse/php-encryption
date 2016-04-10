@@ -733,8 +733,8 @@ final class File
     private static function getLastErrorMessage()
     {
         $error = error_get_last();
-        if ($error === NULL) {
-            return "[no PHP error]";
+        if ($error === null) {
+            return '[no PHP error]';
         } else {
             return $error['message'];
         }

@@ -316,9 +316,9 @@ final class Core
             $substr = \mb_substr($str, $start, $length, '8bit');
             if (Core::ourStrlen($substr) !== $length) {
                 throw new EnvironmentIsBrokenException(
-                    "Your version of PHP has bug #66797. Its implementation of
+                    'Your version of PHP has bug #66797. Its implementation of
                     mb_substr() is incorrect. See the details here:
-                    https://bugs.php.net/bug.php?id=66797"
+                    https://bugs.php.net/bug.php?id=66797'
                 );
             }
             return $substr;
@@ -426,5 +426,4 @@ final class Core
             return Encoding::binToHex(Core::ourSubstr($output, 0, $key_length));
         }
     }
-
 }
