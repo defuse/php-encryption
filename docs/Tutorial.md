@@ -31,9 +31,9 @@ to be using this library. For that, set up a TLS connection between the two
 points, or, if it's a chat app, use the [Signal
 Protocol](https://whispersystems.org/blog/advanced-ratcheting/).
 
-This library provides symmetric encryption for "data at rest." This means it is
-not suitable for use in building protocols where "data is in motion" (i.e. over
-a network) except in a very restricted set of cases.
+What this library provides is symmetric encryption for "data at rest." This
+means it is not suitable for use in building protocols where "data is in motion"
+(i.e. over a network) except in a very restricted set of cases.
 
 Getting the Code
 -----------------
