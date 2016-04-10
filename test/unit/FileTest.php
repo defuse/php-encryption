@@ -37,32 +37,24 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src = self::$FILE_DIR . '/' . $srcName;
 
         $dest1  = self::$TEMP_DIR . '/ff1';
-        $result = File::encryptFile($src, $dest1, $this->key);
-        $this->assertTrue($result,
-            sprintf('File "%s" did not encrypt successfully.', $src));
+        File::encryptFile($src, $dest1, $this->key);
         $this->assertFileExists($dest1, 'destination file not created.');
 
         $reverse1 = self::$TEMP_DIR . '/rv1';
-        $result   = File::decryptFile($dest1, $reverse1, $this->key);
-        $this->assertTrue($result,
-            sprintf('File "%s" did not decrypt successfully.', $dest1));
+        File::decryptFile($dest1, $reverse1, $this->key);
         $this->assertFileExists($reverse1);
         $this->assertSame(md5_file($src), md5_file($reverse1),
             'File and encrypted-decrypted file do not match.');
 
         $dest2  = self::$TEMP_DIR . '/ff2';
-        $result = File::encryptFile($reverse1, $dest2, $this->key);
+        File::encryptFile($reverse1, $dest2, $this->key);
         $this->assertFileExists($dest2);
-        $this->assertTrue($result,
-            sprintf('File "%s" did not re-encrypt successfully.', $reverse1));
 
         $this->assertNotEquals(md5_file($dest1), md5_file($dest2),
             'First and second encryption produced identical files.');
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
-        $result   = File::decryptFile($dest2, $reverse2, $this->key);
-        $this->assertTrue($result,
-            sprintf('File "%s" did not re-decrypt successfully.', $dest1));
+        File::decryptFile($dest2, $reverse2, $this->key);
         $this->assertSame(md5_file($src), md5_file($reverse2),
             'File and encrypted-decrypted file do not match.');
     }
@@ -79,32 +71,24 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src = self::$FILE_DIR . '/' . $srcName;
 
         $dest1  = self::$TEMP_DIR . '/ff1';
-        $result = File::encryptFileWithPassword($src, $dest1, "password");
-        $this->assertTrue($result,
-            sprintf('File "%s" did not encrypt successfully.', $src));
+        File::encryptFileWithPassword($src, $dest1, "password");
         $this->assertFileExists($dest1, 'destination file not created.');
 
         $reverse1 = self::$TEMP_DIR . '/rv1';
-        $result   = File::decryptFileWithPassword($dest1, $reverse1, "password");
-        $this->assertTrue($result,
-            sprintf('File "%s" did not decrypt successfully.', $dest1));
+        File::decryptFileWithPassword($dest1, $reverse1, "password");
         $this->assertFileExists($reverse1);
         $this->assertSame(md5_file($src), md5_file($reverse1),
             'File and encrypted-decrypted file do not match.');
 
         $dest2  = self::$TEMP_DIR . '/ff2';
-        $result = File::encryptFileWithPassword($reverse1, $dest2, "password");
+        File::encryptFileWithPassword($reverse1, $dest2, "password");
         $this->assertFileExists($dest2);
-        $this->assertTrue($result,
-            sprintf('File "%s" did not re-encrypt successfully.', $reverse1));
 
         $this->assertNotEquals(md5_file($dest1), md5_file($dest2),
             'First and second encryption produced identical files.');
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
-        $result   = File::decryptFileWithPassword($dest2, $reverse2, "password");
-        $this->assertTrue($result,
-            sprintf('File "%s" did not re-decrypt successfully.', $dest1));
+        File::decryptFileWithPassword($dest2, $reverse2, "password");
         $this->assertSame(md5_file($src), md5_file($reverse2),
             'File and encrypted-decrypted file do not match.');
     }
@@ -121,8 +105,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src      = fopen($srcName, 'r');
         $dest     = fopen($destName, 'w');
 
-        $success = File::encryptResource($src, $dest, $this->key);
-        $this->assertTrue($success, 'File did not encrypt successfully.');
+        File::encryptResource($src, $dest, $this->key);
 
         fclose($src);
         fclose($dest);
@@ -130,8 +113,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src2  = fopen($destName, 'r');
         $dest2 = fopen(self::$TEMP_DIR . '/dest2', 'w');
 
-        $success = File::decryptResource($src2, $dest2, $this->key);
-        $this->assertTrue($success, 'File did not decrypt successfully.');
+        File::decryptResource($src2, $dest2, $this->key);
         fclose($src2);
         fclose($dest2);
 
@@ -151,8 +133,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src      = fopen($srcName, 'r');
         $dest     = fopen($destName, 'w');
 
-        $success = File::encryptResourceWithPassword($src, $dest, "password");
-        $this->assertTrue($success, 'File did not encrypt successfully.');
+        File::encryptResourceWithPassword($src, $dest, "password");
 
         fclose($src);
         fclose($dest);
@@ -160,8 +141,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $src2  = fopen($destName, 'r');
         $dest2 = fopen(self::$TEMP_DIR . '/dest2', 'w');
 
-        $success = File::decryptResourceWithPassword($src2, $dest2, "password");
-        $this->assertTrue($success, 'File did not decrypt successfully.');
+        File::decryptResourceWithPassword($src2, $dest2, "password");
         fclose($src2);
         fclose($dest2);
 

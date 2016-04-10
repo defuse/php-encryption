@@ -15,12 +15,10 @@ final class File
      *
      * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      * @throws Defuse\Crypto\Exception\IOException
-     *
-     * @return bool
      */
     public static function encryptFile($inputFilename, $outputFilename, Key $key)
     {
-        return self::encryptFileInternal(
+        self::encryptFileInternal(
             $inputFilename,
             $outputFilename,
             KeyOrPassword::createFromKey($key)
@@ -37,14 +35,137 @@ final class File
      *
      * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      * @throws Defuse\Crypto\Exception\IOException
-     *
-     * @return bool
      */
     public static function encryptFileWithPassword($inputFilename, $outputFilename, $password)
     {
-        return self::encryptFileInternal(
+        self::encryptFileInternal(
             $inputFilename,
             $outputFilename,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
+    /**
+     * Decrypts the input file, saving the plaintext to the output file.
+     *
+     * @param string $inputFilename
+     * @param string $outputFilename
+     * @param Key    $key
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public static function decryptFile($inputFilename, $outputFilename, Key $key)
+    {
+        self::decryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    /**
+     * Decrypts a file with a password, using a slow key derivation function to
+     * make password cracking more expensive.
+     *
+     * @param string $inputFilename
+     * @param string $outputFilename
+     * @param string $password
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public static function decryptFileWithPassword($inputFilename, $outputFilename, $password)
+    {
+        self::decryptFileInternal(
+            $inputFilename,
+            $outputFilename,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
+    /**
+     * Takes two resource handles and encrypts the contents of the first,
+     * writing the ciphertext into the second.
+     *
+     * @param resource $inputHandle
+     * @param resource $outputHandle
+     * @param Key      $key
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public static function encryptResource($inputHandle, $outputHandle, Key $key)
+    {
+        self::encryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    /**
+     * Encrypts the contents of one resource handle into another with a
+     * password, using a slow key derivation function to make password cracking
+     * more expensive.
+     *
+     * @param resource $inputHandle
+     * @param resource $outputHandle
+     * @param string   $password
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public static function encryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    {
+        self::encryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromPassword($password)
+        );
+    }
+
+    /**
+     * Takes two resource handles and decrypts the contents of the first,
+     * writing the plaintext into the second.
+     *
+     * @param resource $inputHandle
+     * @param resource $outputHandle
+     * @param Key      $key
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public static function decryptResource($inputHandle, $outputHandle, Key $key)
+    {
+        self::decryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
+            KeyOrPassword::createFromKey($key)
+        );
+    }
+
+    /**
+     * Decrypts the contents of one resource into another with a password, using
+     * a slow key derivation function to make password cracking more expensive.
+     *
+     * @param resource $inputHandle
+     * @param resource $outputHandle
+     * @param string   $password
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public static function decryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    {
+        self::decryptResourceInternal(
+            $inputHandle,
+            $outputHandle,
             KeyOrPassword::createFromPassword($password)
         );
     }
@@ -93,7 +214,7 @@ final class File
          * Use encryptResource() to actually write the encrypted data to $of
          */
         try {
-            $encrypted = self::encryptResourceInternal($if, $of, $secret);
+            self::encryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
             \fclose($if);
             \fclose($of);
@@ -113,39 +234,6 @@ final class File
                 'Cannot close input file for encrypting'
             );
         }
-
-        /**
-         *  Return the result (which should be true)
-         */
-        return $encrypted;
-    }
-
-    /**
-     * Decrypt the contents at $inputFilename, storing the result in $outputFilename
-     * using HKDF of $key to decrypt then verify
-     *
-     * @param string $inputFilename
-     * @param string $outputFilename
-     * @param Key    $key
-     *
-     * @return bool
-     */
-    public static function decryptFile($inputFilename, $outputFilename, Key $key)
-    {
-        return self::decryptFileInternal(
-            $inputFilename,
-            $outputFilename,
-            KeyOrPassword::createFromKey($key)
-        );
-    }
-
-    public static function decryptFileWithPassword($inputFilename, $outputFilename, $password)
-    {
-        return self::decryptFileInternal(
-            $inputFilename,
-            $outputFilename,
-            KeyOrPassword::createFromPassword($password)
-        );
     }
 
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
@@ -192,7 +280,7 @@ final class File
          * Use decryptResource() to actually write the decrypted data to $of
          */
         try {
-            $decrypted = self::decryptResourceInternal($if, $of, $secret);
+            self::decryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
             \fclose($if);
             \fclose($of);
@@ -212,42 +300,6 @@ final class File
                 'Cannot close input file for decrypting'
             );
         }
-
-        /**
-         * Return the result (which should be true)
-         */
-        return $decrypted;
-    }
-
-    /**
-     * Encrypt the contents of a file handle $inputHandle and store the results
-     * in $outputHandle using HKDF of $key to perform authenticated encryption
-     *
-     * @param resource $inputHandle
-     * @param resource $outputHandle
-     * @param Key      $key
-     *
-     * @throws Exception\EnvironmentIsBrokenException
-     * @throws Exception\WrongKeyOrModifiedCiphertextException
-     *
-     * @return bool
-     */
-    public static function encryptResource($inputHandle, $outputHandle, Key $key)
-    {
-        return self::encryptResourceInternal(
-            $inputHandle,
-            $outputHandle,
-            KeyOrPassword::createFromKey($key)
-        );
-    }
-
-    public static function encryptResourceWithPassword($inputHandle, $outputHandle, $password)
-    {
-        return self::encryptResourceInternal(
-            $inputHandle,
-            $outputHandle,
-            KeyOrPassword::createFromPassword($password)
-        );
     }
 
     private static function encryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
@@ -379,38 +431,6 @@ final class File
         $finalHMAC = \hash_final($hmac, true);
 
         self::writeBytes($outputHandle, $finalHMAC, CORE::MAC_BYTE_SIZE);
-        return true;
-    }
-
-    /**
-     * Decrypt the contents of a file handle $inputHandle and store the results
-     * in $outputHandle using HKDF of $key to decrypt then verify
-     *
-     * @param resource $inputHandle
-     * @param resource $outputHandle
-     * @param Key      $key
-     *
-     * @throws Exception\EnvironmentIsBrokenException
-     * @throws Exception\WrongKeyOrModifiedCiphertextException
-     *
-     * @return bool
-     */
-    public static function decryptResource($inputHandle, $outputHandle, Key $key)
-    {
-        return self::decryptResourceInternal(
-            $inputHandle,
-            $outputHandle,
-            KeyOrPassword::createFromKey($key)
-        );
-    }
-
-    public static function decryptResourceWithPassword($inputHandle, $outputHandle, $password)
-    {
-        return self::decryptResourceInternal(
-            $inputHandle,
-            $outputHandle,
-            KeyOrPassword::createFromPassword($password)
-        );
     }
 
     public static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
@@ -693,7 +713,6 @@ final class File
                 Core::ourStrlen($decrypted)
             );
         }
-        return true;
     }
 
     /**
@@ -702,15 +721,15 @@ final class File
      * @param resource $stream
      * @param int      $num_bytes
      *
-     * @throws \RangeException
-     * @throws Ex\IOException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
     final public static function readBytes($stream, $num_bytes)
     {
         if ($num_bytes < 0) {
-            throw new \RangeException(
+            throw new Ex\EnvironmentIsBrokenException(
                 'Tried to read less than 0 bytes'
             );
         } elseif ($num_bytes === 0) {
@@ -744,7 +763,7 @@ final class File
      * @param string   $buf
      * @param int      $num_bytes
      *
-     * @throws Ex\IOException
+     * @throws Defuse\Crypto\Exception\IOException
      *
      * @return string
      */
@@ -779,7 +798,7 @@ final class File
     }
 
     /**
-     * Returns the last PHP error's message string.
+     * Returns the last PHP error's or warning's message string.
      *
      * @return string
      */
