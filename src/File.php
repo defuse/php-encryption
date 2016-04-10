@@ -556,7 +556,7 @@ final class File
         /* Verify the HMAC. */
         if (! Core::hashEquals($final_mac, $stored_mac)) {
             throw new Ex\WrongKeyOrModifiedCiphertextException(
-                'Message Authentication failure; tampering detected.'
+                'Integrity check failed.'
             );
         }
 
