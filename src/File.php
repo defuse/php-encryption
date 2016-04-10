@@ -210,6 +210,7 @@ final class File
         }
 
         if (\fclose($if) === false) {
+            \fclose($of);
             throw new Ex\IOException(
                 'Cannot close input file for encrypting'
             );
@@ -262,6 +263,7 @@ final class File
         }
 
         if (\fclose($if) === false) {
+            \fclose($of);
             throw new Ex\IOException(
                 'Cannot close input file for decrypting'
             );
