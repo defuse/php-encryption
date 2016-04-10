@@ -17,12 +17,12 @@ Other times, encryption needs to be used in a very specific way in order for it
 to work as intended. Even if you are sure of what you are doing, we strongly
 recommend seeking advice from an expert.
 
-**This isn't for storing passwords:** The most common thing web applications do
-is protect their users passwords. If you're trying to use this library to
-"encrypt" your users' passwords, you're in the wrong place. Passwords shouldn't
-be *encrypted*, they should be *hashed* with a slow computation-heavy function
-that makes password guessing attacks more expensive. See [How to Safely Store
-Your Users' Passwords in
+**This isn't for storing passwords:** The most common use of cryptography in web
+applications is to protect the users' passwords. If you're trying to use this
+library to "encrypt" your users' passwords, you're in the wrong place. Passwords
+shouldn't be *encrypted*, they should be *hashed* with a slow computation-heavy
+function that makes password guessing attacks more expensive. See [How to Safely
+Store Your Users' Passwords in
 2016](https://paragonie.com/blog/2016/02/how-safely-store-password-in-2016).
 
 **This isn't for encrypting network communication:** Likewise, if you're trying
