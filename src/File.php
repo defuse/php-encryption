@@ -212,12 +212,12 @@ final class File
         if (\fclose($if) === false) {
             \fclose($of);
             throw new Ex\IOException(
-                'Cannot close input file for encrypting'
+                'Cannot close input file after encrypting'
             );
         }
         if (\fclose($of) === false) {
             throw new Ex\IOException(
-                'Cannot close input file for encrypting'
+                'Cannot close output file after encrypting'
             );
         }
     }
@@ -265,12 +265,12 @@ final class File
         if (\fclose($if) === false) {
             \fclose($of);
             throw new Ex\IOException(
-                'Cannot close input file for decrypting'
+                'Cannot close input file after decrypting'
             );
         }
         if (\fclose($of) === false) {
             throw new Ex\IOException(
-                'Cannot close input file for decrypting'
+                'Cannot close output file after decrypting'
             );
         }
     }
