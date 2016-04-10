@@ -68,3 +68,8 @@ This library is developed around several core values:
     > to install and cannot packaged with "just download and extract"
     > applications. This library will always be just a handful of PHP files that
     > you can copy to your source tree and require().
+
+Publishing Releases
+--------------------
+
+TODO: add those steps here
