@@ -72,7 +72,7 @@ final class Key
      */
     public static function loadFromAsciiSafeString($savedKeyString)
     {
-        $key_bytes = Core::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $savedKeyString);
+        $key_bytes = Encoding::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $savedKeyString);
         return new Key($key_bytes);
     }
 
@@ -85,7 +85,7 @@ final class Key
      */
     public function saveToAsciiSafeString()
     {
-        return Core::saveBytesToChecksummedAsciiSafeString(
+        return Encoding::saveBytesToChecksummedAsciiSafeString(
             self::KEY_CURRENT_VERSION,
             $this->key_bytes
         );

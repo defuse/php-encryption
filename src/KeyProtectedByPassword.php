@@ -23,7 +23,7 @@ final class KeyProtectedByPassword
 
     public static function loadFromAsciiSafeString($savedKeyString)
     {
-        $encrypted_key = Core::loadBytesFromChecksummedAsciiSafeString(
+        $encrypted_key = Encoding::loadBytesFromChecksummedAsciiSafeString(
             self::PASSWORD_KEY_CURRENT_VERSION,
             $savedKeyString
         );
@@ -32,7 +32,7 @@ final class KeyProtectedByPassword
 
     public function saveToAsciiSafeString()
     {
-        return Core::saveBytesToChecksummedAsciiSafeString(
+        return Encoding::saveBytesToChecksummedAsciiSafeString(
             self::PASSWORD_KEY_CURRENT_VERSION,
             $this->encrypted_key
         );
