@@ -70,7 +70,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
      */
     public function testIncrementCounterTestVector($start, $end, $inc)
     {
-        $actual_end = \Defuse\Crypto\Core::incrementCounter(\hex2bin($start), $inc, Core::CIPHER_METHOD);
+        $actual_end = \Defuse\Crypto\Core::incrementCounter(\hex2bin($start), $inc);
         $this->assertSame(
             $end,
             \bin2hex($actual_end),
@@ -94,7 +94,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
              */
             $start        = str_repeat("\xFF", $offset) . "\xFE" . str_repeat("\xFF", 16 - $offset - 1);
             $expected_end = str_repeat("\xFF", $offset + 1) . str_repeat("\x00", 16 - $offset - 1);
-            $actual_end   = \Defuse\Crypto\Core::incrementCounter($start, 1, Core::CIPHER_METHOD);
+            $actual_end   = \Defuse\Crypto\Core::incrementCounter($start, 1);
             $this->assertSame(
                 \bin2hex($expected_end),
                 \bin2hex($actual_end),
@@ -122,7 +122,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
                 chr(($sum >> 16) & 0xff) .
                 chr(($sum >> 8) & 0xff) .
                 chr(($sum >> 0) & 0xff);
-            $actual_end = \Defuse\Crypto\Core::incrementCounter($start, $rand_b, Core::CIPHER_METHOD);
+            $actual_end = \Defuse\Crypto\Core::incrementCounter($start, $rand_b);
 
             $this->assertSame(
                 \bin2hex($expected_end),
@@ -139,8 +139,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     {
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
-            -1,
-            Core::CIPHER_METHOD
+            -1
         );
     }
 
@@ -162,7 +161,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         /* Smallest value that will overflow. */
         $increment = (PHP_INT_MAX - $lsb) + 1;
         $start     = str_repeat("\x00", 15) . chr($lsb);
-        \Defuse\Crypto\Core::incrementCounter($start, $increment, Core::CIPHER_METHOD);
+        \Defuse\Crypto\Core::incrementCounter($start, $increment);
     }
 
     /**
@@ -172,8 +171,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     {
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 15),
-            1,
-            Core::CIPHER_METHOD
+            1
         );
     }
 
@@ -184,8 +182,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     {
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 17),
-            1,
-            Core::CIPHER_METHOD
+            1
         );
     }
 
@@ -196,8 +193,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     {
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
-            1.0,
-            Core::CIPHER_METHOD
+            1.0
         );
     }
 
@@ -223,8 +219,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         /* Compute what the nonce should be at the start of the last half. */
         $computed_nonce = \Defuse\Crypto\Core::incrementCounter(
             $starting_nonce,
-            0x150,
-            Core::CIPHER_METHOD
+            0x150
         );
 
         /* Try to decrypt it using that nonce. */

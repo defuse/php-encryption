@@ -6,17 +6,17 @@ use Defuse\Crypto\Exception as Ex;
 
 /*
  * We're using static class inheritance to get access to protected methods
- * inside Crypto. To keep things easy to understand, DO NOT USE self:: in this
- * class. Always prefix explicitly with Crypto:: or RuntimeTests::.
+ * inside Crypto. To make it easy to know where the method we're calling can be
+ * found, within this file, prefix calls with `Crypto::` or `RuntimeTests::`,
+ * and don't use `self::`.
  */
 
 class RuntimeTests extends Crypto
 {
-    /*
-     * Runs tests.
-     * Raises Ex\EnvironmentIsBrokenException or if one of the tests fail.
-     * If any tests fails, there is a bug in this library or your system is not
-     * capable of performing encryption, so make sure you fail safe in that case.
+    /**
+     * Runs the runtime tests.
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public static function runtimeTest()
     {
@@ -70,6 +70,11 @@ class RuntimeTests extends Crypto
         $test_state = 1;
     }
 
+    /**
+     * High-level tests of Crypto operations.
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
     private static function testEncryptDecrypt()
     {
         $key  = Key::createNewRandomKey();
@@ -135,9 +140,9 @@ class RuntimeTests extends Crypto
     }
 
     /**
-     * Run-time testing
+     * Test HKDF against test vectors.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     private static function HKDFTestVector()
     {
@@ -173,9 +178,9 @@ class RuntimeTests extends Crypto
     }
 
     /**
-     * Run-Time tests
+     * Test HMAC against test vectors.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     private static function HMACTestVector()
     {
@@ -189,9 +194,9 @@ class RuntimeTests extends Crypto
     }
 
     /**
-     * Run-time tests
+     * Test AES against test vectors.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     private static function AESTestVector()
     {

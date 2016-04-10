@@ -6,8 +6,8 @@ use Defuse\Crypto\Exception as Ex;
 
 final class Core
 {
-    const HEADER_VERSION_SIZE               = 4;  /* This must never change. */
-    const MINIMUM_CIPHERTEXT_SIZE           = 84; /* Absolute minimum */
+    const HEADER_VERSION_SIZE               = 4;
+    const MINIMUM_CIPHERTEXT_SIZE           = 84;
 
     const HEADER_MAGIC                      = "\xDE\xF5";
     const CURRENT_VERSION                   = "\xDE\xF5\x02\x00";
@@ -38,17 +38,16 @@ final class Core
      */
 
     /**
-     * Increment a counter (prevent nonce reuse)
+     * Adds an integer to a block-sized counter.
      *
-     * @param string $ctr - raw binary
-     * @param int    $inc - how much?
-     * @param $cipherMethod
+     * @param string $ctr
+     * @param int    $inc
      *
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
-    public static function incrementCounter($ctr, $inc, $cipherMethod)
+    public static function incrementCounter($ctr, $inc)
     {
         if (Core::ourStrlen($ctr) !== Core::BLOCK_BYTE_SIZE) {
             throw new Ex\EnvironmentIsBrokenException(
@@ -68,7 +67,7 @@ final class Core
             );
         }
 
-        /**
+        /*
          * We start at the rightmost byte (big-endian)
          * So, too, does OpenSSL: http://stackoverflow.com/a/3146214/2224584
          */
@@ -89,13 +88,13 @@ final class Core
     }
 
     /**
-     * Returns a random binary string of length $octets bytes.
+     * Returns a random byte string of the specified length.
      *
      * @param int $octets
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
-     * @return string (raw binary)
+     * @return string
      */
     public static function secureRandom($octets)
     {
@@ -108,9 +107,10 @@ final class Core
             );
         }
     }
+
     /**
-     * Use HKDF to derive multiple keys from one.
-     * http://tools.ietf.org/html/rfc5869
+     * Computes the HKDF key derivation function specified in
+     * http://tools.ietf.org/html/rfc5869.
      *
      * @param string $hash   Hash Function
      * @param string $ikm    Initial Keying Material
@@ -118,7 +118,7 @@ final class Core
      * @param string $info   What sort of key are we deriving?
      * @param string $salt
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -175,14 +175,13 @@ final class Core
     }
 
     /**
-     * Verify a HMAC without crypto side-channels
+     * Checks if two equal-length strings are the same without leaking
+     * information through side channels.
      *
-     * @staticvar boolean $native Use native hash_equals()?
+     * @param string $expected
+     * @param string $given
      *
-     * @param string $expected string (raw binary)
-     * @param string $given    string (raw binary)
-     *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return bool
      */
@@ -198,12 +197,13 @@ final class Core
 
         // We can't just compare the strings with '==', since it would make
         // timing attacks possible. We could use the XOR-OR constant-time
-        // comparison algorithm, but I'm not sure if that's good enough way up
-        // here in an interpreted language. So we use the method of HMACing the
-        // strings we want to compare with a random key, then comparing those.
+        // comparison algorithm, but that may not be a reliable defense in an
+        // interpreted language. So we use the approach of HMACing both strings
+        // with a random key and comparing the HMACs.
 
-        // NOTE: This leaks information when the strings are not the same
-        // length, but they should always be the same length here. Enforce it:
+        // We're not attempting to make variable-length string comparison
+        // secure, as that's very difficult. Make sure the strings are the same
+        // length.
         if (Core::ourStrlen($expected) !== Core::ourStrlen($given)) {
             throw new Ex\EnvironmentIsBrokenException();
         }
@@ -214,11 +214,11 @@ final class Core
         return $correct_compare === $message_compare;
     }
     /**
-     * If the constant doesn't exist, throw an exception
+     * Throws an exception if the constant doesn't exist.
      *
      * @param string $name
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public static function ensureConstantExists($name)
     {
@@ -228,11 +228,11 @@ final class Core
     }
 
     /**
-     * If the functon doesn't exist, throw an exception
+     * Throws an exception if the function doesn't exist.
      *
-     * @param string $name Function name
+     * @param string $name
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public static function ensureFunctionExists($name)
     {
@@ -248,11 +248,11 @@ final class Core
      */
 
     /**
-     * Safe string length
+     * Computes the length of a string in bytes.
      *
      * @param string $str
      *
-     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return int
      */
@@ -274,13 +274,13 @@ final class Core
     }
 
     /**
-     * Safe substring
-     *
-     * @staticvar boolean $exists
+     * Behaves roughly like the function substr() in PHP 7 does.
      *
      * @param string $str
      * @param int    $start
      * @param int    $length
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -290,6 +290,7 @@ final class Core
         if ($exists === null) {
             $exists = \function_exists('mb_substr');
         }
+
         if ($exists) {
             // mb_substr($str, 0, NULL, '8bit') returns an empty string on PHP
             // 5.3, so we have to find the length ourselves.
@@ -332,25 +333,22 @@ final class Core
     }
 
     /**
-     * Copied from https://github.com/defuse/password-hashing
+     * Computes the PBKDF2 password-based key derivation function.
      *
-     * PBKDF2 key derivation function as defined by RSA's PKCS #5: https://www.ietf.org/rfc/rfc2898.txt
+     * The PBKDF2 function is defined in RFC 2898. Test vectors can be found in
+     * RFC 6070. This implementation of PBKDF2 was originally created by Taylor
+     * Hornby, with improvements from http://www.variations-of-shadow.com/.
      *
-     * @param $algorithm - The hash algorithm to use. Recommended: SHA256
-     * @param $password - The password.
-     * @param $salt - A salt that is unique to the password.
-     * @param $count - Iteration count. Higher is better, but slower. Recommended: At least 1000.
-     * @param $key_length - The length of the derived key in bytes.
-     * @param bool $raw_output - If true, the key is returned in raw binary format. Hex encoded otherwise.
+     * @param string $algorithm  The hash algorithm to use. Recommended: SHA256
+     * @param string $password   The password.
+     * @param string $salt       A salt that is unique to the password.
+     * @param int    $count      Iteration count. Higher is better, but slower. Recommended: At least 1000.
+     * @param int    $key_length The length of the derived key in bytes.
+     * @param bool   $raw_output If true, the key is returned in raw binary format. Hex encoded otherwise.
      *
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
-     * @return string - A $key_length-byte key derived from the password and salt.
-     *
-     * Test vectors can be found here: https://www.ietf.org/rfc/rfc6070.txt
-     *
-     * This implementation of PBKDF2 was originally created by https://defuse.ca
-     * With improvements by http://www.variations-of-shadow.com
+     * @return string A $key_length-byte key derived from the password and salt.
      */
     public static function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = false)
     {
@@ -425,7 +423,7 @@ final class Core
         if ($raw_output) {
             return Core::ourSubstr($output, 0, $key_length);
         } else {
-            return \bin2hex(Core::ourSubstr($output, 0, $key_length));
+            return Encoding::binToHex(Core::ourSubstr($output, 0, $key_length));
         }
     }
 

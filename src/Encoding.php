@@ -11,20 +11,22 @@ final class Encoding
     const SERIALIZE_HEADER_BYTES = 4;
 
     /**
-     * Convert a binary string into a hexadecimal string without cache-timing
-     * leaks
+     * Converts a byte string to a hexadecimal string without leaking
+     * information through side channels.
      *
-     * @param string $bin_string (raw binary)
+     * @param string $binary_string
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return string
      */
-    public static function binToHex($bin_string)
+    public static function binToHex($byte_string)
     {
         $hex = '';
-        $len = Core::ourStrlen($bin_string);
+        $len = Core::ourStrlen($byte_string);
         for ($i = 0; $i < $len; ++$i) {
-            $c = \ord($bin_string[$i]) & 0xf;
-            $b = \ord($bin_string[$i]) >> 4;
+            $c = \ord($byte_string[$i]) & 0xf;
+            $b = \ord($byte_string[$i]) >> 4;
             $hex .= \pack(
                 'CC',
                 87 + $b + ((($b - 10) >> 8) & ~38),
@@ -35,12 +37,15 @@ final class Encoding
     }
 
     /**
-     * Convert a hexadecimal string into a binary string without cache-timing
-     * leaks
+     * Converts a hexadecimal string into a byte string without leaking
+     * information through side channels.
      *
      * @param string $hex_string
      *
-     * @return string (raw binary)
+     * @throws Defuse\Crypto\Exception\BadFormatException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     *
+     * @return string
      */
     public static function hexToBin($hex_string)
     {
@@ -57,8 +62,8 @@ final class Encoding
             $c_alpha  = ($c & ~32) - 55;
             $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
             if (($c_num0 | $c_alpha0) === 0) {
-                throw new \RangeException(
-                    'Encoding::hexToBin() only expects hexadecimal characters'
+                throw new Ex\BadFormatException(
+                    'Encoding::hexToBin() input is not a hex string.'
                 );
             }
             $c_val = ($c_num0 & $c_num) | ($c_alpha & $c_alpha0);
@@ -73,11 +78,42 @@ final class Encoding
         return $bin;
     }
 
-    /**
-     * Save bytes to check summed ascii safe string.
+
+    /*
+     * SECURITY NOTE ON APPLYING CHECKSUMS TO SECRETS:
      *
-     * @param $header
-     * @param $bytes
+     *      The checksum introduces a potential security weakness. For example,
+     *      suppose we apply a checksum to a key, and that an adversary has an
+     *      exploit against the process containing the key, such that they can
+     *      overwrite an arbitrary byte of memory and then cause the checksum to
+     *      be verified and learn the result.
+     *
+     *      In this scenario, the adversary can extract the key one byte at
+     *      a time by overwriting it with their guess of its value and then
+     *      asking if the checksum matches. If it does, their guess was right.
+     *      This kind of attack may be more easy to implement and more reliable
+     *      than a remote code execution attack.
+     *
+     *      This attack also applies to authenticated encryption as a whole, in
+     *      the situation where the adversary can overwrite a byte of the key
+     *      and then cause a valid ciphertext to be decrypted, and then
+     *      determine whether the MAC check passed or failed.
+     *
+     *      By using the full SHA256 hash instead of truncating it, I'm ensuring
+     *      that both ways of going about the attack are equivalently difficult.
+     *      A shorter checksum of say 32 bits might be more useful to the
+     *      adversary as an oracle in case their writes are coarser grained.
+     *
+     *      Because the scenario assumes a serious vulnerability, we don't try
+     *      to prevent attacks of this style.
+     */
+
+    /**
+     * INTERNAL USE ONLY: Applies a version header, applies a checksum, and
+     * then encodes a byte string into a range of printable ASCII characters.
+     *
+     * @param string $header
+     * @param string $bytes
      *
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
@@ -89,7 +125,7 @@ final class Encoding
         // being a prefix of another type's header, leading to ambiguity.
         if (Core::ourStrlen($header) !== self::SERIALIZE_HEADER_BYTES) {
             throw new Ex\EnvironmentIsBrokenException(
-                'Header must be 4 bytes.'
+                'Header must be ' . self::SERIALIZE_HEADER_BYTES . ' bytes.'
             );
         }
 
@@ -105,10 +141,11 @@ final class Encoding
     }
 
     /**
-     * Load bytes from checksummed ascii safe string.
+     * INTERNAL USE ONLY: Decodes, verifies the header and checksum, and returns
+     * the encoded byte string.
      *
-     * @param $expected_header
-     * @param $string
+     * @param string $expected_header
+     * @param string $string
      *
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      * @throws \Defuse\Crypto\Exception\BadFormatException
@@ -125,13 +162,7 @@ final class Encoding
             );
         }
 
-        try {
-            $bytes = Encoding::hexToBin($string);
-        } catch (\RangeException $ex) {
-            throw new Ex\BadFormatException(
-                'String has invalid hex encoding.'
-            );
-        }
+        $bytes = Encoding::hexToBin($string);
 
         /* Make sure we have enough bytes to get the version header and checksum. */
         if (Core::ourStrlen($bytes) < self::SERIALIZE_HEADER_BYTES + self::CHECKSUM_BYTE_SIZE) {
@@ -166,7 +197,7 @@ final class Encoding
         /* Re-compute the checksum. */
         $checksum_b = \hash(self::CHECKSUM_HASH_ALGO, $checked_bytes, true);
 
-        /* Validate it. It *is* important for this to be constant time. */
+        /* Check if the checksum matches. */
         if (! Core::hashEquals($checksum_a, $checksum_b)) {
             throw new Ex\BadFormatException(
                 "Data is corrupted, the checksum doesn't match"

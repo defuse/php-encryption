@@ -9,52 +9,14 @@ final class Key
     const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
     const KEY_BYTE_SIZE       = 32;
 
-    /*
-     * Format:
-     * bin2hex([__HEADER__][____KEY BYTES___][___CHECKSUM___])
-     *
-     * HEADER:      The 4-byte version header.
-     * KEY BYTES:   The raw key bytes (length may depend on version).
-     * CHECKSUM:    SHA256(HEADER . KEY BYTES).
-     *
-     * The checksum field is for detecting accidental corruption *only*. It
-     * provides no cryptographic functionality.
-     *
-     * SECURITY NOTE:
-     *
-     *      The checksum introduces a potential security weakness.
-     *
-     *      Suppose an adversary has an exploit against the process containing
-     *      the key that allows them to overwrite an arbitrary byte of memory.
-     *      The adversary has exhausted all options, and can't get remote code
-     *      execution.
-     *
-     *      If they can overwrite a byte of the key, then force the checksum
-     *      validation to run, then determine (possibly through a side channel)
-     *      whether or not the checksum was correct, they learn whether their
-     *      guess for that byte was correct or not. They can recover the key
-     *      using at most 256 queries per byte.
-     *
-     *      This attack also applies to authenticated encryption as a whole, in
-     *      the situation where the adversary can overwrite a byte of the key
-     *      and then cause a valid ciphertext to be decrypted, and then
-     *      determine whether the MAC check passed or failed. This is much more
-     *      plausible than attacking encoded keys.
-     *
-     *      By using the full SHA256 hash instead of truncating it, I'm ensuring
-     *      that both ways of going about the attack are equivalently difficult
-     *      (a shorter checksum might be more useful if the arbitrary write
-     *      is more coarse-grained than a single byte).
-     */
-
     private $key_bytes = null;
 
     /**
-     * Create new random key.
+     * Creates new random key.
      *
-     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
-     * @return \Defuse\Crypto\Key
+     * @return Defuse\Crypto\Key
      */
     public static function createNewRandomKey()
     {
@@ -62,10 +24,11 @@ final class Key
     }
 
     /**
-     * Load a key from ascii safe string.
+     * Loads a Key from its encoded form.
      *
-     * @param $savedKeyString
+     * @param string $savedKeyString
      *
+     * @throws \Defuse\Crypto\Exception\BadFormatException
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
      * @return \Defuse\Crypto\Key
@@ -77,7 +40,7 @@ final class Key
     }
 
     /**
-     * Save to ascii safe string.
+     * Encodes the Key into a string of printable ASCII characters.
      *
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
@@ -92,9 +55,9 @@ final class Key
     }
 
     /**
-     * Gets raw bytes
+     * Gets the raw bytes of the key.
      *
-     * @return mixed
+     * @return string
      */
     public function getRawBytes()
     {
@@ -102,10 +65,9 @@ final class Key
     }
 
     /**
-     * Constructs a new Key object.
+     * Constructs a new Key object from a string of raw bytes.
      *
-     *
-     * @param $bytes
+     * @param string $bytes
      *
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
@@ -120,7 +82,7 @@ final class Key
     }
 
     /**
-     * NEVER use this, except for testing.
+     * INTERNAL USE ONLY: Constructs a Key object from a string of raw bytes.
      *
      * @param $bytes
      *

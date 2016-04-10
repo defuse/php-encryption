@@ -7,15 +7,14 @@ use Defuse\Crypto\Exception as Ex;
 final class File
 {
     /**
-     * Encrypt the contents at $inputFilename, storing the result in
-     * $outputFilename using HKDF of $key to perform authenticated encryption
+     * Encrypts the input file, saving the ciphertext to the output file.
      *
      * @param string $inputFilename
      * @param string $outputFilename
      * @param Key    $key
      *
-     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
-     * @throws \Defuse\Crypto\Exception\CryptoException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
      *
      * @return bool
      */
@@ -28,6 +27,19 @@ final class File
         );
     }
 
+    /**
+     * Encrypts a file with a password, using a slow key derivation function to
+     * make password cracking more expensive.
+     *
+     * @param string $inputFilename
+     * @param string $outputFilename
+     * @param string $password
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     *
+     * @return bool
+     */
     public static function encryptFileWithPassword($inputFilename, $outputFilename, $password)
     {
         return self::encryptFileInternal(
@@ -338,7 +350,7 @@ final class File
                 $thisIv
             );
 
-            $thisIv = Core::incrementCounter($thisIv, $inc, Core::CIPHER_METHOD);
+            $thisIv = Core::incrementCounter($thisIv, $inc);
 
             /**
              * Check that the encryption was performed successfully
@@ -661,7 +673,7 @@ final class File
                 $thisIv
             );
 
-            $thisIv = Core::incrementCounter($thisIv, $inc, Core::CIPHER_METHOD);
+            $thisIv = Core::incrementCounter($thisIv, $inc);
 
             /**
              * Test for decryption faulure
@@ -685,27 +697,27 @@ final class File
     }
 
     /**
-     * Read from a stream; prevent partial reads
+     * Read from a stream; prevent partial reads.
      *
      * @param resource $stream
-     * @param int      $num
+     * @param int      $num_bytes
      *
      * @throws \RangeException
      * @throws Ex\IOException
      *
      * @return string
      */
-    final public static function readBytes($stream, $num)
+    final public static function readBytes($stream, $num_bytes)
     {
-        if ($num < 0) {
+        if ($num_bytes < 0) {
             throw new \RangeException(
                 'Tried to read less than 0 bytes'
             );
-        } elseif ($num === 0) {
+        } elseif ($num_bytes === 0) {
             return '';
         }
         $buf       = '';
-        $remaining = $num;
+        $remaining = $num_bytes;
         while ($remaining > 0 && ! \feof($stream)) {
             $read = \fread($stream, $remaining);
 
@@ -717,7 +729,7 @@ final class File
             $buf .= $read;
             $remaining -= Core::ourStrlen($read);
         }
-        if (Core::ourStrlen($buf) !== $num) {
+        if (Core::ourStrlen($buf) !== $num_bytes) {
             throw new Ex\IOException(
                 'Tried to read past the end of the file'
             );
@@ -726,33 +738,33 @@ final class File
     }
 
     /**
-     * Write to a stream; prevent partial writes
+     * Write to a stream; prevents partial writes.
      *
      * @param resource $stream
      * @param string   $buf
-     * @param int      $num    (number of bytes)
+     * @param int      $num_bytes
      *
      * @throws Ex\IOException
      *
      * @return string
      */
-    final public static function writeBytes($stream, $buf, $num = null)
+    final public static function writeBytes($stream, $buf, $num_bytes = null)
     {
         $bufSize = Core::ourStrlen($buf);
-        if ($num === null) {
-            $num = $bufSize;
+        if ($num_bytes === null) {
+            $num_bytes = $bufSize;
         }
-        if ($num > $bufSize) {
+        if ($num_bytes > $bufSize) {
             throw new Ex\IOException(
                 'Trying to write more bytes than the buffer contains.'
             );
         }
-        if ($num < 0) {
+        if ($num_bytes < 0) {
             throw new Ex\IOException(
                 'Tried to write less than 0 bytes'
             );
         }
-        $remaining = $num;
+        $remaining = $num_bytes;
         while ($remaining > 0) {
             $written = \fwrite($stream, $buf, $remaining);
             if ($written === false) {
@@ -763,9 +775,14 @@ final class File
             $buf = Core::ourSubstr($buf, $written, null);
             $remaining -= $written;
         }
-        return $num;
+        return $num_bytes;
     }
 
+    /**
+     * Returns the last PHP error's message string.
+     *
+     * @return string
+     */
     private static function getLastErrorMessage()
     {
         $error = error_get_last();

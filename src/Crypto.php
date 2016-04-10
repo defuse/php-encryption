@@ -213,7 +213,7 @@ class Crypto
         if (! $raw_binary) {
             try {
                 $ciphertext = Encoding::hexToBin($ciphertext);
-            } catch (\RangeException $ex) {
+            } catch (Ex\BadFormatException $ex) {
                 throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'Ciphertext has invalid hex encoding.'
                 );
