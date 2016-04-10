@@ -40,7 +40,7 @@ Getting the Code
 
 There are several different ways to obtain this library's code and to add it to
 your project. Even if you've already cloned the code from GitHub, you should
-take steps to verify the cryptographic signatures, to make sure the code you got
+take steps to verify the cryptographic signatures to make sure the code you got
 was not intercepted and modified by an attacker.
 
 See the [**Installing and Verifying**](docs/InstallingAndVerifying.md)
