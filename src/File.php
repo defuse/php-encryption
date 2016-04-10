@@ -170,6 +170,16 @@ final class File
         );
     }
 
+    /**
+     * Encrypts a file with either a key or a password.
+     *
+     * @param string        $inputFilename
+     * @param string        $outputFilename
+     * @param KeyOrPassword $secret
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     */
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
         if (! \is_string($inputFilename)) {
@@ -183,12 +193,7 @@ final class File
             );
         }
 
-            /** Open the file handles **/
-
-            /**
-             * Input file handle
-             */
-            $if = @\fopen($inputFilename, 'rb');
+        $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
                 'Cannot open input file for encrypting: ' .
@@ -197,10 +202,7 @@ final class File
         }
         \stream_set_read_buffer($if, 0);
 
-            /**
-             * Output file handle
-             */
-            $of = @\fopen($outputFilename, 'wb');
+        $of = @\fopen($outputFilename, 'wb');
         if ($of === false) {
             \fclose($if);
             throw new Ex\IOException(
@@ -210,9 +212,6 @@ final class File
         }
         \stream_set_write_buffer($of, 0);
 
-        /**
-         * Use encryptResource() to actually write the encrypted data to $of
-         */
         try {
             self::encryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
@@ -221,9 +220,6 @@ final class File
             throw $ex;
         }
 
-        /**
-         * Close handles
-         */
         if (\fclose($if) === false) {
             throw new Ex\IOException(
                 'Cannot close input file for encrypting'
@@ -236,6 +232,17 @@ final class File
         }
     }
 
+    /**
+     * Decrypts a file with either a key or a password.
+     *
+     * @param string        $inputFilename
+     * @param string        $outputFilename
+     * @param KeyOrPassword $secret
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
         if (! \is_string($inputFilename)) {
@@ -249,12 +256,7 @@ final class File
             );
         }
 
-            /** Open the file handles **/
-
-            /**
-             * Input file handle
-             */
-            $if = @\fopen($inputFilename, 'rb');
+        $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
                 'Cannot open input file for decrypting: ' .
@@ -263,10 +265,7 @@ final class File
         }
         \stream_set_read_buffer($if, 0);
 
-            /**
-             * Output file handle
-             */
-            $of = @\fopen($outputFilename, 'wb');
+        $of = @\fopen($outputFilename, 'wb');
         if ($of === false) {
             \fclose($if);
             throw new Ex\IOException(
@@ -276,9 +275,6 @@ final class File
         }
         \stream_set_write_buffer($of, 0);
 
-        /**
-         * Use decryptResource() to actually write the decrypted data to $of
-         */
         try {
             self::decryptResourceInternal($if, $of, $secret);
         } catch (Ex\CryptoException $ex) {
@@ -287,9 +283,6 @@ final class File
             throw $ex;
         }
 
-        /**
-         * Close handles
-         */
         if (\fclose($if) === false) {
             throw new Ex\IOException(
                 'Cannot close input file for decrypting'
@@ -302,6 +295,16 @@ final class File
         }
     }
 
+    /**
+     * Encrypts a resource with either a key or a password.
+     *
+     * @param resource      $inputHandle
+     * @param resource      $outputHandle
+     * @param KeyOrPassword $secret
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     */
     private static function encryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
     {
         // Because we don't have strict typing in PHP 5
@@ -433,6 +436,17 @@ final class File
         self::writeBytes($outputHandle, $finalHMAC, CORE::MAC_BYTE_SIZE);
     }
 
+    /**
+     * Decrypts a resource with either a key or a password.
+     *
+     * @param resource      $inputHandle
+     * @param resource      $outputHandle
+     * @param KeyOrPassword $secret
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Defuse\Crypto\Exception\IOException
+     * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
     public static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
     {
         // Because we don't have strict typing in PHP 5
