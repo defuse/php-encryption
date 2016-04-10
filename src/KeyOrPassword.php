@@ -13,20 +13,44 @@ final class KeyOrPassword
     private $secret_type = null;
     private $secret      = null;
 
+    /**
+     * Initializes an instance of KeyOrPassword from a key.
+     *
+     * @param Key $key
+     *
+     * @return KeyOrPassword
+     */
     public static function createFromKey(Key $key)
     {
         return new KeyOrPassword(self::SECRET_TYPE_KEY, $key);
     }
 
+    /**
+     * Initializes an instance of KeyOrPassword from a password.
+     *
+     * @param string $password
+     *
+     * @return KeyOrPassword
+     */
     public static function createFromPassword($password)
     {
         return new KeyOrPassword(self::SECRET_TYPE_PASSWORD, $password);
     }
 
+    /**
+     * Derives authentication and encryption keys from the secret, using a slow
+     * key derivation function if the secret is a password.
+     *
+     * @param string $salt
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     *
+     * @return DerivedKeys
+     */
     public function deriveKeys($salt)
     {
         if (Core::ourStrlen($salt) !== Core::SALT_BYTE_SIZE) {
-            throw new Ex\CannotPerformOperationException("Bad salt.");
+            throw new Ex\EnvironmentIsBrokenException('Bad salt.');
         }
 
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
@@ -54,7 +78,6 @@ final class KeyOrPassword
                 Core::KEY_BYTE_SIZE,
                 true
             );
-            // TODO: Is reusing the same $salt between PBKDF2 and HKDF acceptable?
             $akey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $prekey,
@@ -71,10 +94,16 @@ final class KeyOrPassword
             );
             return new DerivedKeys($akey, $ekey);
         } else {
-            throw new Ex\CannotPerformOperationException("Bad secret type.");
+            throw new Ex\EnvironmentIsBrokenException('Bad secret type.');
         }
     }
 
+    /**
+     * Constructor for KeyOrPassword.
+     *
+     * @param int   $secret_type
+     * @param mixed $secret      (either a Key or a password string)
+     */
     private function __construct($secret_type, $secret)
     {
         $this->secret_type = $secret_type;

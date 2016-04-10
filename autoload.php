@@ -48,19 +48,15 @@
             'Salt.php',
         'RuntimeTests' =>
             'RuntimeTests.php',
-        'StreamInterface' =>
-            'StreamInterface.php',
         // Exceptions:
-        'Exception\\CannotPerformOperationException' =>
-            'Exception/CannotPerformOperationException.php',
+        'Exception\\BadFormatException' =>
+            'Exception/BadFormatException.php',
+        'Exception\\EnvironmentIsBrokenException' =>
+            'Exception/EnvironmentIsBrokenException.php',
         'Exception\\CryptoException' =>
             'Exception/CryptoException.php',
-        'Exception\\CryptoTestFailedException' =>
-            'Exception/CryptoTestFailedException.php',
         'Exception\\IOException' =>
             'Exception/IOException.php',
-        'Exception\\InvalidInput' =>
-            'Exception/InvalidInput.php',
         'Exception\\WrongKeyOrModifiedCiphertextException' =>
             'Exception/WrongKeyOrModifiedCiphertextException.php',
     );

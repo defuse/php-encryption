@@ -6,17 +6,17 @@ use Defuse\Crypto\Exception as Ex;
 
 /*
  * We're using static class inheritance to get access to protected methods
- * inside Crypto. To keep things easy to understand, DO NOT USE self:: in this
- * class. Always prefix explicitly with Crypto:: or RuntimeTests::.
+ * inside Crypto. To make it easy to know where the method we're calling can be
+ * found, within this file, prefix calls with `Crypto::` or `RuntimeTests::`,
+ * and don't use `self::`.
  */
 
 class RuntimeTests extends Crypto
 {
-    /*
-     * Runs tests.
-     * Raises Ex\CannotPerformOperationException or Ex\CryptoTestFailedException if
-     * one of the tests fail. If any tests fails, your system is not capable of
-     * performing encryption, so make sure you fail safe in that case.
+    /**
+     * Runs the runtime tests.
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public static function runtimeTest()
     {
@@ -37,7 +37,7 @@ class RuntimeTests extends Crypto
              * don't care about, and just ignores all exceptions, they won't get
              * screwed when they then start to use the library for something
              * they do care about. */
-            throw new Ex\CryptoTestFailedException('Tests failed previously.');
+            throw new Ex\EnvironmentIsBrokenException('Tests failed previously.');
         }
 
         try {
@@ -45,7 +45,7 @@ class RuntimeTests extends Crypto
 
             Core::ensureFunctionExists('openssl_get_cipher_methods');
             if (\in_array(Core::CIPHER_METHOD, \openssl_get_cipher_methods()) === false) {
-                throw new Ex\CryptoTestFailedException('Cipher method not supported.');
+                throw new Ex\EnvironmentIsBrokenException('Cipher method not supported.');
             }
 
             RuntimeTests::AESTestVector();
@@ -54,13 +54,13 @@ class RuntimeTests extends Crypto
 
             RuntimeTests::testEncryptDecrypt();
             if (Core::ourStrlen(Key::createNewRandomKey()->getRawBytes()) != Core::KEY_BYTE_SIZE) {
-                throw new Ex\CryptoTestFailedException();
+                throw new Ex\EnvironmentIsBrokenException();
             }
 
             if (Core::ENCRYPTION_INFO_STRING == Core::AUTHENTICATION_INFO_STRING) {
-                throw new Ex\CryptoTestFailedException();
+                throw new Ex\EnvironmentIsBrokenException();
             }
-        } catch (Ex\CryptoTestFailedException $ex) {
+        } catch (Ex\EnvironmentIsBrokenException $ex) {
             // Do this, otherwise it will stay in the "tests are running" state.
             $test_state = 3;
             throw $ex;
@@ -70,6 +70,11 @@ class RuntimeTests extends Crypto
         $test_state = 1;
     }
 
+    /**
+     * High-level tests of Crypto operations.
+     *
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
     private static function testEncryptDecrypt()
     {
         $key  = Key::createNewRandomKey();
@@ -81,18 +86,18 @@ class RuntimeTests extends Crypto
             $decrypted = Crypto::decrypt($ciphertext, $key, true);
         } catch (Ex\WrongKeyOrModifiedCiphertextException $ex) {
             // It's important to catch this and change it into a
-            // Ex\CryptoTestFailedException, otherwise a test failure could trick
+            // Ex\EnvironmentIsBrokenException, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
         if ($decrypted !== $data) {
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         // Modifying the ciphertext: Appending a string.
         try {
             Crypto::decrypt($ciphertext . 'a', $key, true);
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
@@ -101,14 +106,14 @@ class RuntimeTests extends Crypto
             0, // The header.
             Core::HEADER_VERSION_SIZE + 1, // the salt
             Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + 1, // the IV
-            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + Core::BLOCK_BYTE_SIZE + 1 // the ciphertext
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + Core::BLOCK_BYTE_SIZE + 1, // the ciphertext
         ];
 
         foreach ($indices_to_change as $index) {
             try {
                 $ciphertext[$index] = \chr((\ord($ciphertext[$index]) + 1) % 256);
                 Crypto::decrypt($ciphertext, $key, true);
-                throw new Ex\CryptoTestFailedException();
+                throw new Ex\EnvironmentIsBrokenException();
             } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
             }
         }
@@ -120,7 +125,7 @@ class RuntimeTests extends Crypto
         $wrong_key  = Key::createNewRandomKey();
         try {
             Crypto::decrypt($ciphertext, $wrong_key, true);
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
@@ -129,15 +134,15 @@ class RuntimeTests extends Crypto
         $ciphertext = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
         try {
             Crypto::decrypt($ciphertext, $key, true);
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
     }
 
     /**
-     * Run-time testing
+     * Test HKDF against test vectors.
      *
-     * @throws Ex\CryptoTestFailedException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     private static function HKDFTestVector()
     {
@@ -155,7 +160,7 @@ class RuntimeTests extends Crypto
         );
         $computed_okm = Core::HKDF('sha256', $ikm, $length, $info, $salt);
         if ($computed_okm !== $okm) {
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         // Test Case 7
@@ -168,14 +173,14 @@ class RuntimeTests extends Crypto
         );
         $computed_okm = Core::HKDF('sha1', $ikm, $length, '', null);
         if ($computed_okm !== $okm) {
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
     }
 
     /**
-     * Run-Time tests
+     * Test HMAC against test vectors.
      *
-     * @throws Ex\CryptoTestFailedException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     private static function HMACTestVector()
     {
@@ -184,14 +189,14 @@ class RuntimeTests extends Crypto
         $data    = 'Hi There';
         $correct = 'b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7';
         if (\hash_hmac(Core::HASH_FUNCTION_NAME, $data, $key) !== $correct) {
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
     }
 
     /**
-     * Run-time tests
+     * Test AES against test vectors.
      *
-     * @throws Ex\CryptoTestFailedException
+     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     private static function AESTestVector()
     {
@@ -221,12 +226,12 @@ class RuntimeTests extends Crypto
             echo "\n---\n";
             echo \bin2hex($ciphertext);
             echo \str_repeat("\n", 30);
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
 
         $computed_plaintext = Crypto::plainDecrypt($ciphertext, $key, $iv, Core::CIPHER_METHOD);
         if ($computed_plaintext !== $plaintext) {
-            throw new Ex\CryptoTestFailedException();
+            throw new Ex\EnvironmentIsBrokenException();
         }
     }
 }

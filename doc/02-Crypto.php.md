@@ -37,9 +37,7 @@ try {
     //     \Defuse\Crypto\Crypto\binToHex()
     //     \Defuse\Crypto\Crypto\hexToBin()
     //
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely create a key');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely create a key');
 }
 ```
@@ -51,9 +49,7 @@ Encrypting a Message
 $message = 'ATTACK AT DAWN';
 try {
     $ciphertext = \Defuse\Crypto\Crypto::Encrypt($message, $key);
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely perform encryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely perform encryption');
 }
 ```
@@ -71,9 +67,7 @@ try {
     //   3. $ciphertext is not a valid ciphertext or was corrupted.
     // Assume the worst.
     die('DANGER! DANGER! The ciphertext has been tampered with!');
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely perform decryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely perform decryption');
 }
 ```
@@ -93,9 +87,7 @@ try {
     //   3. $ciphertext is not a valid ciphertext or was corrupted.
     // Assume the worst.
     die('DANGER! DANGER! The ciphertext has been tampered with!');
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely perform decryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely perform decryption');
 }
 ```

@@ -37,9 +37,7 @@ try {
     //     \Defuse\Crypto\File\binToHex()
     //     \Defuse\Crypto\File\hexToBin()
     //
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely create a key');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely create a key');
 }
 ```
@@ -62,9 +60,7 @@ try {
         $outputFilename,
         $key
     );
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely perform encryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely perform encryption');
 }
 ```
@@ -87,9 +83,7 @@ try {
         $outputFilename,
         $key
     );
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely perform decryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely perform decryption');
 }
 ```
@@ -108,9 +102,7 @@ $oFile = \fopen('image2.enc.jpg', 'wb');
 
 try {
     \Defuse\Crypto\File::encryptResource($iFile, $oFile, $key);
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely perform encryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely perform encryption');
 }
 ```
@@ -129,9 +121,7 @@ $oFile = \fopen('image2.dec.jpg', 'wb');
 
 try {
     \Defuse\Crypto\File::decryptResource($iFile, $oFile, $key);
-} catch (\Defuse\Crypto\Exception\CryptoTestFailedException $ex) {
-    die('Cannot safely perform decryption');
-} catch (\Defuse\Crypto\Exception\CannotPerformOperationException $ex) {
+} catch (\Defuse\Crypto\Exception\EnvironmentIsBrokenException $ex) {
     die('Cannot safely perform decryption');
 }
 ```

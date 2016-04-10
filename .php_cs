@@ -37,7 +37,6 @@ $config = Symfony\CS\Config\Config::create()
         'unused_use',
         'whitespacy_lines',
         'align_double_arrow',
-        'align_equals',
         'concat_with_spaces',
         'logical_not_operators_with_successor_space',
         'multiline_spaces_before_semicolon',
