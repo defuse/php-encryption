@@ -309,36 +309,19 @@ final class File
                 'Output handle must be a resource!'
             );
         }
+
         $inputStat = \fstat($inputHandle);
         $inputSize = $inputStat['size'];
 
-        /**
-         *  Let's split our keys
-         */
         $file_salt = Core::secureRandom(Core::SALT_BYTE_SIZE);
         $keys = $secret->deriveKeys($file_salt);
         $ekey = $keys->getEncryptionKey();
         $akey = $keys->getAuthenticationKey();
 
-        /**
-         *  Generate a random initialization vector.
-         */
         $ivsize = Core::BLOCK_BYTE_SIZE;
         $iv     = Core::secureRandom($ivsize);
 
-        /**
-         * First let's write our header, file salt, and IV to the first N blocks of the output file
-         */
-        self::writeBytes(
-            $outputHandle,
-            Core::CURRENT_VERSION . $file_salt . $iv,
-            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + $ivsize
-        );
-
-        /**
-         * We're going to initialize a HMAC-SHA256 with the given $akey
-         * and update it with each ciphertext chunk
-         */
+        /* Initialize a streaming HMAC state. */
         $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
         if ($hmac === false) {
             throw new Ex\EnvironmentIsBrokenException(
@@ -346,34 +329,37 @@ final class File
             );
         }
 
-        /**
-         * We operate on $thisIv using a hash-based PRF derived from the initial
-         * IV for the first block
-         */
-        $thisIv = $iv;
+        /* Write the header, salt, and IV. */
+        self::writeBytes(
+            $outputHandle,
+            Core::CURRENT_VERSION . $file_salt . $iv,
+            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + $ivsize
+        );
 
-        /**
-         * How much do we increase the counter after each buffered encryption to
-         * prevent nonce reuse?
-         */
-        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
-
-        /**
-         * Let's MAC our salt and IV/nonce
-         */
+        /* Add the header, salt, and IV to the HMAC. */
         \hash_update($hmac, Core::CURRENT_VERSION);
         \hash_update($hmac, $file_salt);
         \hash_update($hmac, $iv);
 
-        /**
-         * Iterate until we reach the end of the input file
-         */
-        $breakR = false;
-        while (! \feof($inputHandle)) {
+        /* $thisIv will be incremented after each call to the encryption. */
+        $thisIv = $iv;
+
+        /* How many blocks do we encrypt at a time? We increment by this value. */
+        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
+
+        /* Loop until we reach the end of the input file. */
+        $at_file_end = false;
+        while (! (\feof($inputHandle) || $at_file_end)) {
+            /* Find out if we can read a full buffer, or only a partial one. */
             $pos = \ftell($inputHandle);
+            if ($pos === false) {
+                throw new Ex\IOException(
+                    'Could not get current position in input file during encryption'
+                );
+            }
             if ($pos + Core::BUFFER_BYTE_SIZE >= $inputSize) {
-                $breakR = true;
-                // We need to break after this loop iteration
+                /* We're at the end of the file, so we need to break out of the loop. */
+                $at_file_end = true;
                 $read = self::readBytes(
                     $inputHandle,
                     $inputSize - $pos
@@ -385,9 +371,7 @@ final class File
                 );
             }
 
-            /**
-             * Perform the AES encryption. Encrypts the plaintext.
-             */
+            /* Encrypt this buffer. */
             $encrypted = \openssl_encrypt(
                 $read,
                 Core::CIPHER_METHOD,
@@ -396,34 +380,26 @@ final class File
                 $thisIv
             );
 
-            $thisIv = Core::incrementCounter($thisIv, $inc);
-
-            /**
-             * Check that the encryption was performed successfully
-             */
             if ($encrypted === false) {
                 throw new Ex\EnvironmentIsBrokenException(
                     'OpenSSL encryption error'
                 );
             }
 
-            /**
-             * Write the ciphertext to the output file
-             */
+            /* Write this buffer's ciphertext. */
             self::writeBytes($outputHandle, $encrypted, Core::ourStrlen($encrypted));
-
-            /**
-             * Update the HMAC for the entire file with the data from this block
-             */
+            /* Add this buffer's ciphertext to the HMAC. */
             \hash_update($hmac, $encrypted);
-            if ($breakR) {
-                break;
-            }
+
+            /* Increment the counter by the number of blocks in a buffer. */
+            $thisIv = Core::incrementCounter($thisIv, $inc);
+            /* WARNING: Usually, unless the file is a multiple of the buffer
+             * size, $thisIv will contain an incorrect value here on the last
+             * iteration of this loop. */
         }
 
-        // Now let's get our HMAC and append it
+        /* Get the HMAC and append it to the ciphertext. */
         $finalHMAC = \hash_final($hmac, true);
-
         self::writeBytes($outputHandle, $finalHMAC, CORE::MAC_BYTE_SIZE);
     }
 
@@ -450,6 +426,7 @@ final class File
                 'Output handle must be a resource!'
             );
         }
+
         $stat = \fstat($inputHandle);
         if ($stat['size'] < Core::MINIMUM_CIPHERTEXT_SIZE) {
             throw new Ex\WrongKeyOrModifiedCiphertextException(
