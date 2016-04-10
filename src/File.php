@@ -182,17 +182,6 @@ final class File
      */
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
-        if (! \is_string($inputFilename)) {
-            throw new Ex\IOException(
-                'Input filename must be a string!'
-            );
-        }
-        if (! \is_string($outputFilename)) {
-            throw new Ex\IOException(
-                'Output filename must be a string!'
-            );
-        }
-
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
@@ -245,17 +234,6 @@ final class File
      */
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
-        if (! \is_string($inputFilename)) {
-            throw new Ex\IOException(
-                'Input filename must be a string!'
-            );
-        }
-        if (! \is_string($outputFilename)) {
-            throw new Ex\IOException(
-                'Output filename must be a string!'
-            );
-        }
-
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
             throw new Ex\IOException(
