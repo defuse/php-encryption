@@ -13,8 +13,9 @@ Let's start with the following definitions:
   and *salt* is the salt.
 - AES-256-CTR(*m*, *key*, *iv*) is the encryption of *m* with AES-256 in CTR
   mode using key *key* and initialization vector *iv*.
-- PBKDF2-SHA256(*p*, *s*, *i*, *n*) is PBKDF2 using *i* iterations of the
-  hash function SHA256 on the password *p* and salt *s*, outputting *n* bytes.
+- PBKDF2-SHA256(*p*, *s*, *i*, *n*) is the password-based key derivation
+  function defined in RFC 2898, using *i* iterations of the hash function SHA256
+  on the password *p* and salt *s*, outputting *n* bytes.
 - VERSION is the string `"\xDE\xF5\x02\x00"`.
 - AUTHINFO is the string `"DefusePHP|V2|KeyForAuthentication"`.
 - ENCRINFO is the string `"DefusePHP|V2|KeyForEncryption"`.
@@ -41,5 +42,5 @@ For encryption using a password *p*, steps 1-3 above are replaced by:
 4. Derive the 32-byte encryption key *ekey* = HKDF-SHA256(*k*, 32, ENCRINFO, *salt*)
 
 The remainder of the process is the same. Notice the reuse of the same *salt*
-for PBKDF2 and HKDF-SHA256.
+for PBKDF2-SHA256 and HKDF-SHA256.
 
