@@ -30,10 +30,10 @@ To encrypt a message *m* using a 32-byte key *k*, the following steps are taken:
 7. Compute *h* = HMAC-SHA256(*ctxt*, *akey*).
 8. Output *ctxt* || *h*.
 
-Decryption is roughly the reverse process (see the code for details). The HMAC
-is verified before *c* is decrypted.
+Decryption is roughly the reverse process (see the code for details, since the
+security of the decryption routine is highly implementation-dependant).
 
-For encryption using a password *p*, steps 1-3 above are replaced with:
+For encryption using a password *p*, steps 1-3 above are replaced by:
 
 1. Generate a random 32-byte string *salt*.
 2. Compute *k* = PBKDF2-SHA256(*p*, *salt*, 100000, 32).
