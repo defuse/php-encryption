@@ -30,10 +30,6 @@ final class Core
     const LEGACY_ENCRYPTION_INFO_STRING     = 'DefusePHP|KeyForEncryption';
     const LEGACY_AUTHENTICATION_INFO_STRING = 'DefusePHP|KeyForAuthentication';
 
-    const CHECKSUM_BYTE_SIZE     = 32;
-    const CHECKSUM_HASH_ALGO     = 'sha256';
-    const SERIALIZE_HEADER_BYTES = 4;
-
     /*
      * V2.0 Format: VERSION (4 bytes) || SALT (32 bytes) || IV (16 bytes) ||
      *              CIPHERTEXT (varies) || HMAC (32 bytes)
