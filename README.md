@@ -7,8 +7,9 @@ This is a library for encrypting data with a key or password in PHP. **It
 requires PHP 5.4 or newer.** The current version is v2.0.0, which is supported
 by its authors with security and bugfixes until Jan 01, 2019.
 
-The library is a joint effort between Taylor Hornby and Scott Arciszewski as
-well as numerous open-source contributotrs.
+The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
+[Scott Arciszewski](https://paragonie.com/blog/author/scott-arcizewski) as well
+as numerous open-source contributotrs.
 
 What separates this library from other PHP encryption libraries is, firstly,
 that it is secure. The authors used to encounter insecure PHP encryption code on
