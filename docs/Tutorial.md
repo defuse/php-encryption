@@ -60,10 +60,12 @@ used.
 
 The following classes are available for you to use:
 
-- [Crypto](docs/classes/Crypto.md)
-- [File](docs/classes/File.md)
-- [Key](docs/classes/Key.md)
-- [KeyProtectedByPassword](docs/classes/KeyProtectedByPassword.md)
+- [Crypto](docs/classes/Crypto.md): Encrypting and decrypting strings.
+- [File](docs/classes/File.md): Encrypting and decrypting files.
+- [Key](docs/classes/Key.md): Represents a secret encryption key.
+- [KeyProtectedByPassword](docs/classes/KeyProtectedByPassword.md): Represents
+  a secret encryption key that needs to be "unlocked" by a password before it
+  can be used.
 
 ### Stereotype #1: Encrypting data in a remote database
 
