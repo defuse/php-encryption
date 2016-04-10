@@ -399,8 +399,8 @@ final class File
         }
 
         /* Get the HMAC and append it to the ciphertext. */
-        $finalHMAC = \hash_final($hmac, true);
-        self::writeBytes($outputHandle, $finalHMAC, CORE::MAC_BYTE_SIZE);
+        $final_mac = \hash_final($hmac, true);
+        self::writeBytes($outputHandle, $final_mac, CORE::MAC_BYTE_SIZE);
     }
 
     /**
@@ -427,6 +427,7 @@ final class File
             );
         }
 
+        /* Make sure the file is big enough for all the reads we need to do. */
         $stat = \fstat($inputHandle);
         if ($stat['size'] < Core::MINIMUM_CIPHERTEXT_SIZE) {
             throw new Ex\WrongKeyOrModifiedCiphertextException(
@@ -434,7 +435,7 @@ final class File
             );
         }
 
-        // Parse the header.
+        /* Check the version header. */
         $header = self::readBytes($inputHandle, Core::HEADER_VERSION_SIZE);
         if ($header !== Core::CURRENT_VERSION) {
             throw new Ex\WrongKeyOrModifiedCiphertextException(
@@ -442,63 +443,49 @@ final class File
             );
         }
 
-        // Let's grab the file salt.
+        /* Get the salt. */
         $file_salt = self::readBytes($inputHandle, Core::SALT_BYTE_SIZE);
 
-        // For storing MACs of each buffer chunk
-        $macs = [];
+        /* Get the IV. */
+        $ivsize = Core::BLOCK_BYTE_SIZE;
+        $iv     = self::readBytes($inputHandle, $ivsize);
 
-        /**
-         * 1. We need to decode some values from our files
-         */
-        /**
-         * Let's split our keys
-         *
-         * $ekey -- Encryption Key -- used for AES
-         */
+        /* Derive the authentication and encryption keys. */
         $keys = $secret->deriveKeys($file_salt);
         $ekey = $keys->getEncryptionKey();
         $akey = $keys->getAuthenticationKey();
 
-        /**
-         * Grab our IV from the encrypted message
-         *
-         * It should be the first N blocks of the file (N = 16)
-         */
-        $ivsize = Core::BLOCK_BYTE_SIZE;
-        $iv     = self::readBytes($inputHandle, $ivsize);
+        /* We'll store the MAC of each buffer-sized chunk as we verify the
+         * actual MAC, so that we can check them again when decrypting. */
+        $macs = [];
 
-        // How much do we increase the counter after each buffered encryption to prevent nonce reuse
-        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
-
+        /* $thisIv will be incremented after each call to the decryption. */
         $thisIv = $iv;
 
-        /**
-         * Let's grab our MAC
-         *
-         * It should be the last N blocks of the file (N = 32)
-         */
+        /* How many blocks do we encrypt at a time? We increment by this value. */
+        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
+
+        /* Get the HMAC. */
         if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === false) {
             throw new Ex\IOException(
                 'Cannot seek to beginning of MAC within input file'
             );
         }
 
-        // Grab our last position of ciphertext before we read the MAC
+        /* Get the position of the last byte in the actual ciphertext. */
         $cipher_end = \ftell($inputHandle);
         if ($cipher_end === false) {
             throw new Ex\IOException(
                 'Cannot read input file'
             );
         }
-        --$cipher_end; // We need to subtract one
+        /* We have the position of the first byte of the HMAC. Go back by one. */
+        --$cipher_end;
 
-        // We keep our MAC stored in this variable
+        /* Read the HMAC. */
         $stored_mac = self::readBytes($inputHandle, Core::MAC_BYTE_SIZE);
 
-        /**
-         * We begin recalculating the HMAC for the entire file...
-         */
+        /* Initialize a streaming HMAC state. */
         $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
         if ($hmac === false) {
             throw new Ex\EnvironmentIsBrokenException(
@@ -506,29 +493,22 @@ final class File
             );
         }
 
-        /**
-         * Reset file pointer to the beginning of the file after the header
-         */
+        /* Reset file pointer to the beginning of the file after the header */
         if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
             throw new Ex\IOException(
                 'Cannot read seek within input file'
             );
         }
 
-        /**
-         * Set it to the first non-salt and non-IV byte
-         */
+        /* Seek to the start of the actual ciphertext. */
         if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize, SEEK_CUR) === false) {
             throw new Ex\IOException(
                 'Cannot seek input file to beginning of ciphertext'
             );
         }
-        /**
-         * 2. Let's recalculate the MAC
-         */
-        /**
-         * Let's initialize our $hmac hasher with our Salt and IV
-         */
+
+        /* PASS #1: Calculating the HMAC. */
+
         \hash_update($hmac, $header);
         \hash_update($hmac, $file_salt);
         \hash_update($hmac, $iv);
@@ -536,9 +516,6 @@ final class File
 
         $break = false;
         while (! $break) {
-            /**
-             * First, grab the current position
-             */
             $pos = \ftell($inputHandle);
             if ($pos === false) {
                 throw new Ex\IOException(
@@ -546,10 +523,7 @@ final class File
                 );
             }
 
-            /**
-             * Would a full DBUFFER read put it past the end of the
-             * ciphertext? If so, only return a portion of the file.
-             */
+            /* Read the next buffer-sized chunk (or less). */
             if ($pos + Core::BUFFER_BYTE_SIZE >= $cipher_end) {
                 $break = true;
                 $read  = self::readBytes(
@@ -563,58 +537,40 @@ final class File
                 );
             }
 
-            /**
-             * We're updating our HMAC and nothing else
-             */
+            /* Update the HMAC. */
             \hash_update($hmac, $read);
 
-            /**
-             * Store a MAC of each chunk
-             */
-            $chunkMAC = \hash_copy($hmac);
-            if ($chunkMAC === false) {
+            /* Remember this buffer-sized chunk's HMAC. */
+            $chunk_mac = \hash_copy($hmac);
+            if ($chunk_mac === false) {
                 throw new Ex\EnvironmentIsBrokenException(
                     'Cannot duplicate a hash context'
                 );
             }
-            $macs []= \hash_final($chunkMAC);
+            $macs []= \hash_final($chunk_mac);
         }
-        /**
-         * We should now have enough data to generate an identical HMAC
-         */
-        $finalHMAC = \hash_final($hmac, true);
-        /**
-         * 3. Did we match?
-         */
-        if (! Core::hashEquals($finalHMAC, $stored_mac)) {
+
+        /* Get the final HMAC, which should match the stored one. */
+        $final_mac = \hash_final($hmac, true);
+
+        /* Verify the HMAC. */
+        if (! Core::hashEquals($final_mac, $stored_mac)) {
             throw new Ex\WrongKeyOrModifiedCiphertextException(
                 'Message Authentication failure; tampering detected.'
             );
         }
-        /**
-         * 4. Okay, let's begin decrypting
-         */
-        /**
-         * Return file pointer to the first non-header, non-IV byte in the file
-         */
+
+        /* PASS #2: Decrypt and write output. */
+
+        /* Rewind to the start of the actual ciphertext. */
         if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
             throw new Ex\IOException(
                 'Could not move the input file pointer during decryption'
             );
         }
 
-        /**
-         * Should we break the writing?
-         */
-        $breakW = false;
-
-        /**
-         * This loop writes plaintext to the destination file:
-         */
-        while (! $breakW) {
-            /**
-             * Get the current position
-             */
+        $at_file_end = false;
+        while (! $at_file_end) {
             $pos = \ftell($inputHandle);
             if ($pos === false) {
                 throw new Ex\IOException(
@@ -622,12 +578,9 @@ final class File
                 );
             }
 
-            /**
-             * Would a full BUFFER read put it past the end of the
-             * ciphertext? If so, only return a portion of the file.
-             */
+            /* Read the next buffer-sized chunk (or less). */
             if ($pos + Core::BUFFER_BYTE_SIZE >= $cipher_end) {
-                $breakW = true;
+                $at_file_end = true;
                 $read   = self::readBytes(
                     $inputHandle,
                     $cipher_end - $pos + 1
@@ -639,19 +592,17 @@ final class File
                 );
             }
 
-            /**
-             * Recalculate the MAC, compare with the one stored in the $macs
-             * array to ensure attackers couldn't tamper with the file
-             * after MAC verification
-             */
+            /* Recalculate the MAC (so far) and compare it with the one we
+             * remembered from pass #1 to ensure attackers didn't change the
+             * ciphertext after MAC verification. */
             \hash_update($hmac2, $read);
-            $calcMAC = \hash_copy($hmac2);
-            if ($calcMAC === false) {
+            $calc_mac = \hash_copy($hmac2);
+            if ($calc_mac === false) {
                 throw new Ex\EnvironmentIsBrokenException(
                     'Cannot duplicate a hash context'
                 );
             }
-            $calc = \hash_final($calcMAC);
+            $calc = \hash_final($calc_mac);
 
             if (empty($macs)) {
                 throw new Ex\WrongKeyOrModifiedCiphertextException(
@@ -663,9 +614,7 @@ final class File
                 );
             }
 
-            /**
-             * Perform the AES decryption. Decrypts the message.
-             */
+            /* Decrypt this buffer-sized chunk. */
             $decrypted = \openssl_decrypt(
                 $read,
                 Core::CIPHER_METHOD,
@@ -673,26 +622,24 @@ final class File
                 OPENSSL_RAW_DATA,
                 $thisIv
             );
-
-            $thisIv = Core::incrementCounter($thisIv, $inc);
-
-            /**
-             * Test for decryption faulure
-             */
             if ($decrypted === false) {
                 throw new Ex\EnvironmentIsBrokenException(
                     'OpenSSL decryption error'
                 );
             }
 
-            /**
-             * Write the plaintext out to the output file
-             */
+            /* Write the plaintext to the output file. */
             self::writeBytes(
                 $outputHandle,
                 $decrypted,
                 Core::ourStrlen($decrypted)
             );
+
+            /* Increment the IV by the amount of blocks in a buffer. */
+            $thisIv = Core::incrementCounter($thisIv, $inc);
+            /* WARNING: Usually, unless the file is a multiple of the buffer
+             * size, $thisIv will contain an incorrect value here on the last
+             * iteration of this loop. */
         }
     }
 
