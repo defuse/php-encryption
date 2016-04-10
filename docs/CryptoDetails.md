@@ -37,10 +37,8 @@ For encryption using a password *p*, steps 1-3 above are replaced by:
 
 1. Generate a random 32-byte string *salt*.
 2. Compute *k* = PBKDF2-SHA256(*p*, *salt*, 100000, 32).
-3. Derive the 32-byte authentication key *akey* =
-   HKDF-SHA256(*k*, 32, "DefusePHP|V2|KeyForAuthentication", *salt*).
-4. Derive the 32-byte encryption key *ekey* =
-   HKDF-SHA256(*k*, 32, "DefusePHP|V2|KeyForEncryption", *salt*).
+3. Derive the 32-byte authentication key *akey* = HKDF-SHA256(*k*, 32, AUTHINFO, *salt*)
+4. Derive the 32-byte encryption key *ekey* = HKDF-SHA256(*k*, 32, ENCRINFO, *salt*)
 
 The remainder of the process is the same. Notice the reuse of the same *salt*
 for PBKDF2 and HKDF-SHA256.
