@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 
-
 /**
  * Powered by ext/mcrypt (and thankfully NOT libmcrypt)
  * 

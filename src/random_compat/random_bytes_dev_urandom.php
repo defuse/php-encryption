@@ -25,8 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-if (!defined('RANDOM_COMPAT_READ_BUFFER')) {
+if (! defined('RANDOM_COMPAT_READ_BUFFER')) {
     define('RANDOM_COMPAT_READ_BUFFER', 8);
 }
 
@@ -35,6 +34,7 @@ if (!defined('RANDOM_COMPAT_READ_BUFFER')) {
  * random numbers in accordance with best practices
  * 
  * Why we use /dev/urandom and not /dev/random
+ *
  * @ref http://sockpuppet.org/blog/2014/02/25/safely-generate-random-numbers
  * 
  * @param int $bytes
@@ -55,7 +55,7 @@ function random_bytes($bytes)
          * We never fall back to /dev/random
          */
         $fp = fopen('/dev/urandom', 'rb');
-        if (!empty($fp)) {
+        if (! empty($fp)) {
             $st = fstat($fp);
             if (($st['mode'] & 0170000) !== 020000) {
                 fclose($fp);
@@ -63,7 +63,7 @@ function random_bytes($bytes)
             }
         }
 
-        if (!empty($fp)) {
+        if (! empty($fp)) {
             /**
              * stream_set_read_buffer() does not exist in HHVM
              * 
@@ -102,7 +102,7 @@ function random_bytes($bytes)
      * if (empty($fp)) line is logic that should only be run once per
      * page load.
      */
-    if (!empty($fp)) {
+    if (! empty($fp)) {
         $remaining = $bytes;
         $buf = '';
 
@@ -110,7 +110,7 @@ function random_bytes($bytes)
          * We use fread() in a loop to protect against partial reads
          */
         do {
-            $read = fread($fp, $remaining); 
+            $read = fread($fp, $remaining);
             if ($read === false) {
                 /**
                  * We cannot safely read from the file. Exit the
@@ -125,7 +125,7 @@ function random_bytes($bytes)
             $remaining -= RandomCompat_strlen($read);
             $buf .= $read;
         } while ($remaining > 0);
-        
+
         /**
          * Is our result valid?
          */

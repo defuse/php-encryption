@@ -69,7 +69,7 @@ function random_bytes($bytes)
              */
             return RandomCompat_substr($buf, 0, $bytes);
         }
-        ++$execCount; 
+        ++$execCount;
     } while ($execCount < $bytes);
 
     /**

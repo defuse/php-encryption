@@ -1,7 +1,7 @@
 <?php
 
-use Defuse\Crypto\Core;
 use \Defuse\Crypto\Encoding;
+use \Defuse\Crypto\Core;
 
 class EncodingTest extends PHPUnit_Framework_TestCase
 {
@@ -62,5 +62,4 @@ class EncodingTest extends PHPUnit_Framework_TestCase
         $str[0] = 'Z';
         Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
     }
-
 }
