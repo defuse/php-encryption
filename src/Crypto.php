@@ -73,7 +73,7 @@ class Crypto
      * derivation function to make password cracking more expensive.
      *
      * @param string $ciphertext
-     * @param Key    $key
+     * @param string $password
      * @param bool   $raw_binary
      *
      * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
