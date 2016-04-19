@@ -70,9 +70,15 @@ final class KeyOrPassword
             );
             return new DerivedKeys($akey, $ekey);
         } elseif ($this->secret_type === self::SECRET_TYPE_PASSWORD) {
+            /* Our PBKDF2 polyfill is vulnerable to a DoS attack documented in
+             * GitHub issue #230. The fix is to pre-hash the password to ensure
+             * it is short. We do the prehashing here instead of in pbkdf2() so
+             * that pbkdf2() still computes the function as defined by the
+             * standard. */
+            $prehash = \hash(Core::HASH_FUNCTION_NAME, $this->secret, true);
             $prekey = Core::pbkdf2(
-                'sha256',
-                $this->secret,
+                Core::HASH_FUNCTION_NAME,
+                $prehash,
                 $salt,
                 self::PBKDF2_ITERATIONS,
                 Core::KEY_BYTE_SIZE,
