@@ -7,15 +7,24 @@ a security bug.
 
 Let's start with the following definitions:
 
-- HKDF-SHA256(*k*, *n*, *info*, *salt*) is the key derivation function specified
-  in RFC 5869 (using SHA256 as the hash function) where *k* is the initial
-  keying material, *n* is the number of output bytes, *info* is the info string,
-  and *salt* is the salt.
-- AES-256-CTR(*m*, *key*, *iv*) is the encryption of *m* with AES-256 in CTR
-  mode using key *key* and initialization vector *iv*.
+- HKDF-SHA256(*k*, *n*, *info*, *s*) is the key derivation function specified in
+  RFC 5869 (using the SHA256 hash function). The parameters are:
+    - *k*: The initial keying material.
+    - *n*: The number of output bytes.
+    - *info*: The info string.
+    - *s*: The salt.
+- AES-256-CTR(*m*, *k*, *iv*) is AES-256 encryption in CTR mode. The parameters
+  are:
+    - *m*: An arbitrary-length (possibly zero-length) message.
+    - *k*: A 32-byte key.
+    - *iv*: A 16-byte initialization vector (nonce).
 - PBKDF2-SHA256(*p*, *s*, *i*, *n*) is the password-based key derivation
-  function defined in RFC 2898, using *i* iterations of the hash function SHA256
-  on the password *p* and salt *s*, outputting *n* bytes.
+  function defined in RFC 2898 (using the SHA256 hash function). The parameters
+  are:
+    - *p*: The password string.
+    - *s*: The salt string.
+    - *i*: The iteration count.
+    - *n*: The output length in bytes.
 - VERSION is the string `"\xDE\xF5\x02\x00"`.
 - AUTHINFO is the string `"DefusePHP|V2|KeyForAuthentication"`.
 - ENCRINFO is the string `"DefusePHP|V2|KeyForEncryption"`.
