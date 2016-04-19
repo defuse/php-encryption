@@ -47,7 +47,6 @@ function random_int($min, $max)
      * lose precision, so the <= and => operators might accidentally let a float
      * through.
      */
-    
     try {
         $min = RandomCompat_intval($min);
     } catch (TypeError $ex) {
@@ -63,7 +62,7 @@ function random_int($min, $max)
             'random_int(): $max must be an integer'
         );
     }
-    
+
     /**
      * Now that we've verified our weak typing system has given us an integer,
      * let's validate the logic then we can move forward with generating random
@@ -99,7 +98,7 @@ function random_int($min, $max)
     /**
      * Test for integer overflow:
      */
-    if (!is_int($range)) {
+    if (! is_int($range)) {
 
         /**
          * Still safely calculate wider ranges.
@@ -114,7 +113,6 @@ function random_int($min, $max)
          */
         $bytes = PHP_INT_SIZE;
         $mask = ~0;
-
     } else {
 
         /**
@@ -123,7 +121,7 @@ function random_int($min, $max)
          */
         while ($range > 0) {
             if ($bits % 8 === 0) {
-               ++$bytes;
+                ++$bytes;
             }
             ++$bits;
             $range >>= 1;
@@ -185,7 +183,7 @@ function random_int($min, $max)
          * ... or smaller than $min,
          * then try again.
          */
-    } while (!is_int($val) || $val > $max || $val < $min);
+    } while (! is_int($val) || $val > $max || $val < $min);
 
     return (int) $val;
 }

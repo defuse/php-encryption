@@ -1,7 +1,6 @@
 <?php
 
 use \Defuse\Crypto\Core;
-use \Defuse\Crypto\Encoding;
 use \Defuse\Crypto\Key;
 
 class KeyTest extends PHPUnit_Framework_TestCase
@@ -29,37 +28,6 @@ class KeyTest extends PHPUnit_Framework_TestCase
         $key    = Key::createNewRandomKey();
         $str    = $key->saveToAsciiSafeString();
         $str[0] = 'f';
-        Key::loadFromAsciiSafeString($str);
-    }
-
-    /**
-     * @expectedException \Defuse\Crypto\Exception\BadFormatException
-     * @expectedExceptionMessage checksum doesn't match
-     */
-    public function testIncorrectChecksum()
-    {
-        $key                                     = Key::createNewRandomKey();
-        $str                                     = $key->saveToAsciiSafeString();
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 0] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 1] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 3] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 4] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 5] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 6] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 7] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 8] = 'f';
-        Key::loadFromAsciiSafeString($str);
-    }
-
-    /**
-     * @expectedException \Defuse\Crypto\Exception\BadFormatException
-     * @expectedExceptionMessage not a hex string
-     */
-    public function testBadHexEncoding()
-    {
-        $key    = Key::createNewRandomKey();
-        $str    = $key->saveToAsciiSafeString();
-        $str[0] = 'Z';
         Key::loadFromAsciiSafeString($str);
     }
 }
