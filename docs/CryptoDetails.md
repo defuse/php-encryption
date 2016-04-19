@@ -46,10 +46,12 @@ security of the decryption routine is highly implementation-dependent).
 For encryption using a password *p*, steps 1-3 above are replaced by:
 
 1. Generate a random 32-byte string *salt*.
-2. Compute *k* = PBKDF2-SHA256(*p*, *salt*, 100000, 32).
+2. Compute *k* = PBKDF2-SHA256(SHA256(*p*), *salt*, 100000, 32).
 3. Derive the 32-byte authentication key *akey* = HKDF-SHA256(*k*, 32, AUTHINFO, *salt*)
 4. Derive the 32-byte encryption key *ekey* = HKDF-SHA256(*k*, 32, ENCRINFO, *salt*)
 
 The remainder of the process is the same. Notice the reuse of the same *salt*
-for PBKDF2-SHA256 and HKDF-SHA256.
+for PBKDF2-SHA256 and HKDF-SHA256. The prehashing in step 2 is done to prevent
+a [DoS attack using long
+passwords](https://github.com/defuse/php-encryption/issues/230).
 
