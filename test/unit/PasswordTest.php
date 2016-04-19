@@ -4,7 +4,7 @@ use \Defuse\Crypto\KeyProtectedByPassword;
 
 class PasswordTest extends PHPUnit_Framework_TestCase
 {
-    public function testKeyFromPasswordCorrect()
+    public function testKeyProtectedByPasswordCorrect()
     {
         $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
         $pkey2 = KeyProtectedByPassword::loadFromAsciiSafeString($pkey1->saveToAsciiSafeString());
@@ -18,7 +18,7 @@ class PasswordTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
-    public function testKeyFromPasswordWrong()
+    public function testKeyProtectedByPasswordWrong()
     {
         $pkey = KeyProtectedByPassword::createRandomPasswordProtectedKey('rightpassword');
         $key1 = $pkey->unlockKey('wrongpassword');

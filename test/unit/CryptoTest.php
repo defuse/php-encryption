@@ -84,4 +84,22 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
     }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public function testDecryptRawAsHex()
+    {
+        $ciphertext = Crypto::encryptWithPassword("testdata", "password", true);
+        Crypto::decryptWithPassword($ciphertext, "password", false);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public function testDecryptHexAsRaw()
+    {
+        $ciphertext = Crypto::encryptWithPassword("testdata", "password", false);
+        Crypto::decryptWithPassword($ciphertext, "password", true);
+    }
 }
