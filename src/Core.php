@@ -209,8 +209,8 @@ final class Core
         }
 
         $blind           = Core::secureRandom(32);
-        $message_compare = \hash_hmac('sha256', $given, $blind);
-        $correct_compare = \hash_hmac('sha256', $expected, $blind);
+        $message_compare = \hash_hmac(Core::HASH_FUNCTION_NAME, $given, $blind);
+        $correct_compare = \hash_hmac(Core::HASH_FUNCTION_NAME, $expected, $blind);
         return $correct_compare === $message_compare;
     }
     /**
