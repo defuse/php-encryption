@@ -22,6 +22,11 @@ then you should not store the `Key` at all. If you are protecting sensitive data
 on a server that may be compromised, then you should store it in a hardware
 security module. When in doubt, consult a security expert.
 
+Where do I store the encryption key?
+-------------------------------------
+
+TODO: (point to the stereotypes)
+
 Why is an EnvironmentIsBrokenException getting thrown?
 -------------------------------------------------------
 

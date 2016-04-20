@@ -4,8 +4,9 @@ php-encryption
 [![Build Status](https://travis-ci.org/defuse/php-encryption.svg?branch=master)](https://travis-ci.org/defuse/php-encryption)
 
 This is a library for encrypting data with a key or password in PHP. **It
-requires PHP 5.4 or newer.** The current version is v2.0.0, which is supported
-by its authors with security and bugfixes until Jan 01, 2019.
+requires PHP 5.4 or newer.** The current version is v2.0.0, which is expected to
+remain stable and supported by its authors with security and bugfixes until Jan
+01, 2019.
 
 The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
 [Scott Arciszewski](https://paragonie.com/blog/author/scott-arcizewski) as well
@@ -41,16 +42,15 @@ documentation for each of the classes this library provides:
 - [Key](docs/classes/Key.md)
 - [KeyProtectedByPassword](docs/classes/KeyProtectedByPassword.md)
 
-If you encounter difficulties, see the
-[Troubleshooting](docs/Troubleshooting.md) answers. The fixes to the most
-commonly-reported problems are explained there.
+If you encounter difficulties, see the [FAQ](docs/FAQ.md) answers. The fixes to
+the most commonly-reported problems are explained there.
 
 If you're a cryptographer and want to understand the nitty-gritty details of how
 this library works, look at the [Cryptography Details](docs/CryptoDetails.md)
 documentation.
 
-If you're interested in contributing to this library, see the [Developer
-Documentation](docs/DeveloperDocs.md).
+If you're interested in contributing to this library, see the [Internal
+Developer Documentation](docs/InternalDeveloperDocs.md).
 
 Examples
 ---------

@@ -1,5 +1,5 @@
-Information for Developers of php-encryption
-=============================================
+Information for the Developers of php-encryption
+=================================================
 
 Status
 -------
