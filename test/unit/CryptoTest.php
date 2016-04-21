@@ -90,8 +90,8 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testDecryptRawAsHex()
     {
-        $ciphertext = Crypto::encryptWithPassword("testdata", "password", true);
-        Crypto::decryptWithPassword($ciphertext, "password", false);
+        $ciphertext = Crypto::encryptWithPassword('testdata', 'password', true);
+        Crypto::decryptWithPassword($ciphertext, 'password', false);
     }
 
     /**
@@ -99,7 +99,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testDecryptHexAsRaw()
     {
-        $ciphertext = Crypto::encryptWithPassword("testdata", "password", false);
-        Crypto::decryptWithPassword($ciphertext, "password", true);
+        $ciphertext = Crypto::encryptWithPassword('testdata', 'password', false);
+        Crypto::decryptWithPassword($ciphertext, 'password', true);
     }
 }
