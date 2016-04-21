@@ -54,6 +54,11 @@ if (null === $input->getArgument('path')) {
                 ->in('src/')
                 ->in('other/')
                 ->in('test/')
+                ->filter(
+                  function (\SplFileInfo $file) {
+                    return strpos($file->getRelativePathname(), 'random_compat') === FALSE;
+                  }
+                )
         );
 }
 

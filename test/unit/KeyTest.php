@@ -1,7 +1,6 @@
 <?php
 
 use \Defuse\Crypto\Core;
-use \Defuse\Crypto\Encoding;
 use \Defuse\Crypto\Key;
 
 class KeyTest extends PHPUnit_Framework_TestCase
@@ -31,5 +30,4 @@ class KeyTest extends PHPUnit_Framework_TestCase
         $str[0] = 'f';
         Key::loadFromAsciiSafeString($str);
     }
-
 }
