@@ -13,7 +13,7 @@ clean=0 # Clean up?
 gpg --fingerprint D8406D0D82947747293778314AA394086372C20A
 if [ $? -ne 0 ]; then
     echo -e "\033[33mDownloading PGP Public Key...\033[0m"
-    gpg  --keyserver pgp.mit.edu --recv-keys D8406D0D82947747293778314AA394086372C20A
+    gpg --import test/phpunit-pubkey.asc
     # Sebastian Bergmann <sb@sebastian-bergmann.de>
     gpg --fingerprint D8406D0D82947747293778314AA394086372C20A
     if [ $? -ne 0 ]; then
