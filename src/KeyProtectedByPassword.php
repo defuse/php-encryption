@@ -21,11 +21,10 @@ final class KeyProtectedByPassword
      */
     public static function createRandomPasswordProtectedKey($password)
     {
-        /* Create a new random key. */
         $inner_key = Key::createNewRandomKey();
         $encrypted_key = Crypto::encryptWithPassword(
             $inner_key->saveToAsciiSafeString(),
-            $password,
+            \hash(Core::HASH_FUNCTION_NAME, $password, true),
             true
         );
 
@@ -80,7 +79,7 @@ final class KeyProtectedByPassword
         try {
             $inner_key_encoded = Crypto::decryptWithPassword(
                 $this->encrypted_key,
-                $password,
+                \hash(Core::HASH_FUNCTION_NAME, $password, true),
                 true
             );
             return Key::loadFromAsciiSafeString($inner_key_encoded);
