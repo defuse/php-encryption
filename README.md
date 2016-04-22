@@ -27,8 +27,8 @@ newer with the OpenSSL extensions enabled (the default). It comes bundled with
 [random\_compat](https://github.com/paragonie/random_compat) so that your users
 will not need to follow any special installation steps.
 
-Docmentation
--------------
+Getting Started
+----------------
 
 Start with the [**Tutorial**](docs/Tutorial.md). You can find instructions for
 obtaining this library's code securely in the [Installing and

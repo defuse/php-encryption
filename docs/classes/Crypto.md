@@ -4,10 +4,17 @@ Class: Defuse\Crypto\Crypto
 **Purpose:** The `Crypto` class provides encryption and decryption of *strings*
 either using a secret key or secret password.
 
+Instance Methods
+-----------------
+
+This class has no instance methods, it only provides the static methods above.
+
 Static Methods
 ---------------
 
-## Crypto::encrypt($plaintext, Key $key, $raw\_binary = false)
+## Crypto::encrypt
+
+**Signature:** `Crypto::encrypt($plaintext, Key $key, $raw\_binary = false)`
 
 **Description:** Encrypts a plaintext string using a secret key.
 
@@ -149,11 +156,6 @@ that the plaintext can be re-encrypted into a version 2 ciphertext. See
 **Side-effects:**
 
 **Cautions:**
-
-Instance Methods
------------------
-
-This class has no instance methods, it only provides the static methods above.
 
 Where's the Code?
 ------------------
