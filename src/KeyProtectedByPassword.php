@@ -2,6 +2,8 @@
 
 namespace Defuse\Crypto;
 
+use Defuse\Crypto\Exception as Ex;
+
 final class KeyProtectedByPassword
 {
     const PASSWORD_KEY_CURRENT_VERSION = "\xDE\xF1\x00\x00";
@@ -69,19 +71,30 @@ final class KeyProtectedByPassword
      * be used for encryption and decryption.
      *
      * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
-     * @throws Defuse\Crypto\Exception\BadFormatException
      * @throws Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      *
      * @return Key
      */
     public function unlockKey($password)
     {
-        $inner_key_encoded = Crypto::decryptWithPassword(
-            $this->encrypted_key,
-            $password,
-            true
-        );
-        return Key::loadFromAsciiSafeString($inner_key_encoded);
+        try {
+            $inner_key_encoded = Crypto::decryptWithPassword(
+                $this->encrypted_key,
+                $password,
+                true
+            );
+            return Key::loadFromAsciiSafeString($inner_key_encoded);
+        } catch (Ex\BadFormatException $ex) {
+            /* This should never happen unless an attacker replaced the
+             * encrypted key ciphertext with some other ciphertext that was
+             * encrypted with the same password. We transform the exception type
+             * here in order to make the API simpler, avoiding the need to
+             * document that this method might throw an Ex\BadFormatException. */
+            throw new Ex\WrongKeyOrModifiedCiphertextException(
+                "The decrypted key was found to be in an invalid format. " .
+                "This very likely indicates it was modified by an attacker."
+            );
+        }
     }
 
     /**
