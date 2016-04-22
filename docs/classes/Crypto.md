@@ -5,6 +5,8 @@ The `Crypto` class provides encryption and decryption of strings either using
 a secret key or secret password. For encryption and decryption of large files,
 see the `File` class.
 
+This code for this class is in `src/Crypto.php`.
+
 Instance Methods
 -----------------
 
@@ -27,7 +29,8 @@ Static Methods
 **Return value:**
 
 Returns a ciphertext string representing `$plaintext` encrypted with the key
-`$key`. Knowledge of `$key` is required in order to decrypt the ciphertext.
+`$key`. Knowledge of `$key` is required in order to decrypt the ciphertext and
+recover the plaintext.
 
 **Exceptions:**
 
@@ -102,9 +105,23 @@ If in doubt, consult with a professional cryptographer.
 
 **Parameters:**
 
+1. `$plaintext` is the string to encrypt.
+2. `$password` is a string containing the secret password used for encryption.
+3. `$raw\_binary` determines whether the output will be a byte string (true) or
+  hex encoded (false, the default).
+
 **Return value:**
 
+Returns a ciphertext string representing `$plaintext` encrypted with a key
+derived from `$password`. Knowledge of `$password` is required in order to
+decrypt the ciphertext and recover the plaintext.
+
 **Exceptions:**
+
+- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+  the platform the code is running on cannot safely perform encryption for some
+  reason (e.g. it lacks a secure random number generator), or the runtime tests
+  detected a bug in this library.
 
 **Side-effects and performance:**
 
@@ -116,7 +133,11 @@ encrypt multiple ciphertexts under the same password, see the
 
 **Cautions:**
 
-TODO: stack trace will leak password
+PHP stack traces display (portions of) the arguments passed to methods on the
+call stack. If an exception is thrown inside this call, and it is uncaught, the
+value of `$password` may be leaked out to an attacker through the stack trace.
+We recommend configuring PHP to never output stack traces (either displaying
+them to the user or saving them to log files).
 
 ### Crypto::decryptWithPassword($ciphertext, $password, $raw\_binary = false)
 
@@ -124,9 +145,31 @@ TODO: stack trace will leak password
 
 **Parameters:**
 
+1. `$ciphertext` is the ciphertext to be decrypted.
+2. `$password` is a string containing the secret password used for decryption.
+3. `$raw\_binary` must have the same value as the `$raw\_binary` given to the
+   call to `encryptWithPassword()` that generated `$ciphertext`.
+
 **Return value:**
 
+If the decryption succeeds, returns a string containing the same value as the
+string that was passed to `encryptWithPassword()` when `$ciphertext` was
+produced. Upon a successful return, the caller can be assured that `$ciphertext`
+could not have been produced except by someone with knowledge of `$password`.
+
 **Exceptions:**
+
+- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+  the platform the code is running on cannot safely perform encryption for some
+  reason (e.g. it lacks a secure random number generator), or the runtime tests
+  detected a bug in this library.
+
+- `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
+  either the given `$password` is not the correct password for the given
+  `$ciphertext` or if `$ciphertext` is not the same string as that returned by
+  `encrypt()`, i.e. it was accidentally corrupted or intentionally corrupted by
+  an attacker. There is no way for the caller to distinguish between these two
+  cases.
 
 **Side-effects:**
 
@@ -137,8 +180,17 @@ see the `KeyProtectedByPassword` class.
 
 **Cautions:**
 
-TODO: stack trace will leak password
-    (make sure this caution goes in File too)
+PHP stack traces display (portions of) the arguments passed to methods on the
+call stack. If an exception is thrown inside this call, and it is uncaught, the
+value of `$password` may be leaked out to an attacker through the stack trace.
+We recommend configuring PHP to never output stack traces (either displaying
+them to the user or saving them to log files).
+
+It is impossible in principle to distinguish between the case where you attempt
+to decrypt with the wrong password and the case where you attempt to decrypt
+a modified (corrupted) ciphertext. It is up to the caller how to best deal with
+this ambiguity, as it depends on the application this library is being used in.
+If in doubt, consult with a professional cryptographer.
 
 ### Crypto::legacyDecrypt($ciphertext, $key)
 
@@ -148,15 +200,43 @@ that the plaintext can be re-encrypted into a version 2 ciphertext. See
 
 **Parameters:**
 
+1. `$ciphertext` is a ciphertext produced by version 1.x of this library.
+2. `$key` is a 16-byte string (*not* a Key object) containing the key that was
+   used with version 1.x of this library to produce `$ciphertext`.
+
 **Return value:**
 
+If the decryption succeeds, returns the string that was encrypted to make
+`$ciphertext` by version 1.x of this library. Upon a successful return, the
+caller can be assured that `$ciphertext` could not have been produced except by
+someone with knowledge of `$key`.
+
 **Exceptions:**
+
+- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+  the platform the code is running on cannot safely perform encryption for some
+  reason (e.g. it lacks a secure random number generator), or the runtime tests
+  detected a bug in this library.
+
+- `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
+  either the given `$key` is not the correct key for the given `$ciphertext` or
+  if `$ciphertext` is not the same string as that returned by `encrypt()`, i.e.
+  it was accidentally corrupted or intentionally corrupted by an attacker. There
+  is no way for the caller to distinguish between these two cases.
 
 **Side-effects:**
 
 **Cautions:**
 
-Where's the Code?
-------------------
+PHP stack traces display (portions of) the arguments passed to methods on the
+call stack. If an exception is thrown inside this call, and it is uncaught, the
+value of `$key` may be leaked out to an attacker through the stack trace. We
+recommend configuring PHP to never output stack traces (either displaying them
+to the user or saving them to log files).
 
-`src/Crypto.php`
+It is impossible in principle to distinguish between the case where you attempt
+to decrypt with the wrong key and the case where you attempt to decrypt
+a modified (corrupted) ciphertext. It is up to the caller how to best deal with
+this ambiguity, as it depends on the application this library is being used in.
+If in doubt, consult with a professional cryptographer.
+
