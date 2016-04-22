@@ -12,7 +12,7 @@ This class has no instance methods, it only provides the static methods above.
 Static Methods
 ---------------
 
-## Crypto::encrypt
+### Crypto::encrypt
 
 **Signature:** `Crypto::encrypt($plaintext, Key $key, $raw\_binary = false)`
 
