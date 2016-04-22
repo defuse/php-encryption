@@ -78,8 +78,8 @@ None.
 
 **Parameters:**
 
-1. `$savedKeyString` is the string returned from `saveToAsciiSafeString()` when
-   the original `Key` instance was saved.
+1. `$saved\_key\_string` is the string returned from `saveToAsciiSafeString()`
+   when the original `Key` instance was saved.
 
 **Return value:**
 
