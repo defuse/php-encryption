@@ -204,7 +204,7 @@ If in doubt, consult with a professional cryptographer.
 
 **Description:** Decrypts a ciphertext produced by version 1 of this library so
 that the plaintext can be re-encrypted into a version 2 ciphertext. See
-[Upgrading from v1.2](docs/UpgradingFromV1.2.md).
+[Upgrading from v1.2](../docs/UpgradingFromV1.2.md).
 
 **Parameters:**
 
