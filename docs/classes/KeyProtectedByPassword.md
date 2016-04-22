@@ -2,13 +2,13 @@ Class: Defuse\Crypto\KeyProtectedByPassword
 ============================================
 
 The `KeyProtectedByPassword` class represents a key that is "locked" with
-a password. In order to obtain a usable `Key` instance,
-a `KeyProtectedByPassword` must first be "unlocked" by providing the correct
-password.
+a password. In order to obtain an instance of `Key` that you can use for
+encrypting and decrypting, a `KeyProtectedByPassword` must first be "unlocked"
+by providing the correct password.
 
-It provides an alternative to using the `encryptWithPassword()`,
-`decryptWithPassword()`, `encryptFileWithPassword()`, and
-`decryptFileWithPassword()` methods with several advantages:
+`KeyProtectedByPassword` provides an alternative to using the
+`encryptWithPassword()`, `decryptWithPassword()`, `encryptFileWithPassword()`,
+and `decryptFileWithPassword()` methods with several advantages:
 
 - The slow and computationally-expensive key stretching is run only once when
   you unlock a `KeyProtectedByPassword` to obtain the `Key`.
@@ -16,34 +16,14 @@ It provides an alternative to using the `encryptWithPassword()`,
   things. After you've obtained the `Key` from a `KeyProtectedByPassword`, the
   password is no longer necessary.
 
-
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-
-I found a vuln while writing this doc and that distracted me, so I have no idea
-if it's in a finished state. I'll have to re-read the entire thing to make sure
-it's all good and there are no copy/paste errors.
-
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-TODO TODO TODO
-
 Instance Methods
 -----------------
 
 ### saveToAsciiSafeString()
 
 **Description:** Saves the protected key to a string of printable ASCII
-characters, which can be loaded again into a `KeyProtectedByPassword` instance using
-`KeyProtectedByPassword::loadFromAsciiSafeString()`.
+characters, which can be loaded again into a `KeyProtectedByPassword` instance
+using `KeyProtectedByPassword::loadFromAsciiSafeString()`.
 
 **Parameters:**
 
@@ -53,7 +33,8 @@ This method does not take any parameters.
 
 Returns a string of printable ASCII characters representing this
 `KeyProtectedByPassword` instance, which can be loaded back into an instance of
-`KeyProtectedByPassword` using `Key::loadFromAsciiSafeString()`.
+`KeyProtectedByPassword` using
+`KeyProtectedByPassword::loadFromAsciiSafeString()`.
 
 **Exceptions:**
 
