@@ -1,8 +1,8 @@
 Class: Defuse\Crypto\Crypto
 ============================
 
-**Purpose:** The `Crypto` class provides encryption and decryption of *strings*
-either using a secret key or secret password.
+The `Crypto` class provides encryption and decryption of *strings* either using
+a secret key or secret password.
 
 Instance Methods
 -----------------
