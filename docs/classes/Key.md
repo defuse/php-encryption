@@ -71,7 +71,7 @@ None.
 
 None.
 
-### Key::loadFromAsciiSafeString($savedKeyString)
+### Key::loadFromAsciiSafeString($saved\_key\_string)
 
 **Description:** Loads an instance of `Key` that was saved to a string by
 `saveToAsciiSafeString()`.
