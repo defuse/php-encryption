@@ -55,3 +55,10 @@ for PBKDF2-SHA256 and HKDF-SHA256. The prehashing of the password in step 2 is
 done to prevent a [DoS attack using long
 passwords](https://github.com/defuse/php-encryption/issues/230).
 
+For `KeyProtectedByPassword`, the serialized key is encrypted according to the
+password encryption defined above. However, the actual password used for
+encryption is the SHA256 hash of the password the user provided. This is done in
+order to provide domain separation between the message encryption in the user's
+application and the internal key encryption done by this library. It fixes
+a [key replacement chosen-protocol
+attack](https://github.com/defuse/php-encryption/issues/240).

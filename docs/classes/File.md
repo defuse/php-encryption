@@ -1,0 +1,2 @@
+Class: Defuse\Crypto\File
+==========================
