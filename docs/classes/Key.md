@@ -84,8 +84,8 @@ None.
 **Return value:**
 
 Returns an instance of `Key` representing the same encryption key as the one
-that was represented by the `Key` instance that got saved into `$savedKeyString`
-by a call to `saveToAsciiSafeString()`.
+that was represented by the `Key` instance that got saved into
+`$saved\_key\_string` by a call to `saveToAsciiSafeString()`.
 
 **Exceptions:**
 
@@ -95,7 +95,7 @@ by a call to `saveToAsciiSafeString()`.
   detected a bug in this library.
 
 - `Defuse\Crypto\Exception\BadFormatException` is thrown whenever
-  `$savedKeyString` does not represent a valid `Key` instance.
+  `$saved\_key\_string` does not represent a valid `Key` instance.
 
 **Side-effects and performance:**
 
