@@ -35,7 +35,7 @@ final class Key
      */
     public static function loadFromAsciiSafeString($saved_key_string)
     {
-        $key_bytes = Encoding::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $savedKeyString);
+        $key_bytes = Encoding::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $saved_key_string);
         return new Key($key_bytes);
     }
 
