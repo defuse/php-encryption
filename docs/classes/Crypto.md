@@ -41,13 +41,13 @@ recover the plaintext.
 
 **Side-effects and performance:**
 
-This function has no externally-visible side-effects. It runs a fast set of
-self-tests the very first time it is called, but the performance overhead is
-negligible and can be safely ignored.
+This method runs a small and very fast set of self-tests if it is the very first
+time one of the `Crypto` methods has been called. The performance overhead is
+negligible and can be safely ignored in all applications.
 
 **Cautions:**
 
-The ciphertext returned by this function is decryptable by anyone with knowledge
+The ciphertext returned by this method is decryptable by anyone with knowledge
 of the key `$key`. It is the caller's responsibility to keep `$key` secret.
 Where `$key` should be stored is up to the caller and depends on the threat
 model the caller is designing their application under. If you are unsure where
@@ -87,9 +87,9 @@ been produced except by someone with knowledge of `$key`.
 
 **Side-effects and performance:**
 
-This function has no externally-visible side-effects. It runs a fast set of
-self-tests the very first time it is called, but the performance overhead is
-negligible and can be safely ignored.
+This method runs a small and very fast set of self-tests if it is the very first
+time one of the `Crypto` methods has been called. The performance overhead is
+negligible and can be safely ignored in all applications.
 
 **Cautions:**
 
@@ -125,11 +125,15 @@ decrypt the ciphertext and recover the plaintext.
 
 **Side-effects and performance:**
 
-This function is intentionally slow, using a lot of CPU resources for a fraction
+This method is intentionally slow, using a lot of CPU resources for a fraction
 of a second. It applies key stretching to the password in order to make password
 guessing attacks more computationally expensive. If you need a faster way to
 encrypt multiple ciphertexts under the same password, see the
 `KeyProtectedByPassword` class.
+
+This method runs a small and very fast set of self-tests if it is the very first
+time one of the `Crypto` methods has been called. The performance overhead is
+negligible and can be safely ignored in all applications.
 
 **Cautions:**
 
@@ -173,10 +177,14 @@ could not have been produced except by someone with knowledge of `$password`.
 
 **Side-effects:**
 
-This function is intentionally slow. It applies key stretching to the password
-in order to make password guessing attacks more computationally expensive. If
-you need a faster way to encrypt multiple ciphertexts under the same password,
-see the `KeyProtectedByPassword` class.
+This method is intentionally slow. It applies key stretching to the password in
+order to make password guessing attacks more computationally expensive. If you
+need a faster way to encrypt multiple ciphertexts under the same password, see
+the `KeyProtectedByPassword` class.
+
+This method runs a small and very fast set of self-tests if it is the very first
+time one of the `Crypto` methods has been called. The performance overhead is
+negligible and can be safely ignored in all applications.
 
 **Cautions:**
 
@@ -225,6 +233,10 @@ someone with knowledge of `$key`.
   is no way for the caller to distinguish between these two cases.
 
 **Side-effects:**
+
+This method runs a small and very fast set of self-tests if it is the very first
+time one of the `Crypto` methods has been called. The performance overhead is
+negligible and can be safely ignored in all applications.
 
 **Cautions:**
 
