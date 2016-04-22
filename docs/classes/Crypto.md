@@ -10,7 +10,7 @@ This code for this class is in `src/Crypto.php`.
 Instance Methods
 -----------------
 
-This class has no instance methods, it only provides the static methods above.
+This class has no instance methods.
 
 Static Methods
 ---------------
