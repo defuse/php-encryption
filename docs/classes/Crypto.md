@@ -12,9 +12,7 @@ This class has no instance methods, it only provides the static methods above.
 Static Methods
 ---------------
 
-### Crypto::encrypt
-
-**Signature:** `Crypto::encrypt($plaintext, Key $key, $raw\_binary = false)`
+### Crypto::encrypt($plaintext, Key $key, $raw\_binary = false)
 
 **Description:** Encrypts a plaintext string using a secret key.
 
@@ -52,7 +50,7 @@ model the caller is designing their application under. If you are unsure where
 to store `$key`, consult with a professional cryptographer to get help designing
 your application.
 
-## Crypto::decrypt($ciphertext, Key $key, $raw\_binary = false)
+### Crypto::decrypt($ciphertext, Key $key, $raw\_binary = false)
 
 **Description:** Decrypts a ciphertext string using a secret key.
 
@@ -97,7 +95,7 @@ a modified (corrupted) ciphertext. It is up to the caller how to best deal with
 this ambiguity, as it depends on the application this library is being used in.
 If in doubt, consult with a professional cryptographer.
 
-## Crypto::encryptWithPassword($plaintext, $password, $raw\_binary = false)
+### Crypto::encryptWithPassword($plaintext, $password, $raw\_binary = false)
 
 **Description:** Encrypts a plaintext string using a secret password.
 
@@ -119,7 +117,7 @@ encrypt multiple ciphertexts under the same password, see the
 
 TODO: stack trace will leak password
 
-## Crypto::decryptWithPassword($ciphertext, $password, $raw\_binary = false)
+### Crypto::decryptWithPassword($ciphertext, $password, $raw\_binary = false)
 
 **Description:** Decrypts a ciphertext string using a secret password.
 
@@ -141,7 +139,7 @@ see the `KeyProtectedByPassword` class.
 TODO: stack trace will leak password
     (make sure this caution goes in File too)
 
-## Crypto::legacyDecrypt($ciphertext, $key)
+### Crypto::legacyDecrypt($ciphertext, $key)
 
 **Description:** Decrypts a ciphertext produced by version 1 of this library so
 that the plaintext can be re-encrypted into a version 2 ciphertext. See
