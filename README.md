@@ -74,4 +74,13 @@ a formal audit, please [contact Taylor Hornby](https://defuse.ca/contact.htm).
 Public Keys
 ------------
 
-TODO: put links (and fingerprints) for the developers' public keys here.
+The GnuPG public key used to sign releases is available in
+[other/signingkey.asc](other/signingkey.asc). Its fingerprint is:
+
+```
+2FA6 1D8D 99B9 2658 6BAC  3D53 385E E055 A129 1538
+```
+
+You can verify it against the Taylor Hornby's [contact
+page](https://defuse.ca/contact.htm) and
+[twitter](https://twitter.com/DefuseSec/status/723741424253059074).
