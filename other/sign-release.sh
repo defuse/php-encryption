@@ -21,4 +21,4 @@ gpg -u 7B4B2D98 --armor --output dist/defuse-crypto.phar.sig --detach-sig dist/d
 git add dist
 git commit -m "Automatic commit of dist/"
 
-git -c signingkey=7B4B2D98 tag -s "$1" -m "$2"
+git -c user.signingkey=7B4B2D98 tag -s "$1" -m "$2"
