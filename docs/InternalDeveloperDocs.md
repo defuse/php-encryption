@@ -72,4 +72,23 @@ This library is developed around several core values:
 Publishing Releases
 --------------------
 
-TODO: add those steps here
+Make a fresh clone of the repository:
+
+```
+git clone <url>
+```
+
+Check out the branch you want to release:
+
+```
+git checkout <branchname>
+```
+
+Run the sign-release script (note this will make a commit on your current
+branch):
+
+```
+./other/sign-release.sh <tagname> <tagmessage>
+```
+
+Push the tag up to GitHub.
