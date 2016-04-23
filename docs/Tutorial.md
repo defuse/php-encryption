@@ -283,5 +283,5 @@ backups.
 Getting Help
 -------------
 
-If you're having difficulty using the library, see if your problem has already
-been solved in the [Troubleshooting](docs/Troubleshooting.md) answers.
+If you're having difficulty using the library, see if your problem is already
+solved by an answer in the [FAQ](docs/FAQ.md).
