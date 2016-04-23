@@ -91,4 +91,4 @@ branch):
 ./other/sign-release.sh <tagname> <tagmessage>
 ```
 
-Push the tag up to GitHub.
+Push the branch and tag up to GitHub.
