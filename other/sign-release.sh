@@ -15,7 +15,8 @@ if current_repo_has_unsaved_changes; then
     exit 1
 fi
 
-php -d phar.readonly=Off other/build_phar.php
+./other/build-phar.sh
+./test.sh dist/defuse-crypto.phar
 gpg -u 7B4B2D98 --armor --output dist/defuse-crypto.phar.sig --detach-sig dist/defuse-crypto.phar
 
 git add dist

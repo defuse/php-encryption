@@ -57,9 +57,9 @@ if [ $? -eq 0 ]; then
     echo
     echo -e "\033[33mBegin Unit Testing\033[0m"
     # Run the test suite with normal func_overload.
-    php -d mbstring.func_overload=0 phpunit.phar --bootstrap "$parentdir/autoload.php" "$parentdir/test/unit" && \
+    php -d mbstring.func_overload=0 phpunit.phar --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
     # Run the test suite again with funky func_overload.
-    php -d mbstring.func_overload=7 phpunit.phar --bootstrap "$parentdir/autoload.php" "$parentdir/test/unit"
+    php -d mbstring.func_overload=7 phpunit.phar --bootstrap "$parentdir/$1" "$parentdir/test/unit"
     EXITCODE=$?
     # Cleanup
     if [ "$clean" -eq 1 ]; then
