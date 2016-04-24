@@ -80,10 +80,9 @@ been produced except by someone with knowledge of `$key`.
   detected a bug in this library.
 
 - `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
-  either the given `$key` is not the correct key for the given `$ciphertext` or
-  if `$ciphertext` is not the same string as that returned by `encrypt()`, i.e.
-  it was accidentally corrupted or intentionally corrupted by an attacker. There
-  is no way for the caller to distinguish between these two cases.
+  the `$key` is not the correct key for the given ciphertext, or if the
+  ciphertext has been modified (possibly maliciously). There is no way to
+  distinguish between these two cases.
 
 **Side-effects and performance:**
 
@@ -169,11 +168,9 @@ could not have been produced except by someone with knowledge of `$password`.
   detected a bug in this library.
 
 - `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
-  either the given `$password` is not the correct password for the given
-  `$ciphertext` or if `$ciphertext` is not the same string as that returned by
-  `encrypt()`, i.e. it was accidentally corrupted or intentionally corrupted by
-  an attacker. There is no way for the caller to distinguish between these two
-  cases.
+  the `$password` is not the correct password for the given ciphertext, or if
+  the ciphertext has been modified (possibly maliciously). There is no way to
+  distinguish between these two cases.
 
 **Side-effects:**
 
@@ -227,10 +224,9 @@ someone with knowledge of `$key`.
   detected a bug in this library.
 
 - `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
-  either the given `$key` is not the correct key for the given `$ciphertext` or
-  if `$ciphertext` is not the same string as that returned by `encrypt()`, i.e.
-  it was accidentally corrupted or intentionally corrupted by an attacker. There
-  is no way for the caller to distinguish between these two cases.
+  the `$key` is not the correct key for the given ciphertext, or if the
+  ciphertext has been modified (possibly maliciously). There is no way to
+  distinguish between these two cases.
 
 **Side-effects:**
 
