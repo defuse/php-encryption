@@ -139,6 +139,12 @@ value of `$password` may be leaked out to an attacker through the stack trace.
 We recommend configuring PHP to never output stack traces (either displaying
 them to the user or saving them to log files).
 
+Be aware that if you protecting multiple keys with the same password, an
+attacker with write access to your system will be able to swap the protected
+keys around so that the wrong key gets used next time it is unlocked. This could
+lead to data being encrypted with the wrong key, perhaps one that the attacker
+knows.
+
 ### KeyProtectedByPassword::loadFromAsciiSafeString($saved\_key\_string)
 
 **Description:** Loads an instance of `KeyProtectedByPassword` that was saved to
