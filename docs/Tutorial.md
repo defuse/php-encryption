@@ -96,7 +96,7 @@ developer working on code that will eventually run on the trusted web server.
 
 Let's say Alice and Dave trust each other, and Alice is going to host Dave's
 application on her server. But both Alice and Dave don't trust Eve. They know
-Eve is a good database administrator, but he might have incentive to steal the
+Eve is a good database administrator, but she might have incentive to steal the
 data from the database. They want to keep some of the web application's data
 secret from Eve.
 
