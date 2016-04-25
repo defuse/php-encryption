@@ -147,7 +147,7 @@ using the same key:
     $ciphertext = // ... load $ciphertext from the database
     try {
         $secret_data = Crypto::decrypt($ciphertext, $key);
-    } catch (Defuse\Crypto\WrongKeyOrModifiedCiphertextException) {
+    } catch (Defuse\Crypto\WrongKeyOrModifiedCiphertextException $e) {
         // An attack! Either the wrong key was loaded, or the ciphertext has
         // changed since it was created -- either corrupted in the database or
         // intentionally modified by Eve trying to carry out an attack.
