@@ -152,14 +152,14 @@ a string by `saveToAsciiSafeString()`.
 
 **Parameters:**
 
-1. `$saved\_key\_string` is the string returned from `saveToAsciiSafeString()`
+1. `$saved_key_string` is the string returned from `saveToAsciiSafeString()`
    when the original `KeyProtectedByPassword` instance was saved.
 
 **Return value:**
 
 Returns an instance of `KeyProtectedByPassword` representing the same
 password-protected key as the one that was represented by the
-`KeyProtectedByPassword` instance that got saved into `$saved\_key\_string` by
+`KeyProtectedByPassword` instance that got saved into `$saved_key_string` by
 a call to `saveToAsciiSafeString()`.
 
 **Exceptions:**
@@ -170,7 +170,7 @@ a call to `saveToAsciiSafeString()`.
   detected a bug in this library.
 
 - `Defuse\Crypto\Exception\BadFormatException` is thrown whenever
-  `$saved\_key\_string` does not represent a valid `KeyProtectedByPassword`
+  `$saved_key_string` does not represent a valid `KeyProtectedByPassword`
   instance.
 
 **Side-effects and performance:**
