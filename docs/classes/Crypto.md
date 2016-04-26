@@ -23,7 +23,7 @@ Static Methods
 
 1. `$plaintext` is the string to encrypt.
 2. `$key` is an instance of `Key` containing the secret key for encryption.
-3. `$raw\_binary` determines whether the output will be a byte string (true) or
+3. `$raw_binary` determines whether the output will be a byte string (true) or
   hex encoded (false, the default).
 
 **Return value:**
@@ -62,7 +62,7 @@ your application.
 
 1. `$ciphertext` is the ciphertext to be decrypted.
 2. `$key` is an instance of `Key` containing the secret key for decryption.
-3. `$raw\_binary` must have the same value as the `$raw\_binary` given to the
+3. `$raw_binary` must have the same value as the `$raw_binary` given to the
    call to `encrypt()` that generated `$ciphertext`.
 
 **Return value:**
@@ -106,7 +106,7 @@ If in doubt, consult with a professional cryptographer.
 
 1. `$plaintext` is the string to encrypt.
 2. `$password` is a string containing the secret password used for encryption.
-3. `$raw\_binary` determines whether the output will be a byte string (true) or
+3. `$raw_binary` determines whether the output will be a byte string (true) or
   hex encoded (false, the default).
 
 **Return value:**
@@ -150,7 +150,7 @@ them to the user or saving them to log files).
 
 1. `$ciphertext` is the ciphertext to be decrypted.
 2. `$password` is a string containing the secret password used for decryption.
-3. `$raw\_binary` must have the same value as the `$raw\_binary` given to the
+3. `$raw_binary` must have the same value as the `$raw_binary` given to the
    call to `encryptWithPassword()` that generated `$ciphertext`.
 
 **Return value:**
