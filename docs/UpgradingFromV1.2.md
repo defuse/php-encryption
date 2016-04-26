@@ -1,11 +1,26 @@
 Upgrading From Version 1.2
 ===========================
 
-With version 2.0.0 of this library came major changes to the ciphertext format
-and algorithms used for encryption. In order to decrypt ciphertexts made by
-version 1.2 of this library, you need call the special `legacyDecrypt()`
-method and then re-encrypt the data to get a version 2.0.0 ciphertext. Your
-upgrade code would look something like this:
+With version 2.0.0 of this library came major changes to the ciphertext format,
+algorithms used for encryption, and API.
+
+In version 1.2, keys were represented by 16-byte string variables. In version
+2.0.0, keys are represented by objects, instances of the `Key` class. This
+change was made in order to make it harder to misuse the API. For example, in
+version 1.2, you could pass in *any* 16-byte string, but in version 2.0.0 you
+need a `Key` object, which you can only get if you're "doing the right thing."
+
+This means that for all of your old version 1.2 keys, you'll have to:
+
+1. Generate a new version 2.0.0 key.
+2. For all of the ciphertexts encrypted under the old key:
+    1. Decrypt the ciphertext using the old version 1.2 key.
+    2. Re-encrypt it using the new version 2.0.0 key.
+
+Use the special `Crypto::legacyDecrypt()` method to decrypt the old ciphertexts
+using the old key and then re-encrypt them using `Crypto::encrypt()` with the
+new key. Your code will look something like the following. To avoid data loss,
+securely back up your keys and data before running your upgrade code.
 
 ```php
 <?php
@@ -20,7 +35,12 @@ upgrade code would look something like this:
     // ... save it somewhere ...
 
     // Decrypt it.
-    $plaintext = Crypto::legacyDecrypt($legacy_ciphertext, $legacy_key);
+    try {
+        $plaintext = Crypto::legacyDecrypt($legacy_ciphertext, $legacy_key);
+    } catch (Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex)
+    {
+        // ... TODO: handle this case appropriately ...
+    }
 
     // Re-encrypt it.
     $new_ciphertext = Crypto::encrypt($plaintext, $new_key);
