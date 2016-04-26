@@ -55,8 +55,8 @@ take steps to verify the cryptographic signatures to make sure the code you got
 was not intercepted and modified by an attacker.
 
 Please head over to the [**Installing and
-Verifying**](docs/InstallingAndVerifying.md) documentation to get the code, and
-then come back here to continue the tutorial.
+Verifying**](InstallingAndVerifying.md) documentation to get the code, and then
+come back here to continue the tutorial.
 
 Using the Library
 ------------------
@@ -80,10 +80,10 @@ important security warnings there.
 
 The following classes are available for you to use:
 
-- [Crypto](docs/classes/Crypto.md): Encrypting and decrypting strings.
-- [File](docs/classes/File.md): Encrypting and decrypting files.
-- [Key](docs/classes/Key.md): Represents a secret encryption key.
-- [KeyProtectedByPassword](docs/classes/KeyProtectedByPassword.md): Represents
+- [Crypto](classes/Crypto.md): Encrypting and decrypting strings.
+- [File](classes/File.md): Encrypting and decrypting files.
+- [Key](classes/Key.md): Represents a secret encryption key.
+- [KeyProtectedByPassword](classes/KeyProtectedByPassword.md): Represents
   a secret encryption key that needs to be "unlocked" by a password before it
   can be used.
 
@@ -284,4 +284,4 @@ Getting Help
 -------------
 
 If you're having difficulty using the library, see if your problem is already
-solved by an answer in the [FAQ](docs/FAQ.md).
+solved by an answer in the [FAQ](FAQ.md).
