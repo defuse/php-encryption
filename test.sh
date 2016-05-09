@@ -7,5 +7,11 @@ if [ ! -e $BIG_GENERATED_FILE ] || [ $(wc -c < $BIG_GENERATED_FILE) -ne "2097152
     dd if=/dev/urandom "of=$BIG_GENERATED_FILE" bs=1M count=200
 fi
 
-./test/phpunit.sh
+if [ -n "$1" ]; then
+    BOOTSTRAP="$1"
+else
+    BOOTSTRAP="autoload.php"
+fi
+
+./test/phpunit.sh "$BOOTSTRAP"
 echo ""
