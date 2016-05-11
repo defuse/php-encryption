@@ -1,1 +1,5 @@
-test/unit/File/big-generated-file
+*~
+/test/unit/File/big-generated-file
+/composer.lock
+/vendor
+/defuse-crypto.phar
