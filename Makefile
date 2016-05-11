@@ -19,5 +19,8 @@ composer.lock:
 box.phar:
 	curl -LSs https://box-project.github.io/box2/installer.php | php
 
+composer.phar:
+	curl -sS https://getcomposer.org/installer | php
+
 clean:
 	rm -vf $(TARGETS)

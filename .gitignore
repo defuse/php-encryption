@@ -3,3 +3,5 @@
 /composer.lock
 /vendor
 /defuse-crypto.phar
+/composer.phar
+/box.phar
