@@ -5,11 +5,15 @@ $(shell PATH=$$PATH:. which $1.phar 2>/dev/null || which $1 2>/dev/null || echo 
 endef
 
 box := $(call find_tool, box)
-php := php
+composer := $(call find_tool, composer)
+php := $(call find_tool, php)
 
 phar: $(TARGETS)
 
-%.phar: Makefile box.json
+composer.lock:
+	$(composer) install --no-dev
+
+%.phar: Makefile box.json composer.lock
 	$(php) -d phar.readonly=0 $(box) build -v
 
 box.phar:
