@@ -427,6 +427,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     {
         $data = [];
 
+        $data['empty-file']         = ['empty-file.txt'];
         $data['wat-giagantic-duck'] = ['wat-gigantic-duck.jpg'];
         $data['large']              = ['large.jpg'];
         # Created from /dev/urandom in test.sh
