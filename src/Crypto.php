@@ -196,7 +196,7 @@ class Crypto
     /**
      * Decrypts a ciphertext to a string with either a key or a password.
      *
-     * @param string        $plaintext
+     * @param string        $ciphertext
      * @param KeyOrPassword $secret
      * @param bool          $raw_binary
      *
