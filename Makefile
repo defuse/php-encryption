@@ -1,12 +1,12 @@
 TARGETS := defuse-crypto.phar
 
 define find_tool
-$(shell PATH=$$PATH:. which $1.phar 2>/dev/null || which $1 2>/dev/null || echo false)
+$(shell PATH=$$PATH:. which $1.phar 2>/dev/null || which $1 2>/dev/null || $(error Required tool `$1' not installed, see docs/InstallingAndVerifying.md))
 endef
 
-box := $(call find_tool, box)
-composer := $(call find_tool, composer)
-php := $(call find_tool, php)
+box := $(call find_tool,box)
+composer := $(call find_tool,composer)
+php := $(call find_tool,php)
 
 phar: $(TARGETS)
 
@@ -17,10 +17,10 @@ composer.lock:
 	$(php) -d phar.readonly=0 $(box) build -v
 
 box.phar:
-	curl -LSs https://box-project.github.io/box2/installer.php | php
+	@echo Required tool $@ not installed, see docs/InstallingAndVerifying.md
 
 composer.phar:
-	curl -sS https://getcomposer.org/installer | php
+	@echo Required tool $@ not installed, see docs/InstallingAndVerifying.md
 
 clean:
 	rm -vf $(TARGETS)
