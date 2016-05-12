@@ -21,8 +21,9 @@ phar: $(TARGETS)
 composer.lock:
 	$(composer) install --no-dev
 
-%.phar: Makefile box.json composer.lock
-	$(php) -d phar.readonly=0 $(box) build -v
+%.phar: dist/Makefile dist/box.json composer.lock
+	cp dist/box.json .
+	$(php) -d phar.readonly=0 $(box) build -c box.json -v
 
 # ensure we run in clean tree. export git tree and run there.
 dist-phar:
