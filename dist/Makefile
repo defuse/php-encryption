@@ -30,6 +30,7 @@ dist-phar:
 	install -d worktree
 	(cd $(CURDIR)/..; git archive HEAD) | tar -x -C worktree
 	$(MAKE) -f $(CURDIR)/Makefile -C worktree phar
+	mv worktree/*.phar .
 	rm -rf worktree
 
 clean:
