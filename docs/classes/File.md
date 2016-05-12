@@ -264,8 +264,9 @@ application.
 
 **Parameters:**
 
-1. `$inputHandle` is a handle to a resource (like a file pointer) containing the
-   ciphertext to decrypt.
+1. `$inputHandle` is a handle to a file-backed resource containing the
+   ciphertext to decrypt. It must be a file not a network stream or standard
+   input.
 2. `$outputHandle` is a handle to a resource (like a file pointer) that the
    plaintext will be written to.
 3. `$key` is an instance of `Key` containing the secret key for decryption.
@@ -365,8 +366,9 @@ them to the user or saving them to log files).
 
 **Parameters:**
 
-1. `$inputHandle` is a handle to a resource (like a file pointer) containing the
-   ciphertext to decrypt.
+1. `$inputHandle` is a handle to a file-backed resource containing the
+   ciphertext to decrypt. It must be a file not a network stream or standard
+   input.
 2. `$outputHandle` is a handle to a resource (like a file pointer) that the
    plaintext will be written to.
 3. `$password` is the password used for decryption.

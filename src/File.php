@@ -408,7 +408,7 @@ final class File
     }
 
     /**
-     * Decrypts a resource with either a key or a password.
+     * Decrypts a file-backed resource with either a key or a password.
      *
      * @param resource      $inputHandle
      * @param resource      $outputHandle
