@@ -28,7 +28,7 @@ composer.lock:
 dist-phar:
 	rm -rf worktree
 	install -d worktree
-	git archive HEAD | tar -x -C worktree
+	(cd $(CURDIR)/..; git archive HEAD) | tar -x -C worktree
 	$(MAKE) -f $(CURDIR)/Makefile -C worktree phar
 	rm -rf worktree
 

@@ -2,6 +2,6 @@
 /test/unit/File/big-generated-file
 /composer.lock
 /vendor
-/defuse-crypto.phar
-/composer.phar
-/box.phar
+defuse-crypto.phar
+composer.phar
+box.phar
