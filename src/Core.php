@@ -9,7 +9,6 @@ final class Core
     const HEADER_VERSION_SIZE               = 4;
     const MINIMUM_CIPHERTEXT_SIZE           = 84;
 
-    const HEADER_MAGIC                      = "\xDE\xF5";
     const CURRENT_VERSION                   = "\xDE\xF5\x02\x00";
 
     const CIPHER_METHOD                     = 'aes-256-ctr';
@@ -64,6 +63,12 @@ final class Core
         if ($inc < 0) {
             throw new Ex\EnvironmentIsBrokenException(
               'Trying to increment nonce by a negative amount.'
+            );
+        }
+
+        if ($inc > PHP_INT_MAX - 255) {
+            throw new Ex\EnvironmentIsBrokenException(
+              'Integer overflow may occur.'
             );
         }
 

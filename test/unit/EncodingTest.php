@@ -9,7 +9,7 @@ class EncodingTest extends PHPUnit_Framework_TestCase
     {
         for ($length = 0; $length < 50; $length++) {
             for ($i = 0; $i < 50; $i++) {
-                $random = $length > 0 ? \openssl_random_pseudo_bytes($length) : '';
+                $random = $length > 0 ? Core::secureRandom($length) : '';
 
                 $encode_a = Encoding::binToHex($random);
                 $encode_b = \bin2hex($random);
@@ -22,6 +22,26 @@ class EncodingTest extends PHPUnit_Framework_TestCase
                 $this->assertSame($decode_b, $decode_a);
                 // Just in case.
                 $this->assertSame($random, $decode_b);
+            }
+        }
+    }
+
+    public function testEncodeDecodeEquivalencyTwoBytes()
+    {
+        for ($b1 = 0; $b1 < 256; $b1++) {
+            for ($b2 = 0; $b2 < 256; $b2++) {
+                $str = \pack('C', $b1) . \pack('C', $b2);
+
+                $encode_a = Encoding::binToHex($str);
+                $encode_b = \bin2hex($str);
+
+                $this->assertSame($encode_b, $encode_a);
+
+                $decode_a = Encoding::hexToBin($encode_a);
+                $decode_b = \hex2bin($encode_b);
+
+                $this->assertSame($decode_b, $decode_a);
+                $this->assertSame($str, $decode_b);
             }
         }
     }

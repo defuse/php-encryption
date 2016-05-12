@@ -25,6 +25,9 @@ final class DerivedKeys
 
     /**
      * Constructor for DerivedKeys.
+     *
+     * @param string $akey
+     * @param string $ekey
      */
     public function __construct($akey, $ekey)
     {

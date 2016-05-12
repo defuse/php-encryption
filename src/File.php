@@ -190,6 +190,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_read_buffer($if, 0);
 
         /* Open the output file. */
@@ -201,6 +202,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_write_buffer($of, 0);
 
         /* Perform the encryption. */
@@ -249,6 +251,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_read_buffer($if, 0);
 
         /* Open the output file. */
@@ -260,6 +263,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_write_buffer($of, 0);
 
         /* Perform the decryption. */
@@ -404,7 +408,7 @@ final class File
     }
 
     /**
-     * Decrypts a resource with either a key or a password.
+     * Decrypts a file-backed resource with either a key or a password.
      *
      * @param resource      $inputHandle
      * @param resource      $outputHandle
@@ -654,7 +658,7 @@ final class File
      *
      * @return string
      */
-    final public static function readBytes($stream, $num_bytes)
+    public static function readBytes($stream, $num_bytes)
     {
         if ($num_bytes < 0) {
             throw new Ex\EnvironmentIsBrokenException(
@@ -695,7 +699,7 @@ final class File
      *
      * @return string
      */
-    final public static function writeBytes($stream, $buf, $num_bytes = null)
+    public static function writeBytes($stream, $buf, $num_bytes = null)
     {
         $bufSize = Core::ourStrlen($buf);
         if ($num_bytes === null) {

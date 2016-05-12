@@ -293,7 +293,7 @@ class Crypto
      * Raw unauthenticated encryption (insecure on its own).
      *
      * @param string $plaintext
-     * @param Key    $key
+     * @param string $key
      * @param string $iv
      *
      * @throws Ex\EnvironmentIsBrokenException
@@ -325,7 +325,7 @@ class Crypto
      * Raw unauthenticated decryption (insecure on its own).
      *
      * @param string $ciphertext
-     * @param Key    $key
+     * @param string $key
      * @param string $iv
      * @param string $cipherMethod
      *

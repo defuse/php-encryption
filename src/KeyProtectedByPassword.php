@@ -22,6 +22,10 @@ final class KeyProtectedByPassword
     public static function createRandomPasswordProtectedKey($password)
     {
         $inner_key = Key::createNewRandomKey();
+        /* The password is hashed as a form of poor-man's domain separation
+         * between this use of encryptWithPassword() and other uses of
+         * encryptWithPassword() that the user may also be using as part of the
+         * same protocol. */
         $encrypted_key = Crypto::encryptWithPassword(
             $inner_key->saveToAsciiSafeString(),
             \hash(Core::HASH_FUNCTION_NAME, $password, true),

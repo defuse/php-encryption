@@ -423,10 +423,29 @@ class FileTest extends \PHPUnit_Framework_TestCase
         fclose($resource);
     }
 
+    /**
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    public function testNonFileResourceDecrypt()
+    {
+        /* This should behave equivalently to an empty file. Calling fstat() on
+            stdin returns a result saying it has zero size. */
+        $stdin = fopen('php://stdin', 'r');
+        $output = fopen('php://memory', 'wb');
+        try {
+            File::decryptResource($stdin, $output, $this->key);
+        } catch (Exception $ex) {
+            fclose($output);
+            fclose($stdin);
+            throw $ex;
+        }
+    }
+
     public function fileToFileProvider()
     {
         $data = [];
 
+        $data['empty-file']         = ['empty-file.txt'];
         $data['wat-giagantic-duck'] = ['wat-gigantic-duck.jpg'];
         $data['large']              = ['large.jpg'];
         # Created from /dev/urandom in test.sh
