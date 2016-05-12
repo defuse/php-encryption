@@ -190,6 +190,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_read_buffer($if, 0);
 
         /* Open the output file. */
@@ -201,6 +202,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_write_buffer($of, 0);
 
         /* Perform the encryption. */
@@ -249,6 +251,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_read_buffer($if, 0);
 
         /* Open the output file. */
@@ -260,6 +263,7 @@ final class File
                 self::getLastErrorMessage()
             );
         }
+        /* This call can fail, but the only consequence is performance. */
         \stream_set_write_buffer($of, 0);
 
         /* Perform the decryption. */
