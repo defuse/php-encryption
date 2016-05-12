@@ -1,7 +1,13 @@
 TARGETS := defuse-crypto.phar
 
+define install_tool
+	@echo 'Required tool \"$1\" not installed, see docs/InstallingAndVerifying.md'; false
+endef
+define which
+	$(shell PATH=$$PATH:. which $1.phar 2>/dev/null || which $1 2>/dev/null || { echo "$(call install_tool,$(1))"; })
+endef
 define find_tool
-$(shell PATH=$$PATH:. which $1.phar 2>/dev/null || which $1 2>/dev/null || $(error Required tool `$1' not installed, see docs/InstallingAndVerifying.md))
+	$(call which,$1)
 endef
 
 box := $(call find_tool,box)
