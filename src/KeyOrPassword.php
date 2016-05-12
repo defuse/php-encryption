@@ -91,6 +91,7 @@ final class KeyOrPassword
                 Core::AUTHENTICATION_INFO_STRING,
                 $salt
             );
+            /* Note the cryptographic re-use of $salt here. */
             $ekey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $prekey,
