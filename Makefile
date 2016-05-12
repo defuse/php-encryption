@@ -22,11 +22,5 @@ composer.lock:
 %.phar: Makefile box.json composer.lock
 	$(php) -d phar.readonly=0 $(box) build -v
 
-box.phar:
-	@echo Required tool $@ not installed, see docs/InstallingAndVerifying.md
-
-composer.phar:
-	@echo Required tool $@ not installed, see docs/InstallingAndVerifying.md
-
 clean:
 	rm -vf $(TARGETS)
