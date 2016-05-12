@@ -14,6 +14,8 @@ box := $(call find_tool,box)
 composer := $(call find_tool,composer)
 php := $(call find_tool,php)
 
+all: dist-phar
+
 phar: $(TARGETS)
 
 composer.lock:
@@ -21,6 +23,14 @@ composer.lock:
 
 %.phar: Makefile box.json composer.lock
 	$(php) -d phar.readonly=0 $(box) build -v
+
+# ensure we run in clean tree. export git tree and run there.
+dist-phar:
+	rm -rf worktree
+	install -d worktree
+	git archive HEAD | tar -x -C worktree
+	$(MAKE) -f $(CURDIR)/Makefile -C worktree phar
+	rm -rf worktree
 
 clean:
 	rm -vf $(TARGETS)
