@@ -67,6 +67,12 @@ final class Core
             );
         }
 
+        if ($inc > PHP_INT_MAX - 255) {
+            throw new Ex\EnvironmentIsBrokenException(
+              'Integer overflow may occur.'
+            );
+        }
+
         /*
          * We start at the rightmost byte (big-endian)
          * So, too, does OpenSSL: http://stackoverflow.com/a/3146214/2224584
