@@ -658,7 +658,7 @@ final class File
      *
      * @return string
      */
-    final public static function readBytes($stream, $num_bytes)
+    public static function readBytes($stream, $num_bytes)
     {
         if ($num_bytes < 0) {
             throw new Ex\EnvironmentIsBrokenException(
@@ -699,7 +699,7 @@ final class File
      *
      * @return string
      */
-    final public static function writeBytes($stream, $buf, $num_bytes = null)
+    public static function writeBytes($stream, $buf, $num_bytes = null)
     {
         $bufSize = Core::ourStrlen($buf);
         if ($num_bytes === null) {
