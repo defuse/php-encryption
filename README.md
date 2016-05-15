@@ -23,9 +23,10 @@ Dependencies
 ------------
 
 This library requres no special dependencies except for PHP 5.4 or newer with
-the OpenSSL extensions enabled (this is the default). It comes bundled with
-[random\_compat](https://github.com/paragonie/random_compat) so that your users
-will not need to follow any special installation steps.
+the OpenSSL extensions enabled (this is the default). It uses
+[random\_compat](https://github.com/paragonie/random_compat), which is bundled
+in with this library so that your users will not need to follow any special
+installation steps.
 
 Getting Started
 ----------------
