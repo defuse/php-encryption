@@ -24,7 +24,7 @@ build-phar:
 
 .PHONY: clean
 clean:
-	rm -vf defuse-crypto.phar
+	rm -vf defuse-crypto.phar defuse-crypto.phar.sig
 
 # Inside workdir/:
 
