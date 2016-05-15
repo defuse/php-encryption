@@ -5,8 +5,8 @@ php-encryption
 
 This is a library for encrypting data with a key or password in PHP. **It
 requires PHP 5.4 or newer.** The current version is v2.0.0, which is expected to
-remain stable and supported by its authors with security and bugfixes until Jan
-01, 2019.
+remain stable and supported by its authors with security and bugfixes until at
+least January 1st, 2019.
 
 The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
 [Scott Arciszewski](https://paragonie.com/blog/author/scott-arcizewski) as well
