@@ -22,8 +22,8 @@ easy to use in a secure way and hard to use in an insecure way.
 Dependencies
 ------------
 
-This library requres no special dependencies except for a version of PHP 5.4 or
-newer with the OpenSSL extensions enabled (the default). It comes bundled with
+This library requres no special dependencies except for PHP 5.4 or newer with
+the OpenSSL extensions enabled (this is the default). It comes bundled with
 [random\_compat](https://github.com/paragonie/random_compat) so that your users
 will not need to follow any special installation steps.
 
