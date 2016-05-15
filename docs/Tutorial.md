@@ -74,7 +74,7 @@ needs to be different on your own.
 ### Formal Documentation
 
 While this tutorial should get you up and running fast, it's important to
-understand how this library behaves. Please make sure you read the formal
+understand how this library behaves. Please make sure to read the formal
 documentation of all of the functions you're using, since there are some
 important security warnings there.
 
@@ -111,8 +111,9 @@ encryption key and prints it to standard output:
 
 ```
 
-Alice will run this script once and save it to a configuration file, say in
-`/etc/daveapp-secret-key.txt` and set the file permissions appropriately.
+Alice will run this script once and save the output to a configuration file, say
+in `/etc/daveapp-secret-key.txt` and set the file permissions so that only the
+user that the website PHP scripts run as can access it.
 
 Dave will write his code to load the key from the configuration file:
 
@@ -180,13 +181,13 @@ including its database, on her server. Alice is worried about her server getting
 hacked. The application will store the users' credit card numbers, and Alice
 wants to protect them in case the server gets hacked.
 
-We can model this as follows. After the server gets hacked, the attacker will
-have read and write access to all data on it until the attack is detected and
-Alice rebuilds the server. We'll call the time the attacker has access to the
-server the *exposure window.* One idea to minimize loss is to encrypt the users'
-credit card numbers using a key made from their login password. Then, as long as
-the users' all have strong passwords, and they are never logged in during the
-exposure window, their credit cards will be protected from the attacker.
+We can model the situation like this: after the server gets hacked, the attacker
+will have read and write access to all data on it until the attack is detected
+and Alice rebuilds the server. We'll call the time the attacker has access to
+the server the *exposure window.* One idea to minimize loss is to encrypt the
+users' credit card numbers using a key made from their login password. Then, as
+long as the users all have strong passwords, and they are never logged in during
+the exposure window, their credit cards will be protected from the attacker.
 
 To implement this, Dave will use the `KeyProtectedByPassword` class. When a new
 user account is created, Dave will save a new key to their account, one that's
@@ -208,7 +209,7 @@ protected by their login password:
 Then, when the user logs in, Dave's code will load the protected key from the
 user's account record, unlock it to get a `Key` object, and save the `Key`
 object somewhere safe (like temporary memory-backed session storage). Note that
-wherever Dave's code save the key, it must be destroyed once the user logs out,
+wherever Dave's code saves the key, it must be destroyed once the user logs out,
 or else the attacker might be able to find users' keys even if they were never
 logged in during the attack.
 
@@ -276,9 +277,9 @@ When the application needs to use the credit card number, it will decrypt it:
 With all caveats carefully heeded, this solution limits credit card number
 exposure in the case where Alice's server gets hacked for a short amount of
 time. Remember to think about the attacks that *aren't* included in our threat
-model. The attacker is still free to do all sorts of hurtful things like
+model. The attacker is still free to do all sorts of harmful things like
 modifying the server's data which may go undetected if Alice doesn't have secure
-backups.
+backups to compare against.
 
 Getting Help
 -------------
