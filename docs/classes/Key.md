@@ -10,9 +10,10 @@ Instance Methods
 
 ### saveToAsciiSafeString()
 
-**Description:** Saves the encryption key to a string of printable ASCII
-characters, which can be loaded again into a `Key` instance using
-`Key::loadFromAsciiSafeString()`.
+**Description:**
+
+Saves the encryption key to a string of printable ASCII characters, which can be
+loaded again into a `Key` instance using `Key::loadFromAsciiSafeString()`.
 
 **Parameters:**
 
@@ -46,7 +47,9 @@ Static Methods
 
 ### Key::createNewRandomKey()
 
-**Description:** Generates a new random key and returns an instance of `Key`.
+**Description:**
+
+Generates a new random key and returns an instance of `Key`.
 
 **Parameters:**
 
@@ -73,7 +76,9 @@ None.
 
 ### Key::loadFromAsciiSafeString($saved\_key\_string)
 
-**Description:** Loads an instance of `Key` that was saved to a string by
+**Description:**
+
+Loads an instance of `Key` that was saved to a string by
 `saveToAsciiSafeString()`.
 
 **Parameters:**

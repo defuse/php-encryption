@@ -21,9 +21,11 @@ Instance Methods
 
 ### saveToAsciiSafeString()
 
-**Description:** Saves the protected key to a string of printable ASCII
-characters, which can be loaded again into a `KeyProtectedByPassword` instance
-using `KeyProtectedByPassword::loadFromAsciiSafeString()`.
+**Description:**
+
+Saves the protected key to a string of printable ASCII characters, which can be
+loaded again into a `KeyProtectedByPassword` instance using
+`KeyProtectedByPassword::loadFromAsciiSafeString()`.
 
 **Parameters:**
 
@@ -56,6 +58,9 @@ string.
 ### unlockKey($password)
 
 **Description:**
+
+Unlocks the password-protected key, obtaining a `Key` which can be used for
+encryption and decryption.
 
 **Parameters:**
 
@@ -106,8 +111,10 @@ Static Methods
 
 ### KeyProtectedByPassword::createRandomPasswordProtectedKey($password)
 
-**Description:** Generates a new random key that's protected by the string
-`$password` and returns an instance of `KeyProtectedByPassword`.
+**Description:**
+
+Generates a new random key that's protected by the string `$password` and
+returns an instance of `KeyProtectedByPassword`.
 
 **Parameters:**
 
@@ -147,8 +154,10 @@ knows.
 
 ### KeyProtectedByPassword::loadFromAsciiSafeString($saved\_key\_string)
 
-**Description:** Loads an instance of `KeyProtectedByPassword` that was saved to
-a string by `saveToAsciiSafeString()`.
+**Description:**
+
+Loads an instance of `KeyProtectedByPassword` that was saved to a string by
+`saveToAsciiSafeString()`.
 
 **Parameters:**
 

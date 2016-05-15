@@ -17,7 +17,9 @@ Static Methods
 
 ### Crypto::encrypt($plaintext, Key $key, $raw\_binary = false)
 
-**Description:** Encrypts a plaintext string using a secret key.
+**Description:**
+
+Encrypts a plaintext string using a secret key.
 
 **Parameters:**
 
@@ -56,7 +58,9 @@ your application.
 
 ### Crypto::decrypt($ciphertext, Key $key, $raw\_binary = false)
 
-**Description:** Decrypts a ciphertext string using a secret key.
+**Description:**
+
+Decrypts a ciphertext string using a secret key.
 
 **Parameters:**
 
@@ -100,7 +104,9 @@ If in doubt, consult with a professional cryptographer.
 
 ### Crypto::encryptWithPassword($plaintext, $password, $raw\_binary = false)
 
-**Description:** Encrypts a plaintext string using a secret password.
+**Description:**
+
+Encrypts a plaintext string using a secret password.
 
 **Parameters:**
 
@@ -144,7 +150,9 @@ them to the user or saving them to log files).
 
 ### Crypto::decryptWithPassword($ciphertext, $password, $raw\_binary = false)
 
-**Description:** Decrypts a ciphertext string using a secret password.
+**Description:**
+
+Decrypts a ciphertext string using a secret password.
 
 **Parameters:**
 
@@ -199,9 +207,11 @@ If in doubt, consult with a professional cryptographer.
 
 ### Crypto::legacyDecrypt($ciphertext, $key)
 
-**Description:** Decrypts a ciphertext produced by version 1 of this library so
-that the plaintext can be re-encrypted into a version 2 ciphertext. See
-[Upgrading from v1.2](../UpgradingFromV1.2.md).
+**Description:**
+
+Decrypts a ciphertext produced by version 1 of this library so that the
+plaintext can be re-encrypted into a version 2 ciphertext. See [Upgrading from
+v1.2](../UpgradingFromV1.2.md).
 
 **Parameters:**
 

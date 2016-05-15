@@ -11,7 +11,9 @@ Static Methods
 
 ### File::encryptFile($inputFilename, $outputFilename, Key $key)
 
-**Description:** Encrypts a file using a secret key.
+**Description:**
+
+Encrypts a file using a secret key.
 
 **Parameters:**
 
@@ -52,7 +54,9 @@ application.
 
 ### File::decryptFile($inputFilename, $outputFilename, Key $key)
 
-**Description:** Decrypts a file using a secret key.
+**Description:**
+
+Decrypts a file using a secret key.
 
 **Parameters:**
 
@@ -107,7 +111,9 @@ If in doubt, consult with a professional cryptographer.
 
 ### File::encryptFileWithPassword($inputFilename, $outputFilename, $password)
 
-**Description:** Encrypts a file with a password.
+**Description:**
+
+Encrypts a file with a password.
 
 **Parameters:**
 
@@ -151,7 +157,9 @@ them to the user or saving them to log files).
 
 ### File::decryptFileWithPassword($inputFilename, $outputFilename, $password)
 
-**Description:** Decrypts a file with a password.
+**Description:**
+
+Decrypts a file with a password.
 
 **Parameters:**
 
@@ -218,7 +226,9 @@ If in doubt, consult with a professional cryptographer.
 
 ### File::encryptResource($inputHandle, $outputHandle, Key $key)
 
-**Description:** Encrypts a resource (stream) with a secret key.
+**Description:**
+
+Encrypts a resource (stream) with a secret key.
 
 **Parameters:**
 
@@ -260,7 +270,9 @@ application.
 
 ### File::decryptResource($inputHandle, $outputHandle, Key $key)
 
-**Description:** Decrypts a resource (stream) with a secret key.
+**Description:**
+
+Decrypts a resource (stream) with a secret key.
 
 **Parameters:**
 
@@ -317,7 +329,9 @@ If in doubt, consult with a professional cryptographer.
 
 ### File::encryptResourceWithPassword($inputHandle, $outputHandle, $password)
 
-**Description:** Encrypts a resource (stream) with a password.
+**Description:**
+
+Encrypts a resource (stream) with a password.
 
 **Parameters:**
 
@@ -362,7 +376,9 @@ them to the user or saving them to log files).
 
 ### File::decryptResourceWithPassword($inputHandle, $outputHandle, $password)
 
-**Description:** Decrypts a resource (stream) with a password.
+**Description:**
+
+Decrypts a resource (stream) with a password.
 
 **Parameters:**
 
