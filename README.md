@@ -10,7 +10,7 @@ least January 1st, 2019.
 
 The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
 [Scott Arciszewski](https://paragonie.com/blog/author/scott-arcizewski) as well
-as numerous open-source contributotrs.
+as numerous open-source contributors.
 
 What separates this library from other PHP encryption libraries is, firstly,
 that it is secure. The authors used to encounter insecure PHP encryption code on
