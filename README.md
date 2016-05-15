@@ -65,9 +65,9 @@ Security Audit Status
 ---------------------
 
 This code has not been subjected to a formal, paid, security audit. However, it
-has received lots of review from members of the PHP security community. In all
-likelihood, you are safer using this library than almost any other encryption
-library for PHP.
+has received lots of review from members of the PHP security community, and the
+authors are experienced with cryptography. In all likelihood, you are safer
+using this library than almost any other encryption library for PHP.
 
 If you use this library as a part of your business and would like to help fund
 a formal audit, please [contact Taylor Hornby](https://defuse.ca/contact.htm).
