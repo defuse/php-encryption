@@ -23,16 +23,21 @@ Option 2: Including a PHAR
 ----------------------------
 
 The `.phar` option lets you include this library into your project simply by
-calling `require_once()` on a single file. Simply check out the tag with the
-version you want, for example for version 2.0.0 you would do:
+calling `require_once()` on a single file. Download `defuse-crypto.phar` and
+`defuse-crypto.phar.sig` from this project's
+[releases](https://github.com/defuse/php-encryption/releases) page.
 
-```
-git checkout v2.0.0
-```
+You should verify the integrity of the `.phar`. The `defuse-crypto.phar.sig`
+contains the signature of `defuse-crypto.phar`. It is signed with Taylor
+Hornby's PGP key. You can find Taylor's public key in `dist/signingkey.asc.
 
-You'll find the `.phar` file for that release in `dist/defuse-crypto.phar`.
-Install it to somewhere on your filesystem, e.g.
-`/var/www/lib/defuse-crypto.phar`. You can now use it in your code like this:
+You can verify the public key's fingerprint against the Taylor Hornby's [contact
+page](https://defuse.ca/contact.htm) and
+[twitter](https://twitter.com/DefuseSec/status/723741424253059074).
+
+Once you have verified the signature, it is safe to use the `.phar`. Install it
+to somewhere on your file system, e.g. `/var/www/lib/defuse-crypto.phar`, and
+then you can use it like this:
 
 ```php
 <?php
@@ -45,10 +50,3 @@ Install it to somewhere on your filesystem, e.g.
     // ...
 ```
 
-You should verify the integrity of the `.phar`. It is signed with Taylor
-Hornby's PGP key. The signature file is `dist/defuse-crypto.phar.sig`. You can
-find Taylor's public key in `other/signingkey.asc.
-
-You can verify the public key's fingerprint against the Taylor Hornby's [contact
-page](https://defuse.ca/contact.htm) and
-[twitter](https://twitter.com/DefuseSec/status/723741424253059074).
