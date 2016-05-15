@@ -10,7 +10,7 @@ fi
 if [ -n "$1" ]; then
     BOOTSTRAP="$1"
 else
-    BOOTSTRAP="autoload.php"
+    BOOTSTRAP="vendor/autoload.php"
 fi
 
 ./test/phpunit.sh "$BOOTSTRAP"

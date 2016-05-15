@@ -16,12 +16,14 @@ following tools installed:
 
 - `php` (with OpenSSL enabled, if you're compiling from source).
 - `gpg`
+- `composer`
 
 Running the Tests
 ------------------
 
-Simply run `./test.sh`. This will download a PHPUnit PHAR, verify its
-cryptographic signatures, and then use it to run the tests in `test/unit`.
+First do `composer install` and then you can run the tests by running
+`./test.sh`. This will download a PHPUnit PHAR, verify its cryptographic
+signatures, and then use it to run the tests in `test/unit`.
 
 Reporting Bugs
 ---------------

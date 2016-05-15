@@ -5,3 +5,6 @@
 defuse-crypto.phar
 composer.phar
 box.phar
+phpunit.phar
+phpunit.phar.asc
+test/unit/File/tmp
