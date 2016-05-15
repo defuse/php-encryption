@@ -7,7 +7,13 @@
     "authors": [
         {
             "name": "Taylor Hornby",
-            "email": "taylor@defuse.ca"
+            "email": "taylor@defuse.ca",
+            "homepage": "https://defuse.ca/"
+        },
+        {
+            "name": "Scott Arciszewski",
+            "email": "info@paragonie.com",
+            "homepage": "https://paragonie.com"
         }
     ],
     "autoload": {
