@@ -10,4 +10,8 @@ sudo: false
 matrix:
     fast_finish: true
 
-script: ./test.sh
+install:
+    - composer install
+
+script:
+    - ./test.sh
