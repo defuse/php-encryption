@@ -10,6 +10,7 @@ fi
 if [ -n "$1" ]; then
     BOOTSTRAP="$1"
 else
+    # You need to run `composer install` to generate this file.
     BOOTSTRAP="vendor/autoload.php"
 fi
 
