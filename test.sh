@@ -1,42 +1,18 @@
 #!/bin/bash
+set -e
 
-echo "Normal"
-echo "--------------------------------------------------"
-php -d mbstring.func_overload=0 tests/runtime.php
-if [ $? -ne 0 ]; then
-    echo "FAIL."
-    exit 1
+BIG_GENERATED_FILE=./test/unit/File/big-generated-file
+if [ ! -e $BIG_GENERATED_FILE ] || [ $(wc -c < $BIG_GENERATED_FILE) -ne "209715200" ]; then
+    echo "Please wait while I create a large random test plaintext file..."
+    dd if=/dev/urandom "of=$BIG_GENERATED_FILE" bs=1M count=200
 fi
-echo "--------------------------------------------------"
 
-echo ""
-
-echo "Multibyte"
-echo "--------------------------------------------------"
-php -d mbstring.func_overload=7 tests/runtime.php
-if [ $? -ne 0 ]; then
-    echo "FAIL."
-    exit 1
-fi
-echo "--------------------------------------------------"
-
-echo ""
-
-if [ -z "$(php tests/empty.php)" ]; then
-    echo "PASS: Crypto.php output is empty."
+if [ -n "$1" ]; then
+    BOOTSTRAP="$1"
 else
-    echo "FAIL: Crypto.php output is not empty."
-    exit 1
+    # You need to run `composer install` to generate this file.
+    BOOTSTRAP="vendor/autoload.php"
 fi
 
-echo "--------------------------------------------------"
-
+./test/phpunit.sh "$BOOTSTRAP"
 echo ""
-
-php tests/encode.php
-if [ $? -ne 0 ]; then
-    echo "FAIL."
-    exit 1
-else
-    echo "PASS: Hex encoding is working correctly"
-fi
