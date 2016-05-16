@@ -3,8 +3,7 @@
     "finder": [
         {
             "in": "src",
-            "name": "*.php",
-            "exclude": "random_compat"
+            "name": "*.php"
         },
         {
             "in": "vendor/composer",
@@ -20,7 +19,6 @@
     "compactors": [
         "Herrera\\Box\\Compactor\\Php"
     ],
-    "compression": "GZ",
     "main": "vendor/autoload.php",
     "output": "defuse-crypto.phar",
     "stub": true
