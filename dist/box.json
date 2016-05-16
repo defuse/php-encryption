@@ -7,8 +7,7 @@
         },
         {
             "in": "vendor/composer",
-            "name": "*.php",
-            "exclude": "other"
+            "name": "*.php"
         },
         {
             "in": "vendor/paragonie",
