@@ -10,4 +10,13 @@ sudo: false
 matrix:
     fast_finish: true
 
-script: ./test.sh
+install:
+    - composer install
+    - curl -LSs https://box-project.github.io/box2/installer.php | php
+    - mkdir ~/box
+    - mv box.phar ~/box/box
+
+script:
+    - ./test.sh
+    - PATH=$PATH:~/box/ make -C dist/ build-phar
+    - ./test.sh dist/defuse-crypto.phar

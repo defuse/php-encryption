@@ -16,12 +16,14 @@ following tools installed:
 
 - `php` (with OpenSSL enabled, if you're compiling from source).
 - `gpg`
+- `composer`
 
 Running the Tests
 ------------------
 
-Simply run `./test.sh`. This will download a PHPUnit PHAR, verify its
-cryptographic signatures, and then use it to run the tests in `test/unit`.
+First do `composer install` and then you can run the tests by running
+`./test.sh`. This will download a PHPUnit PHAR, verify its cryptographic
+signatures, and then use it to run the tests in `test/unit`.
 
 Reporting Bugs
 ---------------
@@ -72,6 +74,14 @@ This library is developed around several core values:
 Publishing Releases
 --------------------
 
+To make a release, you will need to install [composer](https://getcomposer.org/)
+and [box](https://github.com/box-project/box2) on your system. They will need to
+be available in your `$PATH` so that running the commands `composer` and `box`
+in your terminal run them, respectively. You will also need the private key for
+signing (ID: 7B4B2D98) available.
+
+Once you have those tools installed and the key available follow these steps:
+
 Make a fresh clone of the repository:
 
 ```
@@ -84,11 +94,23 @@ Check out the branch you want to release:
 git checkout <branchname>
 ```
 
-Run the sign-release script (note this will make a commit on your current
-branch):
+Generate and sign the `.phar`:
 
 ```
-./other/sign-release.sh <tagname> <tagmessage>
+cd dist
+make
 ```
 
-Push the branch and tag up to GitHub.
+Tag the release:
+
+```
+git -c user.signingkey=7B4B2D98 tag -s "<TAG NAME>" -m "<TAG MESSAGE>"
+```
+
+`<TAG NAME>` should be in the format `v2.0.0` and `<TAG MESSAGE>` should look
+like "Release of v2.0.0."
+
+Push the tag to github, then use the
+[releases](https://github.com/defuse/php-encryption/releases) page to draft
+a new release for that tag. Upload the `.phar` and the `.phar.sig` file to be
+included as part of that release.
