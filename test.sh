@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 BIG_GENERATED_FILE=./test/unit/File/big-generated-file
@@ -13,6 +13,10 @@ else
     # You need to run `composer install` to generate this file.
     BOOTSTRAP="vendor/autoload.php"
 fi
+
+# loading bootstrap should output nothing
+load=$(php -r "require '$BOOTSTRAP';")
+test -z "$load"
 
 ./test/phpunit.sh "$BOOTSTRAP"
 echo ""
