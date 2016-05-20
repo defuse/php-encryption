@@ -20,5 +20,6 @@
     ],
     "main": "vendor/autoload.php",
     "output": "defuse-crypto.phar",
+    "shebang": false,
     "stub": true
 }
