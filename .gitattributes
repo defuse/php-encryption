@@ -1,2 +1,5 @@
 /.gitattributes export-ignore
 /.travis.yml export-ignore
+/test.sh export-ignore
+/test export-ignore
+/dist
