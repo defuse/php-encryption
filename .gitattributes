@@ -2,4 +2,3 @@
 /.travis.yml export-ignore
 /test.sh export-ignore
 /test export-ignore
-/dist export-ignore
