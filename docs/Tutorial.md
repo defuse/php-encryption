@@ -221,7 +221,7 @@ logged in during the attack.
 
     $protected_key_encoded = // ... load it from the user's account record
     $protected_key = KeyProtectedByPassword::loadFromAsciiSafeString($protected_key_encoded);
-    $user_key = $protected_key->unlock($password);
+    $user_key = $protected_key->unlockKey($password);
     $user_key_encoded = $user_key->saveToAsciiSafeString();
     // ... save $user_key_encoded in the session
 ```
