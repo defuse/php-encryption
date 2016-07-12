@@ -45,7 +45,12 @@ class RuntimeTests extends Crypto
 
             Core::ensureFunctionExists('openssl_get_cipher_methods');
             if (\in_array(Core::CIPHER_METHOD, \openssl_get_cipher_methods()) === false) {
-                throw new Ex\EnvironmentIsBrokenException('Cipher method not supported.');
+                throw new Ex\EnvironmentIsBrokenException(
+                    'Cipher method not supported. This is normally caused by an outdated ' .
+                    'version of OpenSSL (and/or OpenSSL compiled for FIPS compliance). ' .
+                    'Please upgrade to a newer version of OpenSSL that supports ' .
+                    Core::CIPHER_METHOD . ' to use this library.'
+                );
             }
 
             RuntimeTests::AESTestVector();
