@@ -76,7 +76,7 @@ Public Keys
 ------------
 
 The GnuPG public key used to sign releases is available in
-[dist/signingkey.asc](dist/signingkey.asc). Its fingerprint is:
+[dist/signingkey.asc](https://github.com/defuse/php-encryption/raw/master/dist/signingkey.asc). Its fingerprint is:
 
 ```
 2FA6 1D8D 99B9 2658 6BAC  3D53 385E E055 A129 1538
