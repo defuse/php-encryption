@@ -51,14 +51,9 @@ if (null === $input->getArgument('path')) {
     $config
         ->finder(
             Symfony\CS\Finder\DefaultFinder::create()
-                ->in('src/')
-                ->in('other/')
-                ->in('test/')
-                ->filter(
-                  function (\SplFileInfo $file) {
-                    return strpos($file->getRelativePathname(), 'random_compat') === FALSE;
-                  }
-                )
+                ->in('src')
+                ->in('test')
+                ->exclude('vendor')
         );
 }
 
