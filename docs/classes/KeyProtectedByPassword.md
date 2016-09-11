@@ -118,7 +118,7 @@ returns an instance of `KeyProtectedByPassword`.
 
 **Parameters:**
 
-This method does not take any parameters.
+1. `$password` is the password used to protect the random key.
 
 **Return value:**
 
