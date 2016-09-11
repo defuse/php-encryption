@@ -81,17 +81,4 @@ final class Key
         $this->key_bytes = $bytes;
     }
 
-    /**
-     * INTERNAL USE ONLY: Constructs a Key object from a string of raw bytes.
-     *
-     * @param $bytes
-     *
-     * @return \Defuse\Crypto\Key
-     *
-     * @internal
-     */
-    public static function loadFromRawBytesForTestingPurposesOnlyInsecure($bytes)
-    {
-        return new Key($bytes);
-    }
 }
