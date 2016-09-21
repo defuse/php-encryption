@@ -14,9 +14,9 @@ final class Key
     /**
      * Creates new random key.
      *
-     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      *
-     * @return Defuse\Crypto\Key
+     * @return \Defuse\Crypto\Key
      */
     public static function createNewRandomKey()
     {
