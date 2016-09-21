@@ -14,9 +14,9 @@ final class Key
     /**
      * Creates new random key.
      *
-     * @throws Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Ex\EnvironmentIsBrokenException
      *
-     * @return Defuse\Crypto\Key
+     * @return Key
      */
     public static function createNewRandomKey()
     {
@@ -26,10 +26,10 @@ final class Key
     /**
      * Loads a Key from its encoded form.
      *
-     * @param string $savedKeyString
+     * @param string $saved_key_string
      *
-     * @throws \Defuse\Crypto\Exception\BadFormatException
-     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Ex\BadFormatException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return \Defuse\Crypto\Key
      */
@@ -42,7 +42,7 @@ final class Key
     /**
      * Encodes the Key into a string of printable ASCII characters.
      *
-     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string
      */
@@ -69,7 +69,7 @@ final class Key
      *
      * @param string $bytes
      *
-     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @throws Ex\EnvironmentIsBrokenException
      */
     private function __construct($bytes)
     {
