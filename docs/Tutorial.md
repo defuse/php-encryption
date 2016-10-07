@@ -91,7 +91,7 @@ The following classes are available for you to use:
 
 In this scenario, our threat model is as follows. Alice is a server
 administrator responsible for managing a trusted web server. Eve is a database
-administrator responsibile for managing a database server. Dave is a web
+administrator responsible for managing a database server. Dave is a web
 developer working on code that will eventually run on the trusted web server.
 
 Let's say Alice and Dave trust each other, and Alice is going to host Dave's
