@@ -94,11 +94,31 @@ Check out the branch you want to release:
 git checkout <branchname>
 ```
 
-Generate and sign the `.phar`:
+Run the tests:
+
+```
+./test.sh
+```
+
+Generate the `.phar`:
 
 ```
 cd dist
-make
+make build-phar
+```
+
+Test the `.phar`:
+
+```
+cd ../
+./test.sh dist/defuse-crypto.phar
+```
+
+Sign the `.phar`:
+
+```
+cd dist
+make sign-phar
 ```
 
 Tag the release:
