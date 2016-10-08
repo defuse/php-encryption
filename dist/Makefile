@@ -5,7 +5,7 @@ box := $(shell which box)
 composer := "composer"
 
 .PHONY: all
-all: sign-phar
+all: build-phar
 
 .PHONY: sign-phar
 sign-phar: build-phar
