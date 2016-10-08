@@ -151,7 +151,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     * @excpectedExceptionMessage Ciphertext file has a bad magic number.
+     * @expectedExceptionMessage Input file is too small to have been created by this library.
      */
     public function testDecryptBadMagicNumber()
     {
