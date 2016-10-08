@@ -97,6 +97,7 @@ git checkout <branchname>
 Run the tests:
 
 ```
+composer install
 ./test.sh
 ```
 
