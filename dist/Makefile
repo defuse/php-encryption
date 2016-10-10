@@ -5,10 +5,10 @@ box := $(shell which box)
 composer := "composer"
 
 .PHONY: all
-all: sign-phar
+all: build-phar
 
 .PHONY: sign-phar
-sign-phar: build-phar
+sign-phar:
 	gpg -u 7B4B2D98 --armor --output defuse-crypto.phar.sig --detach-sig defuse-crypto.phar
 
 # ensure we run in clean tree. export git tree and run there.
