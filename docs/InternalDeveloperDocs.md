@@ -82,6 +82,8 @@ signing (ID: 7B4B2D98) available.
 
 Once you have those tools installed and the key available follow these steps:
 
+**Remember to set the version number in `composer.json`**
+
 Make a fresh clone of the repository:
 
 ```
