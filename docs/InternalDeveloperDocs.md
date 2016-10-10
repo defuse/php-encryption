@@ -82,7 +82,7 @@ signing (ID: 7B4B2D98) available.
 
 Once you have those tools installed and the key available follow these steps:
 
-**Remember to set the version number in `composer.json`**
+**Remember to set the version number in `composer.json`!**
 
 Make a fresh clone of the repository:
 
@@ -94,6 +94,12 @@ Check out the branch you want to release:
 
 ```
 git checkout <branchname>
+```
+
+Check that the version number in composer.json is correct:
+
+```
+cat composer.json
 ```
 
 Run the tests:
