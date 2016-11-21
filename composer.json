@@ -2,7 +2,6 @@
     "name": "defuse/php-encryption",
     "description": "Secure PHP Encryption Library",
     "license": "MIT",
-    "version": "2.0.3",
     "keywords": ["security", "encryption", "AES", "openssl", "cipher", "cryptography", "symmetric key cryptography", "crypto", "encrypt", "authenticated encryption"],
     "authors": [
         {
