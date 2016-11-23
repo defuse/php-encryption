@@ -105,9 +105,11 @@ encryption key and prints it to standard output:
 
 ```php
 <?php
-    // generate-key.php
-    $key = Key::createNewRandomKey();
-    echo $key->saveToAsciiSafeString();
+// generate-key.php
+use Defuse\Crypto\Key;
+
+$key = Key::createNewRandomKey();
+echo $key->saveToAsciiSafeString();
 
 ```
 
@@ -119,11 +121,13 @@ Dave will write his code to load the key from the configuration file:
 
 ```php
 <?php
-    function loadEncryptionKeyFromConfig()
-    {
-        $keyAscii = // ... load the contents of /etc/daveapp-secret-key.txt
-        return Key::loadFromAsciiSafeString($keyAscii);
-    }
+use Defuse\Crypto\Key;
+
+function loadEncryptionKeyFromConfig()
+{
+    $keyAscii = // ... load the contents of /etc/daveapp-secret-key.txt
+    return Key::loadFromAsciiSafeString($keyAscii);
+}
 ```
 
 Then, whenever Dave wants to save a secret value to the database, he will first
@@ -131,30 +135,35 @@ encrypt it:
 
 ```php
 <?php
-    // ...
-    $key = loadEncryptionKeyFromConfig();
-    // ...
-    $ciphertext = Crypto::encrypt($secret_data, $key);
-    // ... save $ciphertext into the database ...
+use Defuse\Crypto\Crypto;
+
+// ...
+$key = loadEncryptionKeyFromConfig();
+// ...
+$ciphertext = Crypto::encrypt($secret_data, $key);
+// ... save $ciphertext into the database ...
 ```
 
 Whenever Dave wants to get the value back from the database, he must decrypt it
 using the same key:
 
 ```php
-    // ...
-    $key = loadEncryptionKeyFromConfig();
-    // ...
-    $ciphertext = // ... load $ciphertext from the database
-    try {
-        $secret_data = Crypto::decrypt($ciphertext, $key);
-    } catch (Defuse\Crypto\WrongKeyOrModifiedCiphertextException $ex) {
-        // An attack! Either the wrong key was loaded, or the ciphertext has
-        // changed since it was created -- either corrupted in the database or
-        // intentionally modified by Eve trying to carry out an attack.
+<?php
+use Defuse\Crypto\Crypto;
 
-        // ... handle this case in a way that's suitable to your application ...
-    }
+// ...
+$key = loadEncryptionKeyFromConfig();
+// ...
+$ciphertext = // ... load $ciphertext from the database
+try {
+    $secret_data = Crypto::decrypt($ciphertext, $key);
+} catch (Defuse\Crypto\WrongKeyOrModifiedCiphertextException $ex) {
+    // An attack! Either the wrong key was loaded, or the ciphertext has
+    // changed since it was created -- either corrupted in the database or
+    // intentionally modified by Eve trying to carry out an attack.
+
+    // ... handle this case in a way that's suitable to your application ...
+}
 ```
 
 Note that if anyone ever steals the key from Alice's server, they can decrypt
@@ -195,15 +204,16 @@ protected by their login password:
 
 ```php
 <?php
+use Defuse\Crypto\KeyProtectedByPassword;
 
-    function CreateUserAccount($username, $password)
-    {
-        // ... other user account creation stuff, including password hashing
+function CreateUserAccount($username, $password)
+{
+    // ... other user account creation stuff, including password hashing
 
-        $protected_key = KeyProtectedByPassword::createRandomPasswordProtectedKey($password);
-        $protected_key_encoded = $protected_key->saveToAsciiSafeString();
-        // ... save $protected_key_encoded into the user's account record
-    }
+    $protected_key = KeyProtectedByPassword::createRandomPasswordProtectedKey($password);
+    $protected_key_encoded = $protected_key->saveToAsciiSafeString();
+    // ... save $protected_key_encoded into the user's account record
+}
 ```
 
 Then, when the user logs in, Dave's code will load the protected key from the
@@ -215,21 +225,22 @@ logged in during the attack.
 
 ```php
 <?php
+use Defuse\Crypto\KeyProtectedByPassword;
 
-    // ... authenticate the user using a good password hashing scheme
-    // keep the user's password in $password
+// ... authenticate the user using a good password hashing scheme
+// keep the user's password in $password
 
-    $protected_key_encoded = // ... load it from the user's account record
-    $protected_key = KeyProtectedByPassword::loadFromAsciiSafeString($protected_key_encoded);
-    $user_key = $protected_key->unlockKey($password);
-    $user_key_encoded = $user_key->saveToAsciiSafeString();
-    // ... save $user_key_encoded in the session
+$protected_key_encoded = // ... load it from the user's account record
+$protected_key = KeyProtectedByPassword::loadFromAsciiSafeString($protected_key_encoded);
+$user_key = $protected_key->unlockKey($password);
+$user_key_encoded = $user_key->saveToAsciiSafeString();
+// ... save $user_key_encoded in the session
 ```
 
 ```php
 <?php
-    // ... when the user is logging out ...
-    // ... securely wipe the saved $user_key_encoded from the system ...
+// ... when the user is logging out ...
+// ... securely wipe the saved $user_key_encoded from the system ...
 ```
 
 When a user adds their credit card number, Dave's code will get the key from the
@@ -237,41 +248,45 @@ session and use it to encrypt the credit card number:
 
 ```php
 <?php
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Key;
 
-    // ...
+// ...
 
-    $user_key_encoded = // ... get it out of the session ...
-    $user_key = Key::loadFromAsciiSafeString($user_key_encoded);
+$user_key_encoded = // ... get it out of the session ...
+$user_key = Key::loadFromAsciiSafeString($user_key_encoded);
 
-    // ...
+// ...
 
-    $credit_card_number = // ... get credit card number from the user
-    $encrypted_card_number = Crypto::encrypt($credit_card_number, $user_key);
-    // ... save $encrypted_card_number in the database
+$credit_card_number = // ... get credit card number from the user
+$encrypted_card_number = Crypto::encrypt($credit_card_number, $user_key);
+// ... save $encrypted_card_number in the database
 ```
 
 When the application needs to use the credit card number, it will decrypt it:
 
 ```php
 <?php
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Key;
 
-    // ...
+// ...
 
-    $user_key_encoded = // ... get it out of the session
-    $user_key = Key::loadFromAsciiSafeString($user_key_encoded);
+$user_key_encoded = // ... get it out of the session
+$user_key = Key::loadFromAsciiSafeString($user_key_encoded);
 
-    // ...
+// ...
 
-    $encrypted_card_number = // ... load it from the database ...
-    try {
-        $credit_card_number = Crypto::decrypt($encrypted_card_number, $user_key);
-    } catch (Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) {
-        // Either there's a bug in our code, we're trying to decrypt with the
-        // wrong key, or the encrypted credit card number was corrupted in the
-        // database.
+$encrypted_card_number = // ... load it from the database ...
+try {
+    $credit_card_number = Crypto::decrypt($encrypted_card_number, $user_key);
+} catch (Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) {
+    // Either there's a bug in our code, we're trying to decrypt with the
+    // wrong key, or the encrypted credit card number was corrupted in the
+    // database.
 
-        // ... handle this case ...
-    }
+    // ... handle this case ...
+}
 ```
 
 With all caveats carefully heeded, this solution limits credit card number
