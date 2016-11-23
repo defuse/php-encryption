@@ -248,6 +248,7 @@ session and use it to encrypt the credit card number:
 
 ```php
 <?php
+use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Key;
 
 // ...
