@@ -100,6 +100,12 @@ class CryptoTest extends PHPUnit_Framework_TestCase
                 Crypto::getExpectedCiphertextLength(strlen($str)),
                 'Miscalculation in getExpectedCiphertextLength()'
             );
+            $cipher  = Crypto::encrypt($str, $key, true);
+            $this->assertSame(
+                strlen($cipher),
+                Crypto::getExpectedCiphertextLength(strlen($str), true),
+                'Miscalculation in getExpectedCiphertextLength()'
+            );
         }
     }
 
