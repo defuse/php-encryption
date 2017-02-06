@@ -16,7 +16,9 @@
         }
     ],
     "autoload": {
-        "classmap": ["src"]
+        "psr-4": {
+            "Defuse\\Crypto\\": "src"
+        }
     },
     "require": {
         "paragonie/random_compat": "~2.0",
