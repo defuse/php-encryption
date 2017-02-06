@@ -35,14 +35,14 @@ fi
 # Let's grab the latest release and its signature
 if [ ! -f phpunit.phar ]; then
     if [[ $PHP_VERSION -ge 50600 ]]; then
-        wget https://phar.phpunit.de/phpunit-5.7.phar
+        wget -O phpunit.phar https://phar.phpunit.de/phpunit-5.7.phar
     else
         wget -O phpunit.phar https://phar.phpunit.de/phpunit-4.8.phar
     fi
 fi
 if [ ! -f phpunit.phar.asc ]; then
     if [[ $PHP_VERSION -ge 50600 ]]; then
-        wget https://phar.phpunit.de/phpunit-5.7.phar.asc
+        wget -O phpunit.phar.asc https://phar.phpunit.de/phpunit-5.7.phar.asc
     else
         wget -O phpunit.phar.asc https://phar.phpunit.de/phpunit-4.8.phar.asc
     fi
