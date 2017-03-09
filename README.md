@@ -60,6 +60,7 @@ If the documentation is not enough for you to understand how to use this
 library, then you can look at an example project that uses this library:
 
 - [encutil](https://github.com/defuse/encutil)
+- [fileencrypt](https://github.com/tsusanka/fileencrypt)
 
 Security Audit Status
 ---------------------
