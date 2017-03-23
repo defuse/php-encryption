@@ -356,7 +356,7 @@ class Crypto
     /**
      * Verifies an HMAC without leaking information through side-channels.
      *
-     * @param string $correct_hmac
+     * @param string $expected_hmac
      * @param string $message
      * @param string $key
      *
@@ -364,9 +364,9 @@ class Crypto
      *
      * @return bool
      */
-    protected static function verifyHMAC($correct_hmac, $message, $key)
+    protected static function verifyHMAC($expected_hmac, $message, $key)
     {
         $message_hmac = \hash_hmac(Core::HASH_FUNCTION_NAME, $message, $key, true);
-        return Core::hashEquals($correct_hmac, $message_hmac);
+        return Core::hashEquals($message_hmac, $expected_hmac);
     }
 }
