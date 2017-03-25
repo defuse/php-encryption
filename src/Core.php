@@ -129,6 +129,14 @@ final class Core
      */
     public static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
     {
+        static $nativeHKDF = null;
+        if ($nativeHKDF === null) {
+            $nativeHKDF = \function_exists('hash_hkdf');
+        }
+        if ($nativeHKDF) {
+            return \hash_hkdf($hash, $ikm, $length, $info, $salt);
+        }
+
         $digest_length = Core::ourStrlen(\hash_hmac($hash, '', '', true));
 
         // Sanity-check the desired output length.
