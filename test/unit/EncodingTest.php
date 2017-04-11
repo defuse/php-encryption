@@ -93,7 +93,31 @@ class EncodingTest extends PHPUnit_Framework_TestCase
             $header,
             Core::secureRandom(Core::KEY_BYTE_SIZE)
         );
+        $orig = $str;
+
+        $str .= "\r";
+        Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
+
         $str .= "\n";
         Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
+
+        $str .= "\t";
+        Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
+
+        $str .= "\0";
+        Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
+
+        $str = $orig;
+
+        $noise = ["\r", "\n", "\t", "\0"];
+        for ($i = 0; $i < 1000; ++$i) {
+            $c = $noise[\random_int(0, 3)];
+            $str .= $c;
+            $this->assertSame(
+                Encoding::binToHex($orig),
+                Encoding::binToHex(Encoding::trimTrailingWhitespace($str)),
+                'Pass #' . $i . ' (' . \dechex(\ord($c)) . ')'
+            );
+        }
     }
 }

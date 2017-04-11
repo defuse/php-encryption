@@ -88,40 +88,44 @@ final class Encoding
      */
     public static function trimTrailingWhitespace($string = '')
     {
-        $prev = $length = Core::ourStrlen($string);
+        $length = Core::ourStrlen($string);
         do {
+            $prev = $length;
             $last = $length - 1;
             $chr = \ord($string[$last]);
 
+            /* Null Byte (0x00), a.k.a. \0 */
             // if ($chr === 0x00) $length -= 1;
-            $sub = (~($chr ^ 0x00)) & 1;
+            $sub = (($chr - 1) >> 8 ) & 1;
             $length -= $sub;
             $last -= $sub;
 
+            /* Horizontal Tab (0x09) a.k.a. \t */
+            $chr = \ord($string[$last]);
+            // if ($chr === 0x09) $length -= 1;
+            $sub = (((0x08 - $chr) & ($chr - 0x0a)) >> 8) & 1;
+            $length -= $sub;
+            $last -= $sub;
+
+            /* New Line (0x0a), a.k.a. \n */
             $chr = \ord($string[$last]);
             // if ($chr === 0x0a) $length -= 1;
             $sub = (((0x09 - $chr) & ($chr - 0x0b)) >> 8) & 1;
             $length -= $sub;
             $last -= $sub;
 
-            $chr = \ord($string[$last]);
-            // if ($chr === 0x0b) $length -= 1;
-            $sub = (((0x0a - $chr) & ($chr - 0x0c)) >> 8) & 1;
-            $length -= $sub;
-            $last -= $sub;
-
+            /* Carriage Return (0x0D), a.k.a. \r */
             $chr = \ord($string[$last]);
             // if ($chr === 0x0d) $length -= 1;
             $sub = (((0x0c - $chr) & ($chr - 0x0e)) >> 8) & 1;
             $length -= $sub;
             $last -= $sub;
 
+            /* Space */
             $chr = \ord($string[$last]);
             // if ($chr === 0x20) $length -= 1;
             $sub = (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
             $length -= $sub;
-
-            $prev = $length;
         } while ($prev !== $length && $length > 0);
         return Core::ourSubstr($string, 0, $length);
     }
