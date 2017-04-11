@@ -77,6 +77,39 @@ final class Encoding
         }
         return $bin;
     }
+    
+    /**
+     * Implement rtrim() without table lookups or branches.
+     * This is still variable-time with regards to string length, but only leaks
+     * how much whitespace was at the end of the string.
+     *
+     * @param string $string
+     * @return string
+     */
+    public static function rtrim($string = '')
+    {
+        $prev = $length = Core::ourStrlen($string);
+        do {
+            $last = $length - 1;
+            $chr = \ord($string[$last]);
+
+            // if ($chr === 0x00) $length -= 1;
+            $length -= (~$chr >> 8) & 1;
+
+            // if ($chr === 0x0a) $length -= 1;
+            $length -= (((0x09 - $chr) & ($chr - 0x0b)) >> 8) & 1;
+            
+            // if ($chr === 0x0b) $length -= 1;
+            $length -= (((0x0a - $chr) & ($chr - 0x0c)) >> 8) & 1;
+
+            // if ($chr === 0x0d) $length -= 1;
+            $length -= (((0x0c - $chr) & ($chr - 0x0e)) >> 8) & 1;
+            
+            // if ($chr === 0x20) $length -= 1;
+            $length -= (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
+        } while ($prev !== $length);
+        return Core::ourSubstr($string, 0, $length);
+    }
 
     /*
      * SECURITY NOTE ON APPLYING CHECKSUMS TO SECRETS:
