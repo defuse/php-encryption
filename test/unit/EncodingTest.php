@@ -82,4 +82,18 @@ class EncodingTest extends PHPUnit_Framework_TestCase
         $str[0] = 'Z';
         Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
     }
+
+    /**
+     * This shouldn't throw an exception.
+     */
+    public function testPaddedHexEncoding()
+    {
+        $header = Core::secureRandom(Core::HEADER_VERSION_SIZE);
+        $str = Encoding::saveBytesToChecksummedAsciiSafeString(
+            $header,
+            Core::secureRandom(Core::KEY_BYTE_SIZE)
+        );
+        $str .= "\n";
+        Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
+    }
 }
