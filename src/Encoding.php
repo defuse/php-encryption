@@ -107,7 +107,7 @@ final class Encoding
             
             // if ($chr === 0x20) $length -= 1;
             $length -= (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
-        } while ($prev !== $length);
+        } while ($prev !== $length && $length >= 0);
         return Core::ourSubstr($string, 0, $length);
     }
 
