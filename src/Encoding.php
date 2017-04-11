@@ -94,20 +94,35 @@ final class Encoding
             $chr = \ord($string[$last]);
 
             // if ($chr === 0x00) $length -= 1;
-            $length -= (~$chr >> 8) & 1;
+            $sub = (~($chr ^ 0x00)) & 1;
+            $length -= $sub;
+            $last -= $sub;
 
+            $chr = \ord($string[$last]);
             // if ($chr === 0x0a) $length -= 1;
-            $length -= (((0x09 - $chr) & ($chr - 0x0b)) >> 8) & 1;
-            
-            // if ($chr === 0x0b) $length -= 1;
-            $length -= (((0x0a - $chr) & ($chr - 0x0c)) >> 8) & 1;
+            $sub = (((0x09 - $chr) & ($chr - 0x0b)) >> 8) & 1;
+            $length -= $sub;
+            $last -= $sub;
 
+            $chr = \ord($string[$last]);
+            // if ($chr === 0x0b) $length -= 1;
+            $sub = (((0x0a - $chr) & ($chr - 0x0c)) >> 8) & 1;
+            $length -= $sub;
+            $last -= $sub;
+
+            $chr = \ord($string[$last]);
             // if ($chr === 0x0d) $length -= 1;
-            $length -= (((0x0c - $chr) & ($chr - 0x0e)) >> 8) & 1;
-            
+            $sub = (((0x0c - $chr) & ($chr - 0x0e)) >> 8) & 1;
+            $length -= $sub;
+            $last -= $sub;
+
+            $chr = \ord($string[$last]);
             // if ($chr === 0x20) $length -= 1;
-            $length -= (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
-        } while ($prev !== $length && $length >= 0);
+            $sub = (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
+            $length -= $sub;
+
+            $prev = $length;
+        } while ($prev !== $length && $length > 0);
         return Core::ourSubstr($string, 0, $length);
     }
 
@@ -194,7 +209,12 @@ final class Encoding
             );
         }
 
-        $bytes = Encoding::hexToBin($string);
+        try {
+            $bytes = Encoding::hexToBin($string);
+        } catch (Ex\BadFormatException $ex) {
+            // If this fails once, try without whitespace.
+            $bytes = Encoding::hexToBin(Encoding::trimTrailingWhitespace($string));
+        }
 
         /* Make sure we have enough bytes to get the version header and checksum. */
         if (Core::ourStrlen($bytes) < self::SERIALIZE_HEADER_BYTES + self::CHECKSUM_BYTE_SIZE) {
