@@ -86,7 +86,7 @@ final class Encoding
      * @param string $string
      * @return string
      */
-    public static function rtrim($string = '')
+    public static function trimTrailingWhitespace($string = '')
     {
         $prev = $length = Core::ourStrlen($string);
         do {
