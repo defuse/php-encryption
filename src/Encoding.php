@@ -79,9 +79,10 @@ final class Encoding
     }
     
     /**
-     * Implement rtrim() without table lookups or branches.
-     * This is still variable-time with regards to string length, but only leaks
-     * how much whitespace was at the end of the string.
+     * Remove trialing whitespace without table look-ups or branches.
+     *
+     * Calling this function may leak the length of the string as well as the
+     * number of trailing whitespace characters through side-channels.
      *
      * @param string $string
      * @return string
@@ -89,8 +90,11 @@ final class Encoding
     public static function trimTrailingWhitespace($string = '')
     {
         $length = Core::ourStrlen($string);
+        if ($length < 1) {
+            return '';
+        }
         do {
-            $prev = $length;
+            $prevLength = $length;
             $last = $length - 1;
             $chr = \ord($string[$last]);
 
@@ -126,7 +130,7 @@ final class Encoding
             // if ($chr === 0x20) $length -= 1;
             $sub = (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
             $length -= $sub;
-        } while ($prev !== $length && $length > 0);
+        } while ($prevLength !== $length && $length > 0);
         return Core::ourSubstr($string, 0, $length);
     }
 
@@ -213,12 +217,9 @@ final class Encoding
             );
         }
 
-        try {
-            $bytes = Encoding::hexToBin($string);
-        } catch (Ex\BadFormatException $ex) {
-            // If this fails once, try without whitespace.
-            $bytes = Encoding::hexToBin(Encoding::trimTrailingWhitespace($string));
-        }
+        /* If you get an exception here when attempting to load from a file, first pass your
+           key to Encoding::trimTrailingWhitespace() to remove newline characters, etc.      */
+        $bytes = Encoding::hexToBin($string);
 
         /* Make sure we have enough bytes to get the version header and checksum. */
         if (Core::ourStrlen($bytes) < self::SERIALIZE_HEADER_BYTES + self::CHECKSUM_BYTE_SIZE) {

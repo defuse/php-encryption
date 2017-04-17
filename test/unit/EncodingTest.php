@@ -88,6 +88,9 @@ class EncodingTest extends PHPUnit_Framework_TestCase
      */
     public function testPaddedHexEncoding()
     {
+        /* We're just ensuring that an empty string doesn't produce an error. */
+        $this->assertSame('', Encoding::trimTrailingWhitespace(''));
+
         $header = Core::secureRandom(Core::HEADER_VERSION_SIZE);
         $str = Encoding::saveBytesToChecksummedAsciiSafeString(
             $header,
