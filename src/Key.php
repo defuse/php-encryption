@@ -27,7 +27,8 @@ final class Key
      * Loads a Key from its encoded form.
      *
      * By default, this function will call Encoding::trimTrailingWhitespace()
-     * to remove trailing CR, LF, NUL, TAB, and SPACE characters.
+     * to remove trailing CR, LF, NUL, TAB, and SPACE characters, which are
+     * commonly appended to files when working with text editors.
      *
      * @param string $saved_key_string
      * @param bool $do_not_trim (default: false)

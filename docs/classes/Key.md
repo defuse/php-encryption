@@ -74,17 +74,23 @@ None.
 
 None.
 
-### Key::loadFromAsciiSafeString($saved\_key\_string)
+### Key::loadFromAsciiSafeString($saved\_key\_string, $do\_not\_trim = false)
 
 **Description:**
 
 Loads an instance of `Key` that was saved to a string by
 `saveToAsciiSafeString()`.
 
+By default, this function will call `Encoding::trimTrailingWhitespace()`
+to remove trailing CR, LF, NUL, TAB, and SPACE characters, which are commonly
+appended to files when working with text editors.
+
 **Parameters:**
 
 1. `$saved_key_string` is the string returned from `saveToAsciiSafeString()`
    when the original `Key` instance was saved.
+2. `$do_not_trim` should be set to `TRUE` if you do not wish for the library
+   to automatically strip trailing whitespace from the string. 
 
 **Return value:**
 
