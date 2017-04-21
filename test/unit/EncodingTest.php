@@ -82,4 +82,30 @@ class EncodingTest extends PHPUnit_Framework_TestCase
         $str[0] = 'Z';
         Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
     }
+
+    /**
+     * This shouldn't throw an exception.
+     */
+    public function testPaddedHexEncoding()
+    {
+        /* We're just ensuring that an empty string doesn't produce an error. */
+        $this->assertSame('', Encoding::trimTrailingWhitespace(''));
+
+        $header = Core::secureRandom(Core::HEADER_VERSION_SIZE);
+        $str = Encoding::saveBytesToChecksummedAsciiSafeString(
+            $header,
+            Core::secureRandom(Core::KEY_BYTE_SIZE)
+        );
+        $orig = $str;
+        $noise = ["\r", "\n", "\t", "\0"];
+        for ($i = 0; $i < 1000; ++$i) {
+            $c = $noise[\random_int(0, 3)];
+            $str .= $c;
+            $this->assertSame(
+                Encoding::binToHex($orig),
+                Encoding::binToHex(Encoding::trimTrailingWhitespace($str)),
+                'Pass #' . $i . ' (' . \dechex(\ord($c)) . ')'
+            );
+        }
+    }
 }

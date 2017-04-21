@@ -77,6 +77,62 @@ final class Encoding
         }
         return $bin;
     }
+    
+    /**
+     * Remove trialing whitespace without table look-ups or branches.
+     *
+     * Calling this function may leak the length of the string as well as the
+     * number of trailing whitespace characters through side-channels.
+     *
+     * @param string $string
+     * @return string
+     */
+    public static function trimTrailingWhitespace($string = '')
+    {
+        $length = Core::ourStrlen($string);
+        if ($length < 1) {
+            return '';
+        }
+        do {
+            $prevLength = $length;
+            $last = $length - 1;
+            $chr = \ord($string[$last]);
+
+            /* Null Byte (0x00), a.k.a. \0 */
+            // if ($chr === 0x00) $length -= 1;
+            $sub = (($chr - 1) >> 8 ) & 1;
+            $length -= $sub;
+            $last -= $sub;
+
+            /* Horizontal Tab (0x09) a.k.a. \t */
+            $chr = \ord($string[$last]);
+            // if ($chr === 0x09) $length -= 1;
+            $sub = (((0x08 - $chr) & ($chr - 0x0a)) >> 8) & 1;
+            $length -= $sub;
+            $last -= $sub;
+
+            /* New Line (0x0a), a.k.a. \n */
+            $chr = \ord($string[$last]);
+            // if ($chr === 0x0a) $length -= 1;
+            $sub = (((0x09 - $chr) & ($chr - 0x0b)) >> 8) & 1;
+            $length -= $sub;
+            $last -= $sub;
+
+            /* Carriage Return (0x0D), a.k.a. \r */
+            $chr = \ord($string[$last]);
+            // if ($chr === 0x0d) $length -= 1;
+            $sub = (((0x0c - $chr) & ($chr - 0x0e)) >> 8) & 1;
+            $length -= $sub;
+            $last -= $sub;
+
+            /* Space */
+            $chr = \ord($string[$last]);
+            // if ($chr === 0x20) $length -= 1;
+            $sub = (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
+            $length -= $sub;
+        } while ($prevLength !== $length && $length > 0);
+        return Core::ourSubstr($string, 0, $length);
+    }
 
     /*
      * SECURITY NOTE ON APPLYING CHECKSUMS TO SECRETS:
@@ -161,6 +217,8 @@ final class Encoding
             );
         }
 
+        /* If you get an exception here when attempting to load from a file, first pass your
+           key to Encoding::trimTrailingWhitespace() to remove newline characters, etc.      */
         $bytes = Encoding::hexToBin($string);
 
         /* Make sure we have enough bytes to get the version header and checksum. */
