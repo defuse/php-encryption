@@ -26,6 +26,6 @@
         "php":  ">=5.4.0"
     },
     "require-dev": {
-        "nikic/php-parser": "^2.0"
+        "nikic/php-parser": "^2.0|^3.0"
     }
 }
