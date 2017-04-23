@@ -124,6 +124,7 @@ final class Core
      * @param string $salt
      *
      * @throws Ex\EnvironmentIsBrokenException
+     * @psalm-suppress UndefinedFunction - We're checking if the function exists first.
      *
      * @return string
      */
