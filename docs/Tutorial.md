@@ -100,17 +100,12 @@ Eve is a good database administrator, but she might have incentive to steal the
 data from the database. They want to keep some of the web application's data
 secret from Eve.
 
-In order to do that, Alice will write a script that generates a random
-encryption key and prints it to standard output:
+In order to do that, Alice will use the included `generate-defuse-key` script
+which generates a random encryption key and prints it to standard output:
 
-```php
-<?php
-// generate-key.php
-use Defuse\Crypto\Key;
-
-$key = Key::createNewRandomKey();
-echo $key->saveToAsciiSafeString();
-
+```sh
+$ composer require defuse/php-encryption
+$ vendor/bin/generate-defuse-key
 ```
 
 Alice will run this script once and save the output to a configuration file, say
