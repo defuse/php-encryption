@@ -27,5 +27,8 @@
     },
     "require-dev": {
         "nikic/php-parser": "^2.0"
-    }
+    },
+    "bin": [
+        "bin/generate-defuse-key"
+    ]
 }
