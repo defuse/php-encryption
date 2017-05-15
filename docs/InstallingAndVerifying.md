@@ -6,6 +6,8 @@ There are two ways to use this library in your applications. You can either:
 1. Use [Composer](https://getcomposer.org/), or
 2. `require_once` a single `.phar` file in your application.
 
+If you are not using either option (for example, because you're using Git submodules), you may need to write your own autoloader ([example](https://gist.github.com/paragonie-scott/949daee819bb7f19c50e5e103170b400)).
+
 Option 1: Using Composer
 -------------------------
 
