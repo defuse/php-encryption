@@ -1,17 +1,29 @@
 language: php
-php:
-    - 7.1
-    - 7.0
-    - 5.6
-    - 5.5
-    - 5.4
-
 sudo: false
 
 matrix:
-    fast_finish: true
+  fast_finish: true
+  include:
+    - php: "5.4"
+      env: USE_PSALM=0
+    - php: "5.5"
+      env: USE_PSALM=0
+    - php: "5.6"
+      env: USE_PSALM=1
+    - php: "7.0"
+      env: USE_PSALM=1
+    - php: "7.1"
+      env: USE_PSALM=1
+    - php: "nightly"
+      env: USE_PSALM=1
+    - php: "hhvm"
+      env: USE_PSALM=1
+  allow_failures:
+    - php: "nightly"
+    - php: "hhvm"
 
 install:
+    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
     - composer install
     - curl -LSs https://box-project.github.io/box2/installer.php | php
     - mkdir ~/box
@@ -21,3 +33,4 @@ script:
     - ./test.sh
     - PATH=$PATH:~/box/ make -C dist/ build-phar
     - ./test.sh dist/defuse-crypto.phar
+    - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
