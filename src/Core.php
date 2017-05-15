@@ -124,6 +124,7 @@ final class Core
      * @param string $salt
      *
      * @throws Ex\EnvironmentIsBrokenException
+     * @psalm-suppress UndefinedFunction - We're checking if the function exists first.
      *
      * @return string
      */
@@ -131,7 +132,7 @@ final class Core
     {
         static $nativeHKDF = null;
         if ($nativeHKDF === null) {
-            $nativeHKDF = \function_exists('hash_hkdf');
+            $nativeHKDF = \is_callable('\\hash_hkdf');
         }
         if ($nativeHKDF) {
             return \hash_hkdf($hash, $ikm, $length, $info, $salt);
@@ -180,8 +181,9 @@ final class Core
         }
 
         // ORM = first L octets of T
+        /** @var string $orm */
         $orm = Core::ourSubstr($t, 0, $length);
-        if ($orm === false) {
+        if (!\is_string($orm)) {
             throw new Ex\EnvironmentIsBrokenException();
         }
         return $orm;
@@ -230,6 +232,7 @@ final class Core
      * Throws an exception if the constant doesn't exist.
      *
      * @param string $name
+     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      */
@@ -244,6 +247,7 @@ final class Core
      * Throws an exception if the function doesn't exist.
      *
      * @param string $name
+     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      */
@@ -295,7 +299,7 @@ final class Core
      *
      * @throws Ex\EnvironmentIsBrokenException
      *
-     * @return string
+     * @return string|bool
      */
     public static function ourSubstr($str, $start, $length = null)
     {
@@ -434,9 +438,9 @@ final class Core
         }
 
         if ($raw_output) {
-            return Core::ourSubstr($output, 0, $key_length);
+            return (string) Core::ourSubstr($output, 0, $key_length);
         } else {
-            return Encoding::binToHex(Core::ourSubstr($output, 0, $key_length));
+            return Encoding::binToHex((string) Core::ourSubstr($output, 0, $key_length));
         }
     }
 }

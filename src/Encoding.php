@@ -131,7 +131,7 @@ final class Encoding
             $sub = (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
             $length -= $sub;
         } while ($prevLength !== $length && $length > 0);
-        return Core::ourSubstr($string, 0, $length);
+        return (string) Core::ourSubstr($string, 0, $length);
     }
 
     /*
@@ -229,7 +229,7 @@ final class Encoding
         }
 
         /* Grab the version header. */
-        $actual_header = Core::ourSubstr($bytes, 0, self::SERIALIZE_HEADER_BYTES);
+        $actual_header = (string) Core::ourSubstr($bytes, 0, self::SERIALIZE_HEADER_BYTES);
 
         if ($actual_header !== $expected_header) {
             throw new Ex\BadFormatException(
@@ -238,14 +238,14 @@ final class Encoding
         }
 
         /* Grab the bytes that are part of the checksum. */
-        $checked_bytes = Core::ourSubstr(
+        $checked_bytes = (string) Core::ourSubstr(
             $bytes,
             0,
             Core::ourStrlen($bytes) - self::CHECKSUM_BYTE_SIZE
         );
 
         /* Grab the included checksum. */
-        $checksum_a = Core::ourSubstr(
+        $checksum_a = (string) Core::ourSubstr(
             $bytes,
             Core::ourStrlen($bytes) - self::CHECKSUM_BYTE_SIZE,
             self::CHECKSUM_BYTE_SIZE
@@ -261,7 +261,7 @@ final class Encoding
             );
         }
 
-        return Core::ourSubstr(
+        return (string) Core::ourSubstr(
             $bytes,
             self::SERIALIZE_HEADER_BYTES,
             Core::ourStrlen($bytes) - self::SERIALIZE_HEADER_BYTES - self::CHECKSUM_BYTE_SIZE
