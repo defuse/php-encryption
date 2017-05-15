@@ -25,6 +25,21 @@ First do `composer install` and then you can run the tests by running
 `./test.sh`. This will download a PHPUnit PHAR, verify its cryptographic
 signatures, and then use it to run the tests in `test/unit`.
 
+Getting and Using Psalm
+-----------------------
+
+[Psalm](https://github.com/vimeo/psalm) is a static analysis suite for PHP projects.
+We use Psalm to ensure type safety throughout our library.
+
+To install Psalm, you just need to run one command:
+
+    composer require --dev "vimeo/psalm:dev-master"
+
+To verify that your code changes are still strictly type-safe, run the following
+command:
+
+    vendor/bin/psalm
+
 Reporting Bugs
 ---------------
 
