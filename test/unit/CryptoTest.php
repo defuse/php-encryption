@@ -84,6 +84,30 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
     }
+    
+    public function testGetExpectedCiphertextLength()
+    {
+        $strings = array(
+            '',
+            'This is a test message',
+            str_repeat('Test message.' . "\n", 32)
+        );
+        $key = Key::createNewRandomKey();
+        foreach ($strings as $str) {
+            $cipher  = Crypto::encrypt($str, $key);
+            $this->assertSame(
+                strlen($cipher),
+                Crypto::getExpectedCiphertextLength(strlen($str)),
+                'Miscalculation in getExpectedCiphertextLength()'
+            );
+            $cipher  = Crypto::encrypt($str, $key, true);
+            $this->assertSame(
+                strlen($cipher),
+                Crypto::getExpectedCiphertextLength(strlen($str), true),
+                'Miscalculation in getExpectedCiphertextLength()'
+            );
+        }
+    }
 
     /**
      * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException

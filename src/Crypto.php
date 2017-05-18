@@ -176,6 +176,36 @@ class Crypto
             );
         }
     }
+    
+    /**
+     * Calculate the expected string length of a ciphertext given
+     * the length of a string.
+     *
+     * @param int $integerContainingStringLength
+     * @param bool $rawOutput
+     * @return int
+     */
+    public static function getExpectedCiphertextLength($integerContainingStringLength, $rawOutput = false)
+    {
+        if (is_string($integerContainingStringLength)) {
+            throw new \InvalidArgumentException(
+                'getExpectedCiphertextLength() expects an integer, not a string. Pass strlen($var) instead of $var'
+            );
+        } elseif (!is_int($integerContainingStringLength)) {
+            throw new \InvalidArgumentException(
+                'getExpectedCiphertextLength() expects an integer'
+            );
+        }
+        $rawEstimate = $integerContainingStringLength;
+        $rawEstimate += 4;  // Header
+        $rawEstimate += 16; // Nonce for AES-CTR
+        $rawEstimate += 32; // HKDF Salt
+        $rawEstimate += 32; // MAC
+        if ($rawOutput) {
+            return (int) $rawEstimate;
+        }
+        return (int) ($rawEstimate * 2); // Hex encoded
+    }
 
     /**
      * Encrypts a string with either a key or a password.
