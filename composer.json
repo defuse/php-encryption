@@ -28,5 +28,8 @@
     "require-dev": {
         "phpunit/phpunit": "^4|^5",
         "nikic/php-parser": "^2.0|^3.0"
-    }
+    },
+    "bin": [
+        "bin/generate-defuse-key"
+    ]
 }
