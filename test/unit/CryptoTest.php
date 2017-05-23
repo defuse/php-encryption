@@ -75,9 +75,17 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         } catch (Ex\WrongKeyOrModifiedCiphertextException $e) { /* expected */
         }
 
-        // Ciphertext too small.
+        // TypeError; password needs to be a string, not an object
         $password        = Key::createNewRandomKey();
-        $ciphertext = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
+        try {
+            $ciphertext     = Crypto::encryptWithPassword($data, $password, true);
+            $this->fail('Crypto::encryptWithPassword() should not accept key objects');
+        } catch (\TypeError $e) { /* expected */
+        }
+
+        // Ciphertext too small.
+        $password        = \random_bytes(32);
+        $ciphertext      = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
         try {
             Crypto::decryptWithPassword($ciphertext, $password, true);
             throw new Ex\EnvironmentIsBrokenException();
