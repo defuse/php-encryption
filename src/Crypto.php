@@ -183,8 +183,8 @@ class Crypto
         /**
          * @var string
          */
-        $ciphertext = Core::ourSubstr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
-        if (!\is_string($ciphertext)) {
+        $messageCiphertext = Core::ourSubstr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
+        if (!\is_string($messageCiphertext)) {
             throw new Ex\EnvironmentIsBrokenException();
         }
 
@@ -197,7 +197,7 @@ class Crypto
             null
         );
 
-        if (self::verifyHMAC($hmac, $ciphertext, $akey)) {
+        if (self::verifyHMAC($hmac, $messageCiphertext, $akey)) {
             // Regenerate the same encryption sub-key.
             $ekey = Core::HKDF(
                 Core::LEGACY_HASH_FUNCTION_NAME,
@@ -208,7 +208,7 @@ class Crypto
             );
 
             // Extract the IV from the ciphertext.
-            if (Core::ourStrlen($ciphertext) <= Core::LEGACY_BLOCK_BYTE_SIZE) {
+            if (Core::ourStrlen($messageCiphertext) <= Core::LEGACY_BLOCK_BYTE_SIZE) {
                 throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'Ciphertext is too short.'
                 );
@@ -216,7 +216,7 @@ class Crypto
             /**
              * @var string
              */
-            $iv = Core::ourSubstr($ciphertext, 0, Core::LEGACY_BLOCK_BYTE_SIZE);
+            $iv = Core::ourSubstr($messageCiphertext, 0, Core::LEGACY_BLOCK_BYTE_SIZE);
             if (!\is_string($iv)) {
                 throw new Ex\EnvironmentIsBrokenException();
             }
@@ -224,7 +224,7 @@ class Crypto
             /**
              * @var string
              */
-            $actualCiphertext = Core::ourSubstr($ciphertext, Core::LEGACY_BLOCK_BYTE_SIZE);
+            $actualCiphertext = Core::ourSubstr($messageCiphertext, Core::LEGACY_BLOCK_BYTE_SIZE);
             if (!\is_string($actualCiphertext)) {
                 throw new Ex\EnvironmentIsBrokenException();
             }
