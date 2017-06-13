@@ -19,6 +19,16 @@ class Crypto
      */
     public static function encrypt($plaintext, Key $key, $raw_binary = false)
     {
+        if (!\is_string($plaintext)) {
+            throw new \TypeError(
+                'String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.'
+            );
+        }
+        if (!\is_bool($raw_binary)) {
+            throw new \TypeError(
+                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
+            );
+        }
         return self::encryptInternal(
             $plaintext,
             KeyOrPassword::createFromKey($key),
@@ -40,6 +50,21 @@ class Crypto
      */
     public static function encryptWithPassword($plaintext, $password, $raw_binary = false)
     {
+        if (!\is_string($plaintext)) {
+            throw new \TypeError(
+                'String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.'
+            );
+        }
+        if (!\is_string($password)) {
+            throw new \TypeError(
+                'String expected for argument 2. ' . \ucfirst(\gettype($password)) . ' given instead.'
+            );
+        }
+        if (!\is_bool($raw_binary)) {
+            throw new \TypeError(
+                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
+            );
+        }
         return self::encryptInternal(
             $plaintext,
             KeyOrPassword::createFromPassword($password),
@@ -54,6 +79,7 @@ class Crypto
      * @param Key    $key
      * @param bool   $raw_binary
      *
+     * @throws \TypeError
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
@@ -61,6 +87,16 @@ class Crypto
      */
     public static function decrypt($ciphertext, Key $key, $raw_binary = false)
     {
+        if (!\is_string($ciphertext)) {
+            throw new \TypeError(
+                'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
+            );
+        }
+        if (!\is_bool($raw_binary)) {
+            throw new \TypeError(
+                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
+            );
+        }
         return self::decryptInternal(
             $ciphertext,
             KeyOrPassword::createFromKey($key),
@@ -83,6 +119,21 @@ class Crypto
      */
     public static function decryptWithPassword($ciphertext, $password, $raw_binary = false)
     {
+        if (!\is_string($ciphertext)) {
+            throw new \TypeError(
+                'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
+            );
+        }
+        if (!\is_string($password)) {
+            throw new \TypeError(
+                'String expected for argument 2. ' . \ucfirst(\gettype($password)) . ' given instead.'
+            );
+        }
+        if (!\is_bool($raw_binary)) {
+            throw new \TypeError(
+                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
+            );
+        }
         return self::decryptInternal(
             $ciphertext,
             KeyOrPassword::createFromPassword($password),
@@ -103,6 +154,17 @@ class Crypto
      */
     public static function legacyDecrypt($ciphertext, $key)
     {
+        if (!\is_string($ciphertext)) {
+            throw new \TypeError(
+                'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
+            );
+        }
+        if (!\is_string($key)) {
+            throw new \TypeError(
+                'String expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.'
+            );
+        }
+
         RuntimeTests::runtimeTest();
 
         // Extract the HMAC from the front of the ciphertext.
@@ -121,8 +183,8 @@ class Crypto
         /**
          * @var string
          */
-        $ciphertext = Core::ourSubstr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
-        if (!\is_string($ciphertext)) {
+        $messageCiphertext = Core::ourSubstr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
+        if (!\is_string($messageCiphertext)) {
             throw new Ex\EnvironmentIsBrokenException();
         }
 
@@ -135,7 +197,7 @@ class Crypto
             null
         );
 
-        if (self::verifyHMAC($hmac, $ciphertext, $akey)) {
+        if (self::verifyHMAC($hmac, $messageCiphertext, $akey)) {
             // Regenerate the same encryption sub-key.
             $ekey = Core::HKDF(
                 Core::LEGACY_HASH_FUNCTION_NAME,
@@ -146,7 +208,7 @@ class Crypto
             );
 
             // Extract the IV from the ciphertext.
-            if (Core::ourStrlen($ciphertext) <= Core::LEGACY_BLOCK_BYTE_SIZE) {
+            if (Core::ourStrlen($messageCiphertext) <= Core::LEGACY_BLOCK_BYTE_SIZE) {
                 throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'Ciphertext is too short.'
                 );
@@ -154,7 +216,7 @@ class Crypto
             /**
              * @var string
              */
-            $iv = Core::ourSubstr($ciphertext, 0, Core::LEGACY_BLOCK_BYTE_SIZE);
+            $iv = Core::ourSubstr($messageCiphertext, 0, Core::LEGACY_BLOCK_BYTE_SIZE);
             if (!\is_string($iv)) {
                 throw new Ex\EnvironmentIsBrokenException();
             }
@@ -162,7 +224,7 @@ class Crypto
             /**
              * @var string
              */
-            $actualCiphertext = Core::ourSubstr($ciphertext, Core::LEGACY_BLOCK_BYTE_SIZE);
+            $actualCiphertext = Core::ourSubstr($messageCiphertext, Core::LEGACY_BLOCK_BYTE_SIZE);
             if (!\is_string($actualCiphertext)) {
                 throw new Ex\EnvironmentIsBrokenException();
             }
