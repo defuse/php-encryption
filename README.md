@@ -83,6 +83,6 @@ The GnuPG public key used to sign releases is available in
 2FA6 1D8D 99B9 2658 6BAC  3D53 385E E055 A129 1538
 ```
 
-You can verify it against the Taylor Hornby's [contact
+You can verify it against Taylor Hornby's [contact
 page](https://defuse.ca/contact.htm) and
 [twitter](https://twitter.com/DefuseSec/status/723741424253059074).
