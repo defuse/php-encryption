@@ -39,7 +39,7 @@ class PasswordTest extends PHPUnit_Framework_TestCase
         // The encrypted_key should not be the same.
         $this->assertNotSame($pkey1_enc_ascii, $pkey1_enc_ascii_new);
 
-        // The encrypted_key should not be the same.
+        // The actual key should be the same.
         $this->assertSame($key1, $key1_new);
     }
 }
