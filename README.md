@@ -19,6 +19,7 @@ ecosystem. Secondly, this library is "difficult to misuse." Like
 [libsodium](https://github.com/jedisct1/libsodium), its API is designed to be
 easy to use in a secure way and hard to use in an insecure way.
 
+
 Dependencies
 ------------
 
@@ -52,6 +53,14 @@ documentation.
 
 If you're interested in contributing to this library, see the [Internal
 Developer Documentation](docs/InternalDeveloperDocs.md).
+
+Other Language Support
+----------------------
+
+This library is intended for server-side PHP software that needs to encrypt data at rest.
+If you are building software that needs to encrypt client-side, or building a system that
+requires cross-platform encryption/decryption support, we strongly recommend using
+[libsodium](https://download.libsodium.org/doc/bindings_for_other_languages) instead.
 
 Examples
 ---------
