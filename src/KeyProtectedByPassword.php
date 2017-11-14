@@ -79,6 +79,7 @@ final class KeyProtectedByPassword
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
+     * @param string $password
      * @return Key
      */
     public function unlockKey($password)
