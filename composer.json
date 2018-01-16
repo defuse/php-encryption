@@ -1,5 +1,5 @@
 {
-    "name": "defuse/php-encryption",
+    "name": "enflow-nl/php-encryption",
     "description": "Secure PHP Encryption Library",
     "license": "MIT",
     "keywords": ["security", "encryption", "AES", "openssl", "cipher", "cryptography", "symmetric key cryptography", "crypto", "encrypt", "authenticated encryption"],
