@@ -135,6 +135,9 @@ final class Core
             $nativeHKDF = \is_callable('\\hash_hkdf');
         }
         if ($nativeHKDF) {
+            if (\is_null($salt)) {
+                $salt = '';
+            }
             return \hash_hkdf($hash, $ikm, $length, $info, $salt);
         }
 
