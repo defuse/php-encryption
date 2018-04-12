@@ -2,6 +2,10 @@ php-encryption
 ===============
 
 [![Build Status](https://travis-ci.org/defuse/php-encryption.svg?branch=master)](https://travis-ci.org/defuse/php-encryption)
+[![Latest Stable Version](https://poser.pugx.org/defuse/php-encryption/v/stable)](https://packagist.org/packages/defuse/php-encryption)
+[![Latest Unstable Version](https://poser.pugx.org/defuse/php-encryption/v/unstable)](https://packagist.org/packages/defuse/php-encryption)
+[![License](https://poser.pugx.org/defuse/php-encryption/license)](https://packagist.org/packages/defuse/php-encryption)
+[![Downloads](https://img.shields.io/packagist/dt/defuse/php-encryption.svg)](https://packagist.org/packages/defuse/php-encryption)
 
 This is a library for encrypting data with a key or password in PHP. **It
 requires PHP 5.4 or newer.** The current version is v2.0.0, which is expected to
