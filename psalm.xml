@@ -6,4 +6,7 @@
     <projectFiles>
         <directory name="src" />
     </projectFiles>
+    <issueHandlers>
+        <RedundantConditionGivenDocblockType errorLevel="info" />
+    </issueHandlers>
 </psalm>
