@@ -25,7 +25,7 @@ matrix:
     - php: "hhvm"
 
 install:
-    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
+    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm"; fi
     - composer install
     - curl -LSs https://box-project.github.io/box2/installer.php | php
     - mkdir ~/box
