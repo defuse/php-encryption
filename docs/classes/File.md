@@ -52,6 +52,16 @@ caller is designing their application under. If you are unsure where to store
 `$key`, consult with a professional cryptographer to get help designing your
 application.
 
+Please note that **encryption does not, and is not intended to, hide the
+*length* of the data being encrypted.** For example, it is not safe to encrypt
+a field in which only a small number of different-length values are possible
+(e.g. "male" or "female") since it would be possible to tell what the plaintext
+is by looking at the length of the ciphertext. In order to do this safely, it is
+your responsibility to, before encrypting, pad the data out to the length of the
+longest string that will ever be encrypted. This way, all plaintexts are the
+same length, and no information about the plaintext can be gleaned from the
+length of the ciphertext.
+
 ### File::decryptFile($inputFilename, $outputFilename, Key $key)
 
 **Description:**
@@ -154,6 +164,16 @@ call stack. If an exception is thrown inside this call, and it is uncaught, the
 value of `$password` may be leaked out to an attacker through the stack trace.
 We recommend configuring PHP to never output stack traces (either displaying
 them to the user or saving them to log files).
+
+Please note that **encryption does not, and is not intended to, hide the
+*length* of the data being encrypted.** For example, it is not safe to encrypt
+a field in which only a small number of different-length values are possible
+(e.g. "male" or "female") since it would be possible to tell what the plaintext
+is by looking at the length of the ciphertext. In order to do this safely, it is
+your responsibility to, before encrypting, pad the data out to the length of the
+longest string that will ever be encrypted. This way, all plaintexts are the
+same length, and no information about the plaintext can be gleaned from the
+length of the ciphertext.
 
 ### File::decryptFileWithPassword($inputFilename, $outputFilename, $password)
 
@@ -268,6 +288,16 @@ caller is designing their application under. If you are unsure where to store
 `$key`, consult with a professional cryptographer to get help designing your
 application.
 
+Please note that **encryption does not, and is not intended to, hide the
+*length* of the data being encrypted.** For example, it is not safe to encrypt
+a field in which only a small number of different-length values are possible
+(e.g. "male" or "female") since it would be possible to tell what the plaintext
+is by looking at the length of the ciphertext. In order to do this safely, it is
+your responsibility to, before encrypting, pad the data out to the length of the
+longest string that will ever be encrypted. This way, all plaintexts are the
+same length, and no information about the plaintext can be gleaned from the
+length of the ciphertext.
+
 ### File::decryptResource($inputHandle, $outputHandle, Key $key)
 
 **Description:**
@@ -373,6 +403,16 @@ call stack. If an exception is thrown inside this call, and it is uncaught, the
 value of `$password` may be leaked out to an attacker through the stack trace.
 We recommend configuring PHP to never output stack traces (either displaying
 them to the user or saving them to log files).
+
+Please note that **encryption does not, and is not intended to, hide the
+*length* of the data being encrypted.** For example, it is not safe to encrypt
+a field in which only a small number of different-length values are possible
+(e.g. "male" or "female") since it would be possible to tell what the plaintext
+is by looking at the length of the ciphertext. In order to do this safely, it is
+your responsibility to, before encrypting, pad the data out to the length of the
+longest string that will ever be encrypted. This way, all plaintexts are the
+same length, and no information about the plaintext can be gleaned from the
+length of the ciphertext.
 
 ### File::decryptResourceWithPassword($inputHandle, $outputHandle, $password)
 

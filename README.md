@@ -8,9 +8,9 @@ php-encryption
 [![Downloads](https://img.shields.io/packagist/dt/defuse/php-encryption.svg)](https://packagist.org/packages/defuse/php-encryption)
 
 This is a library for encrypting data with a key or password in PHP. **It
-requires PHP 5.4 or newer.** The current version is v2.0.0, which is expected to
-remain stable and supported by its authors with security and bugfixes until at
-least January 1st, 2019.
+requires PHP 5.6 or newer and OpenSSL 1.0.1 or newer.** The current version is
+v2.2.0, which is expected to remain stable and supported by its authors with
+security and bugfixes until at least January 1st, 2020.
 
 The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
 [Scott Arciszewski](https://paragonie.com/blog/author/scott-arcizewski) as well
@@ -27,11 +27,11 @@ easy to use in a secure way and hard to use in an insecure way.
 Dependencies
 ------------
 
-This library requires no special dependencies except for PHP 5.4 or newer with
-the OpenSSL extensions enabled (this is the default). It uses
-[random\_compat](https://github.com/paragonie/random_compat), which is bundled
-in with this library so that your users will not need to follow any special
-installation steps.
+This library requires no special dependencies except for PHP 5.6 or newer with
+the OpenSSL extensions (version 1.0.1 or later) enabled (this is the default).
+It uses [random\_compat](https://github.com/paragonie/random_compat), which is
+bundled in with this library so that your users will not need to follow any
+special installation steps.
 
 Getting Started
 ----------------
