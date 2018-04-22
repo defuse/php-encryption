@@ -117,7 +117,7 @@ Check that the version number in composer.json is correct:
 cat composer.json
 ```
 
-Check that the version number in README.md is correct:
+Check that the version number and support lifetime in README.md are correct:
 
 ```
 cat README.md
