@@ -45,6 +45,8 @@ final class Core
      * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string
+     *
+     * @psalm-suppress RedundantCondition - It's valid to use is_int to check for overflow.
      */
     public static function incrementCounter($ctr, $inc)
     {
