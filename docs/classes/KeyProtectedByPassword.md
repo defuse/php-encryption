@@ -152,6 +152,12 @@ keys around so that the wrong key gets used next time it is unlocked. This could
 lead to data being encrypted with the wrong key, perhaps one that the attacker
 knows.
 
+**WARNING:** Because of the way `KeyProtectedByPassword` is implemented, knowing
+`SHA256($password)` is enough to decrypt a `KeyProtectedByPassword`. To be
+secure, your application MUST NOT EVER compute `SHA256($password)` and use or
+store it for any reason. You must also make sure that other libraries your
+application is using don't compute it either.
+
 ### KeyProtectedByPassword::loadFromAsciiSafeString($saved\_key\_string)
 
 **Description:**
