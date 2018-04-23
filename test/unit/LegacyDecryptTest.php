@@ -1,5 +1,6 @@
 <?php
 
+use \Defuse\Crypto\Core;
 use \Defuse\Crypto\Crypto;
 use \Defuse\Crypto\Encoding;
 
@@ -42,4 +43,15 @@ class LegacyDecryptTest extends PHPUnit_Framework_TestCase
             // ^- I changed that byte
         );
     }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     * @expectedExceptionMessage short
+     */
+    public function testLegacyDecryptTooShort()
+    {
+        $too_short = str_repeat("a", Core::LEGACY_MAC_BYTE_SIZE);
+        Crypto::legacyDecrypt($too_short, "0123456789ABCDEF");
+    }
+
 }
