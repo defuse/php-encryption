@@ -55,11 +55,18 @@ fi
 gpg --verify phpunit.phar.asc phpunit.phar
 if [ $? -eq 0 ]; then
     echo
+    if [ "$2" -eq "1" ]; then
+        COVERAGE1_ARGS="--coverage-clover=$parentdir/coverage1.xml -c $parentdir/test/phpunit.xml"
+        COVERAGE2_ARGS="--coverage-clover=$parentdir/coverage2.xml -c $parentdir/test/phpunit.xml"
+    else
+        COVERAGE1_ARGS=""
+        COVERAGE2_ARGS=""
+    fi
     echo -e "\033[33mBegin Unit Testing\033[0m"
     # Run the test suite with normal func_overload.
-    php -d mbstring.func_overload=0 phpunit.phar --coverage-clover="$parentdir/coverage1.xml" -c "$parentdir/test/phpunit.xml" --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
+    php -d mbstring.func_overload=0 phpunit.phar $COVERAGE1_ARGS --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
     # Run the test suite again with funky func_overload.
-    php -d mbstring.func_overload=7 phpunit.phar --coverage-clover="$parentdir/coverage2.xml" -c "$parentdir/test/phpunit.xml" --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
+    php -d mbstring.func_overload=7 phpunit.phar $COVERAGE2_ARGS --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
     EXITCODE=$?
     # Cleanup
     if [ "$clean" -eq 1 ]; then
