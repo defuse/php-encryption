@@ -38,4 +38,6 @@ script:
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
 
 after_success:
+    - cat coverage1.xml
+    - cat coverage2.xml
     - bash <(curl -s https://codecov.io/bash) -Z
