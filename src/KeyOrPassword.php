@@ -64,6 +64,9 @@ final class KeyOrPassword
 
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
             Core::ensureTrue($this->secret instanceof Key);
+            /**
+            * @psalm-suppress PossiblyInvalidMethodCall
+            */
             $akey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $this->secret->getRawBytes(),
