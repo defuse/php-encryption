@@ -336,9 +336,18 @@ final class Core
             }
         }
 
+        if ($length < 0) {
+            throw new \InvalidArgumentException(
+                "Negative lengths are not supported with ourSubstr."
+            );
+        }
+
         if ($exists) {
             $substr = \mb_substr($str, $start, $length, '8bit');
-            if (Core::ourStrlen($substr) !== $length) {
+            // This check is '<' instead of '!==' because the length parameter
+            // for substr and mb_substr is the *maximum* number of characters
+            // returned, not the exact number of characters.
+            if (Core::ourStrlen($substr) < $length) {
                 throw new Ex\EnvironmentIsBrokenException(
                     'Your version of PHP has bug #66797. Its implementation of
                     mb_substr() is incorrect. See the details here:
