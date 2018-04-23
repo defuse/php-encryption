@@ -221,6 +221,12 @@ function CreateUserAccount($username, $password)
 }
 ```
 
+**WARNING:** Because of the way `KeyProtectedByPassword` is implemented, knowing
+`SHA256($password)` is enough to decrypt a `KeyProtectedByPassword`. To be
+secure, your application MUST NOT EVER compute `SHA256($password)` and use or
+store it for any reason. You must also make sure that other libraries your
+application is using don't compute it either.
+
 Then, when the user logs in, Dave's code will load the protected key from the
 user's account record, unlock it to get a `Key` object, and save the `Key`
 object somewhere safe (like temporary memory-backed session storage). Note that

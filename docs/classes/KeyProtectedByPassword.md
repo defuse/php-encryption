@@ -102,9 +102,71 @@ them to the user or saving them to log files).
 
 It is impossible in principle to distinguish between the case where you attempt
 to unlock with the wrong password and the case where you attempt to unlock
-a modified (corrupted) `KeyProtectedByPassword. It is up to the caller how to
+a modified (corrupted) `KeyProtectedByPassword`. It is up to the caller how to
 best deal with this ambiguity, as it depends on the application this library is
 being used in. If in doubt, consult with a professional cryptographer.
+
+### changePassword($current\_password, $new\_password)
+
+**Description:**
+
+Changes the password, so that calling `unlockKey` on this object in the future
+will require you to pass `$new\_password` instead of the old password. It is
+your responsibility to overwrite all stored copies of this
+`KeyProtectedByPassword`. Any copies you leave lying around can still be
+decrypted with the old password.
+
+**Parameters:**
+
+1. `$current\_password` is the password that this `KeyProtectedByPassword` is
+   currently protected with.
+2. `$new\_password` is the new password, which the `KeyProtectedByPassword` will
+   be protected with once this operation completes.
+
+**Return value:**
+
+If `$current\_password` is the correct password, then this method updates itself
+to be protected with the new password, and also returns itself.
+
+**Exceptions:**
+
+- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+  the platform the code is running on cannot safely perform encryption for some
+  reason (e.g. it lacks a secure random number generator), or the runtime tests
+  detected a bug in this library.
+
+- `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
+  either the given `$current\_password` is not the correct password for this
+  `KeyProtectedByPassword` or the ciphertext stored internally by this object
+  has been modified, i.e. it was accidentally corrupted or intentionally
+  corrupted by an attacker. There is no way for the caller to distinguish
+  between these two cases.
+
+**Side-effects and performance:**
+
+This method runs a small and very fast set of self-tests if it is the very first
+time this method or one of the `Crypto` methods has been called. The performance
+overhead is negligible and can be safely ignored in all applications.
+
+**Cautions:**
+
+PHP stack traces display (portions of) the arguments passed to methods on the
+call stack. If an exception is thrown inside this call, and it is uncaught, the
+value of `$password` may be leaked out to an attacker through the stack trace.
+We recommend configuring PHP to never output stack traces (either displaying
+them to the user or saving them to log files).
+
+It is impossible in principle to distinguish between the case where you attempt
+to unlock with the wrong password and the case where you attempt to unlock
+a modified (corrupted) `KeyProtectedByPassword`. It is up to the caller how to
+best deal with this ambiguity, as it depends on the application this library is
+being used in. If in doubt, consult with a professional cryptographer.
+
+**WARNING:** Because of the way `KeyProtectedByPassword` is implemented, knowing
+`SHA256($password)` is enough to decrypt a `KeyProtectedByPassword`. To be
+secure, your application MUST NOT EVER compute `SHA256($password)` and use or
+store it for any reason. You must also make sure that other libraries your
+application is using don't compute it either.
 
 Static Methods
 ---------------
@@ -151,6 +213,12 @@ attacker with write access to your system will be able to swap the protected
 keys around so that the wrong key gets used next time it is unlocked. This could
 lead to data being encrypted with the wrong key, perhaps one that the attacker
 knows.
+
+**WARNING:** Because of the way `KeyProtectedByPassword` is implemented, knowing
+`SHA256($password)` is enough to decrypt a `KeyProtectedByPassword`. To be
+secure, your application MUST NOT EVER compute `SHA256($password)` and use or
+store it for any reason. You must also make sure that other libraries your
+application is using don't compute it either.
 
 ### KeyProtectedByPassword::loadFromAsciiSafeString($saved\_key\_string)
 
