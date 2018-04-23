@@ -57,9 +57,10 @@ final class KeyOrPassword
      */
     public function deriveKeys($salt)
     {
-        if (Core::ourStrlen($salt) !== Core::SALT_BYTE_SIZE) {
-            throw new Ex\EnvironmentIsBrokenException('Bad salt.');
-        }
+        Core::ensureTrue(
+            Core::ourStrlen($salt) === Core::SALT_BYTE_SIZE,
+            'Bad salt.'
+        );
 
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
             if (!($this->secret instanceof Key)) {
