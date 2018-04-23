@@ -211,7 +211,7 @@ final class Core
         // We're not attempting to make variable-length string comparison
         // secure, as that's very difficult. Make sure the strings are the same
         // length.
-        Core::ensureTrue( Core::ourStrlen($expected) === Core::ourStrlen($given));
+        Core::ensureTrue(Core::ourStrlen($expected) === Core::ourStrlen($given));
 
         $blind           = Core::secureRandom(32);
         $message_compare = \hash_hmac(Core::HASH_FUNCTION_NAME, $given, $blind);
