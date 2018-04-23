@@ -63,9 +63,6 @@ final class KeyOrPassword
         );
 
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
-            if (!($this->secret instanceof Key)) {
-                throw new Ex\CryptoException('Expected a Key object');
-            }
             $akey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $this->secret->getRawBytes(),
@@ -82,9 +79,6 @@ final class KeyOrPassword
             );
             return new DerivedKeys($akey, $ekey);
         } elseif ($this->secret_type === self::SECRET_TYPE_PASSWORD) {
-            if (!\is_string($this->secret)) {
-                throw new Ex\CryptoException('Expected a string');
-            }
             /* Our PBKDF2 polyfill is vulnerable to a DoS attack documented in
              * GitHub issue #230. The fix is to pre-hash the password to ensure
              * it is short. We do the prehashing here instead of in pbkdf2() so
@@ -128,6 +122,14 @@ final class KeyOrPassword
      */
     private function __construct($secret_type, $secret)
     {
+        // The constructor is private, so these should never throw.
+        if ($secret_type === self::SECRET_TYPE_KEY) {
+            Core::ensureTrue($secret instanceof Key);
+        } elseif ($secret_type === self::SECRET_TYPE_PASSWORD) {
+            Core::ensureTrue(\is_string($secret));
+        } else {
+            throw new Ex\EnvironmentIsBrokenException('Bad secret type.');
+        }
         $this->secret_type = $secret_type;
         $this->secret = $secret;
     }
