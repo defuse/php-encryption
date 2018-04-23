@@ -106,4 +106,22 @@ class CoreTest extends PHPUnit_Framework_TestCase
             Core::ourSubstr('abc', 5, 2)
         );
     }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testOurSubstrNegativeLength()
+    {
+        Core::ourSubstr('abc', 0, -1);
+    }
+
+    public function testOurSubstrNegativeStart()
+    {
+        $this->assertSame('c', Core::ourSubstr('abc', -1, 1));
+    }
+
+    public function testOurSubstrLengthIsMax()
+    {
+        $this->assertSame('bc', Core::ourSubstr('abc', 1, 500));
+    }
 }

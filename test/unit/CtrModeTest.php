@@ -7,12 +7,6 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     public function counterTestVectorProvider()
     {
         return [
-            /* Incrementing by zero makes no change. */
-            [
-                '01234567890123456789012345778901',
-                '01234567890123456789012345778901',
-                0,
-            ],
             /* First byte, no overflow. */
             [
                 '00000000000000000000000000000000',
@@ -140,6 +134,17 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
             -1
+        );
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
+    public function testIncrementByZero()
+    {
+        \Defuse\Crypto\Core::incrementCounter(
+            str_repeat("\x00", 16),
+            0
         );
     }
 

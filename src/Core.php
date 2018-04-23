@@ -60,9 +60,10 @@ final class Core
             'Trying to increment nonce by a non-integer.'
         );
 
+        // The caller is probably re-using CTR-mode keystream if they increment by 0.
         Core::ensureTrue(
-            $inc >= 0,
-            'Trying to increment a nonce by a negative amount'
+            $inc > 0,
+            'Trying to increment a nonce by a nonpositive amount'
         );
 
         Core::ensureTrue(
