@@ -247,6 +247,7 @@ final class Core
      * Throws an exception if the condition is false.
      *
      * @param bool $condition
+     * @param string $message
      * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
