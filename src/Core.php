@@ -62,7 +62,7 @@ final class Core
 
         Core::ensureTrue(
             $inc >= 0,
-            'Trying to increment a nonce by a nonpositive amount'
+            'Trying to increment a nonce by a negative amount'
         );
 
         Core::ensureTrue(
