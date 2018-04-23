@@ -9,14 +9,16 @@ fi
 
 if [ -n "$1" ]; then
     BOOTSTRAP="$1"
+    MEASURECOVERAGE="0"
 else
     # You need to run `composer install` to generate this file.
     BOOTSTRAP="vendor/autoload.php"
+    MEASURECOVERAGE="1"
 fi
 
 # loading bootstrap should output nothing
 load=$(php -r "require '$BOOTSTRAP';")
 test -z "$load"
 
-./test/phpunit.sh "$BOOTSTRAP"
+./test/phpunit.sh "$BOOTSTRAP" "$MEASURECOVERAGE"
 echo ""
