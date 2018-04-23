@@ -38,4 +38,4 @@ script:
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
 
 after_success:
-    - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash) -Z
