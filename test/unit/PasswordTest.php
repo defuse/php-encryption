@@ -33,6 +33,15 @@ class PasswordTest extends PHPUnit_Framework_TestCase
         $key1 = $pkey1->unlockKey('password')->saveToAsciiSafeString();
 
         $pkey1->changePassword('password', 'new password');
+
+        // Make sure the old password doesn't work anymore.
+        try {
+            $pkey1->unlockKey('password');
+            $this->fail("Decrypting with the old password still works.");
+        } catch (Ex\WrongKeyOrModifiedCiphertextException $ex) {
+            // expected
+        }
+
         $pkey1_enc_ascii_new = $pkey1->saveToAsciiSafeString();
         $key1_new = $pkey1->unlockKey('new password')->saveToAsciiSafeString();
 
