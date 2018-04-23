@@ -14,6 +14,7 @@ class Crypto
      * @param bool   $raw_binary
      *
      * @throws Ex\EnvironmentIsBrokenException
+     * @throws \TypeError
      *
      * @return string
      */
@@ -45,6 +46,7 @@ class Crypto
      * @param bool   $raw_binary
      *
      * @throws Ex\EnvironmentIsBrokenException
+     * @throws \TypeError
      *
      * @return string
      */
@@ -114,6 +116,7 @@ class Crypto
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws \TypeError
      *
      * @return string
      */
@@ -149,6 +152,7 @@ class Crypto
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws \TypeError
      *
      * @return string
      */

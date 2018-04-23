@@ -41,6 +41,8 @@ recover the plaintext.
   reason (e.g. it lacks a secure random number generator), or the runtime tests
   detected a bug in this library.
 
+- `\TypeError` is thrown if the parameters are not of the expected types.
+
 **Side-effects and performance:**
 
 This method runs a small and very fast set of self-tests if it is the very first
@@ -98,6 +100,8 @@ been produced except by someone with knowledge of `$key`.
   ciphertext has been modified (possibly maliciously). There is no way to
   distinguish between these two cases.
 
+- `\TypeError` is thrown if the parameters are not of the expected types.
+
 **Side-effects and performance:**
 
 This method runs a small and very fast set of self-tests if it is the very first
@@ -137,6 +141,8 @@ decrypt the ciphertext and recover the plaintext.
   the platform the code is running on cannot safely perform encryption for some
   reason (e.g. it lacks a secure random number generator), or the runtime tests
   detected a bug in this library.
+
+- `\TypeError` is thrown if the parameters are not of the expected types.
 
 **Side-effects and performance:**
 
@@ -189,6 +195,8 @@ could not have been produced except by someone with knowledge of `$password`.
   the `$password` is not the correct password for the given ciphertext, or if
   the ciphertext has been modified (possibly maliciously). There is no way to
   distinguish between these two cases.
+
+- `\TypeError` is thrown if the parameters are not of the expected types.
 
 **Side-effects:**
 
@@ -247,6 +255,8 @@ someone with knowledge of `$key`.
   the `$key` is not the correct key for the given ciphertext, or if the
   ciphertext has been modified (possibly maliciously). There is no way to
   distinguish between these two cases.
+
+- `\TypeError` is thrown if the parameters are not of the expected types.
 
 **Side-effects:**
 
