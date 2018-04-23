@@ -65,8 +65,8 @@ final class KeyOrPassword
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
             Core::ensureTrue($this->secret instanceof Key);
             /**
-            * @psalm-suppress PossiblyInvalidMethodCall
-            */
+             * @psalm-suppress PossiblyInvalidMethodCall
+             */
             $akey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $this->secret->getRawBytes(),
@@ -74,6 +74,9 @@ final class KeyOrPassword
                 Core::AUTHENTICATION_INFO_STRING,
                 $salt
             );
+            /**
+             * @psalm-suppress PossiblyInvalidMethodCall
+             */
             $ekey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $this->secret->getRawBytes(),
@@ -89,7 +92,12 @@ final class KeyOrPassword
              * it is short. We do the prehashing here instead of in pbkdf2() so
              * that pbkdf2() still computes the function as defined by the
              * standard. */
+
+            /**
+             * @psalm-suppress PossiblyInvalidArgument
+             */
             $prehash = \hash(Core::HASH_FUNCTION_NAME, $this->secret, true);
+
             $prekey = Core::pbkdf2(
                 Core::HASH_FUNCTION_NAME,
                 $prehash,
