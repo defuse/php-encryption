@@ -344,7 +344,7 @@ final class Core
 
         if ($exists) {
             $substr = \mb_substr($str, $start, $length, '8bit');
-            if (Core::ourStrlen($substr) === 0) {
+            if (Core::ourStrlen($substr) === 0 && $length !== 0) {
                 throw new Ex\EnvironmentIsBrokenException(
                     'Your version of PHP has bug #66797. Its implementation of
                     mb_substr() is incorrect. See the details here:
