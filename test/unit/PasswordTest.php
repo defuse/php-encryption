@@ -23,6 +23,7 @@ class PasswordTest extends PHPUnit_Framework_TestCase
         $pkey = KeyProtectedByPassword::createRandomPasswordProtectedKey('rightpassword');
         $key1 = $pkey->unlockKey('wrongpassword');
     }
+
     /**
      * Check that a new password was set.
      */
@@ -34,14 +35,6 @@ class PasswordTest extends PHPUnit_Framework_TestCase
 
         $pkey1->changePassword('password', 'new password');
 
-        // Make sure the old password doesn't work anymore.
-        try {
-            $pkey1->unlockKey('password');
-            $this->fail("Decrypting with the old password still works.");
-        } catch (Ex\WrongKeyOrModifiedCiphertextException $ex) {
-            // expected
-        }
-
         $pkey1_enc_ascii_new = $pkey1->saveToAsciiSafeString();
         $key1_new = $pkey1->unlockKey('new password')->saveToAsciiSafeString();
 
@@ -50,5 +43,17 @@ class PasswordTest extends PHPUnit_Framework_TestCase
 
         // The actual key should be the same.
         $this->assertSame($key1, $key1_new);
+    }
+
+    /**
+     * Check that changing the password actually changes the password.
+     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+     */
+    function testPasswordActuallyChanges()
+    {
+        $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
+        $pkey1->changePassword('password', 'new password');
+
+        $pkey1->unlockKey('password');
     }
 }
