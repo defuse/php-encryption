@@ -344,7 +344,12 @@ final class Core
 
         if ($exists) {
             $substr = \mb_substr($str, $start, $length, '8bit');
-            if (Core::ourStrlen($substr) === 0 && $length !== 0) {
+            // At this point there are two cases where mb_substr can
+            // legitimately return an empty string. Either $length is 0, or
+            // $start is equal to the length of the string (both mb_substr and
+            // substr return an empty string when this happens). It should never
+            // ever return a string that's longer than $length.
+            if (Core::ourStrlen($substr) > $length || (Core::ourStrlen($substr) === 0 && $length !== 0 && $start !== $input_len)) {
                 throw new Ex\EnvironmentIsBrokenException(
                     'Your version of PHP has bug #66797. Its implementation of
                     mb_substr() is incorrect. See the details here:
