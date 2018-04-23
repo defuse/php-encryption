@@ -102,7 +102,7 @@ them to the user or saving them to log files).
 
 It is impossible in principle to distinguish between the case where you attempt
 to unlock with the wrong password and the case where you attempt to unlock
-a modified (corrupted) `KeyProtectedByPassword. It is up to the caller how to
+a modified (corrupted) `KeyProtectedByPassword`. It is up to the caller how to
 best deal with this ambiguity, as it depends on the application this library is
 being used in. If in doubt, consult with a professional cryptographer.
 
