@@ -110,4 +110,121 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         $ciphertext = Crypto::encryptWithPassword('testdata', 'password', false);
         Crypto::decryptWithPassword($ciphertext, 'password', true);
     }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testEncryptTypeErrorA()
+    {
+        $key = Key::createNewRandomKey();
+        Crypto::encrypt(3, $key, false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testEncryptTypeErrorB()
+    {
+        Crypto::encrypt("plaintext", 3, false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testEncryptTypeErrorC()
+    {
+        $key = Key::createNewRandomKey();
+        Crypto::encrypt("plaintext", $key, 3);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testEncryptWithPasswordTypeErrorA()
+    {
+        Crypto::encryptWithPassword(3, "password", false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testEncryptWithPasswordTypeErrorB()
+    {
+        Crypto::encryptWithPassword("plaintext", 3, false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testEncryptWithPasswordTypeErrorC()
+    {
+        Crypto::encryptWithPassword("plaintext", "password", 3);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testDecryptTypeErrorA()
+    {
+        $key = Key::createNewRandomKey();
+        Crypto::decrypt(3, $key, false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testDecryptTypeErrorB()
+    {
+        Crypto::decrypt("ciphertext", 3, false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testDecryptTypeErrorC()
+    {
+        $key = Key::createNewRandomKey();
+        Crypto::decrypt("ciphertext", $key, 3);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testDecryptWithPasswordTypeErrorA()
+    {
+        Crypto::decryptWithPassword(3, "password", false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testDecryptWithPasswordTypeErrorB()
+    {
+        Crypto::decryptWithPassword("ciphertext", 3, false);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testDecryptWithPasswordTypeErrorC()
+    {
+        Crypto::decryptWithPassword("ciphertext", "password", 3);
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testLegacyDecryptTypeErrorA()
+    {
+        Crypto::legacyDecrypt(3, "key");
+    }
+
+    /**
+     * @expectedException \TypeError
+     */
+    public function testLegacyDecryptTypeErrorB()
+    {
+        Crypto::legacyDecrypt("ciphertext", 3);
+    }
+
 }

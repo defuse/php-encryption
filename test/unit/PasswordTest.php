@@ -56,4 +56,17 @@ class PasswordTest extends PHPUnit_Framework_TestCase
 
         $pkey1->unlockKey('password');
     }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\BadFormatException
+     */
+    function testMalformedLoad()
+    {
+        $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
+        $pkey1_enc_ascii = $pkey1->saveToAsciiSafeString();
+
+        $pkey1_enc_ascii[0] = "\xFF";
+
+        KeyProtectedByPassword::loadFromAsciiSafeString($pkey1_enc_ascii);
+    }
 }
