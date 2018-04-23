@@ -18,11 +18,16 @@ class Crypto
      *
      * @return string
      */
-    public static function encrypt($plaintext, Key $key, $raw_binary = false)
+    public static function encrypt($plaintext, $key, $raw_binary = false)
     {
         if (!\is_string($plaintext)) {
             throw new \TypeError(
                 'String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.'
+            );
+        }
+        if (!($key instanceof Key)) {
+            throw new \TypeError(
+                'Key expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.'
             );
         }
         if (!\is_bool($raw_binary)) {
@@ -87,11 +92,16 @@ class Crypto
      *
      * @return string
      */
-    public static function decrypt($ciphertext, Key $key, $raw_binary = false)
+    public static function decrypt($ciphertext, $key, $raw_binary = false)
     {
         if (!\is_string($ciphertext)) {
             throw new \TypeError(
                 'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
+            );
+        }
+        if (!($key instanceof Key)) {
+            throw new \TypeError(
+                'Key expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.'
             );
         }
         if (!\is_bool($raw_binary)) {
