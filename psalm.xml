@@ -7,6 +7,7 @@
     </projectFiles>
     <issueHandlers>
         <DocblockTypeContradiction errorLevel="info" />
+        <RedundantCondition errorLevel="info" />
         <RedundantConditionGivenDocblockType errorLevel="info" />
     </issueHandlers>
 </psalm>
