@@ -10,7 +10,7 @@ php-encryption
 
 This is a library for encrypting data with a key or password in PHP. **It
 requires PHP 5.6 or newer and OpenSSL 1.0.1 or newer.** The current version is
-v2.2.0, which is expected to remain stable and supported by its authors with
+v2.2.1, which is expected to remain stable and supported by its authors with
 security and bugfixes until at least January 1st, 2020.
 
 The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
