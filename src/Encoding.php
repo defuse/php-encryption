@@ -46,6 +46,7 @@ final class Encoding
      * @throws Ex\EnvironmentIsBrokenException
      *
      * @return string
+     * @psalm-suppress TypeDoesNotContainType
      */
     public static function hexToBin($hex_string)
     {

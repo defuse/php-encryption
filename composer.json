@@ -21,7 +21,7 @@
         }
     },
     "require": {
-        "paragonie/random_compat": "~2.0",
+        "paragonie/random_compat": ">= 2",
         "ext-openssl": "*",
         "php":  ">=5.4.0"
     },
