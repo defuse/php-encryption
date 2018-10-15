@@ -1,9 +1,109 @@
 <?php
 
 use \Defuse\Crypto\Core;
+use \Defuse\Crypto\Encoding;
 
 class CoreTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @throws \Exception
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
+    public function testAes256Ctr()
+    {
+        $key = \random_bytes(32);
+        $nonce = \random_bytes(16);
+        for ($i = 0; $i < 10; ++$i) {
+            $message = \random_bytes(16 << $i);
+            $expected = \openssl_encrypt(
+                $message,
+                'aes-256-ctr',
+                $key,
+                OPENSSL_RAW_DATA,
+                $nonce
+            );
+            $actual = Core::aes256ctr($message, $key, $nonce);
+            $this->assertSame(
+                Encoding::binToHex($expected),
+                Encoding::binToHex($actual)
+            );
+        }
+    }
+
+    /**
+     * @ref https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
+     *
+     * Key
+     * 603deb1015ca71be2b73aef0857d7781
+     * 1f352c073b6108d72d9810a30914dff4
+     *
+     * Init. Counter
+     * f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff
+     *
+     * Block #1
+     * Plaintext  6bc1bee22e409f96e93d7e117393172a
+     * Ciphertext 601ec313775789a5b7a7f504bbf3d228
+     *
+     * Block #2
+     * Plaintext  ae2d8a571e03ac9c9eb76fac45af8e51
+     * Ciphertext f443e3ca4d62b59aca84e990cacaf5c5
+     *
+     * Block #3
+     * Plaintext  30c81c46a35ce411e5fbc1191a0a52ef
+     * Ciphertext 2b0930daa23de94ce87017ba2d84988d
+     *
+     * Block #4
+     * Plaintext  f69f2445df4f9b17ad2b417be66c3710
+     * Ciphertext dfc9c58db67aada613c2dd08457941a6
+     *
+     * @throws \Defuse\Crypto\Exception\BadFormatException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
+    public function testPolyfillAes256CtrTestVectors()
+    {
+        $key = Encoding::hexToBin('603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4');
+        $nonce = Encoding::hexToBin('f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff');
+        $plaintext = Encoding::hexToBin(
+            "6bc1bee22e409f96e93d7e117393172a" .
+            "ae2d8a571e03ac9c9eb76fac45af8e51" .
+            "30c81c46a35ce411e5fbc1191a0a52ef" .
+            "f69f2445df4f9b17ad2b417be66c3710"
+        );
+        $expected = "601ec313775789a5b7a7f504bbf3d228" .
+            "f443e3ca4d62b59aca84e990cacaf5c5" .
+            "2b0930daa23de94ce87017ba2d84988d" .
+            "dfc9c58db67aada613c2dd08457941a6";
+
+        $ciphertext = Core::polyfillAes256Ctr($plaintext, $key, $nonce);
+        $this->assertSame(
+            $expected,
+            Encoding::binToHex($ciphertext),
+            'Test Vector from NIST SP 800-38A, F.5.5 CTR-AES256.Encrypt'
+        );
+    }
+
+    /**
+     * @throws \Exception
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
+    public function testPolyfillAes256Ctr()
+    {
+        if (!\in_array('aes-256-ctr', \openssl_get_cipher_methods(), true)) {
+            $this->markTestSkipped('AES-256-CTR is not in the list of OpenSSL cipher methods.');
+        }
+        $key = \random_bytes(32);
+        $nonce = \random_bytes(16);
+        for ($i = 0; $i < 10; ++$i) {
+            $message = \random_bytes(16 << $i);
+            $expected = Core::aes256ctr($message, $key, $nonce);
+            $actual = Core::polyfillAes256Ctr($message, $key, $nonce);
+            $this->assertSame(
+                Encoding::binToHex($expected),
+                Encoding::binToHex($actual)
+            );
+        }
+    }
+
     // The specific bug the following two tests check for did not fail when
     // mbstring.func_overload=0 so it is crucial to run these tests with
     // mbstring.func_overload=7 as well.
