@@ -37,6 +37,82 @@ final class Core
      */
 
     /**
+     * Encrypt data using AES-256-CTR. Opportunistically uses OpenSSL
+     * if it has the cipher available, and our polyfill if it does not.
+     *
+     * @param string $plaintext
+     * @param string $key
+     * @param string $nonce
+     * @return string
+     * @throws Ex\EnvironmentIsBrokenException
+     */
+    public static function aes256ctr($plaintext, $key, $nonce)
+    {
+        static $aes256ctrNative = null;
+        if (\is_null($aes256ctrNative)) {
+            $aes256ctrNative = \in_array(self::CIPHER_METHOD, \openssl_get_cipher_methods(), true);
+        }
+        if ($aes256ctrNative) {
+            return \openssl_encrypt(
+                $plaintext,
+                Core::CIPHER_METHOD,
+                $key,
+                OPENSSL_RAW_DATA,
+                $nonce
+            );
+        }
+        return self::polyfillAes256Ctr($plaintext, $key, $nonce);
+    }
+
+    /**
+     * Userland polyfill for AES-256-CTR, using AES-256-ECB
+     *
+     * @param string $plaintext
+     * @param string $key
+     * @param string $nonce
+     * @return string
+     * @throws Ex\EnvironmentIsBrokenException
+     */
+    public static function polyfillAes256Ctr($plaintext, $key, $nonce)
+    {
+        static $aes256ecbNative = null;
+        if (\is_null($aes256ecbNative)) {
+            $aes256ecbNative = \in_array('aes-256-ecb', \openssl_get_cipher_methods(), true);
+            if (!$aes256ecbNative) {
+                throw new Ex\EnvironmentIsBrokenException(
+                    'Cipher method not supported. We tried to polyfill ' . self::CIPHER_METHOD .
+                    ' (which was not supported) using AES-256-ECB, but it wasn\'t supported either. ' .
+                    'This is normally caused by an outdated ' .
+                    'version of OpenSSL (and/or OpenSSL compiled for FIPS compliance). ' .
+                    'Please upgrade to a newer version of OpenSSL that supports ' .
+                    Core::CIPHER_METHOD . ' to use this library.'
+                );
+            }
+        }
+        if (empty($plaintext)) {
+            return '';
+        }
+        $length = self::ourStrlen($plaintext);
+        /** @var int $numBlocks */
+        $numBlocks = (($length - 1) >> 4) + 1;
+        $stream = '';
+        for ($i = 0; $i < $numBlocks; ++$i) {
+            $stream .= $nonce;
+            $nonce = self::incrementCounter($nonce, 1);
+        }
+        /** @var string $xor */
+        $xor = \openssl_encrypt(
+            $stream,
+            'aes-256-ecb',
+            $key,
+            OPENSSL_RAW_DATA
+        );
+        return (string) (
+            $plaintext ^ self::ourSubstr($xor, 0, $length)
+        );
+    }
+
+    /**
      * Adds an integer to a block-sized counter.
      *
      * @param string $ctr

@@ -383,13 +383,7 @@ class Crypto
         Core::ensureConstantExists('OPENSSL_RAW_DATA');
         Core::ensureFunctionExists('openssl_encrypt');
         /** @var string $ciphertext */
-        $ciphertext = \openssl_encrypt(
-            $plaintext,
-            Core::CIPHER_METHOD,
-            $key,
-            OPENSSL_RAW_DATA,
-            $iv
-        );
+        $ciphertext = Core::aes256ctr($plaintext, $key, $iv);
 
         Core::ensureTrue(\is_string($ciphertext), 'openssl_encrypt() failed');
 
@@ -414,13 +408,17 @@ class Crypto
         Core::ensureFunctionExists('openssl_decrypt');
 
         /** @var string $plaintext */
-        $plaintext = \openssl_decrypt(
-            $ciphertext,
-            $cipherMethod,
-            $key,
-            OPENSSL_RAW_DATA,
-            $iv
-        );
+        if ($cipherMethod === Core::CIPHER_METHOD) {
+            $plaintext = Core::aes256ctr($ciphertext, $key, $iv);
+        } else {
+            $plaintext = \openssl_decrypt(
+                $ciphertext,
+                $cipherMethod,
+                $key,
+                OPENSSL_RAW_DATA,
+                $iv
+            );
+        }
         Core::ensureTrue(\is_string($plaintext), 'openssl_decrypt() failed.');
 
         return $plaintext;

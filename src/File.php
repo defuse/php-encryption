@@ -398,13 +398,7 @@ final class File
 
             /* Encrypt this buffer. */
             /** @var string */
-            $encrypted = \openssl_encrypt(
-                $read,
-                Core::CIPHER_METHOD,
-                $ekey,
-                OPENSSL_RAW_DATA,
-                $thisIv
-            );
+            $encrypted = Core::aes256ctr($read, $ekey, $thisIv);
 
             Core::ensureTrue(\is_string($encrypted), 'OpenSSL encryption error');
 
@@ -636,13 +630,7 @@ final class File
 
             /* Decrypt this buffer-sized chunk. */
             /** @var string $decrypted */
-            $decrypted = \openssl_decrypt(
-                $read,
-                Core::CIPHER_METHOD,
-                $ekey,
-                OPENSSL_RAW_DATA,
-                $thisIv
-            );
+            $decrypted = Core::aes256ctr($read, $ekey, $thisIv);
             Core::ensureTrue(\is_string($decrypted), 'OpenSSL decryption error');
 
             /* Write the plaintext to the output file. */
