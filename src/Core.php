@@ -78,16 +78,16 @@ final class Core
         static $aes256ecbNative = null;
         if (\is_null($aes256ecbNative)) {
             $aes256ecbNative = \in_array('aes-256-ecb', \openssl_get_cipher_methods(), true);
-            if (!$aes256ecbNative) {
-                throw new Ex\EnvironmentIsBrokenException(
-                    'Cipher method not supported. We tried to polyfill ' . self::CIPHER_METHOD .
-                    ' (which was not supported) using AES-256-ECB, but it wasn\'t supported either. ' .
-                    'This is normally caused by an outdated ' .
-                    'version of OpenSSL (and/or OpenSSL compiled for FIPS compliance). ' .
-                    'Please upgrade to a newer version of OpenSSL that supports ' .
-                    Core::CIPHER_METHOD . ' to use this library.'
-                );
-            }
+        }
+        if (!$aes256ecbNative) {
+            throw new Ex\EnvironmentIsBrokenException(
+                'Cipher method not supported. We tried to polyfill ' . self::CIPHER_METHOD .
+                ' (which was not supported) using AES-256-ECB, but it wasn\'t supported either. ' .
+                'This is normally caused by an outdated ' .
+                'version of OpenSSL (and/or OpenSSL compiled for FIPS compliance). ' .
+                'Please upgrade to a newer version of OpenSSL that supports ' .
+                Core::CIPHER_METHOD . ' to use this library.'
+            );
         }
         if (empty($plaintext)) {
             return '';
@@ -106,6 +106,10 @@ final class Core
             'aes-256-ecb',
             $key,
             OPENSSL_RAW_DATA
+        );
+        Core::ensureTrue(
+            \is_string($xor),
+            'OpenSSL failed to produce a keystream.'
         );
         return (string) (
             $plaintext ^ self::ourSubstr($xor, 0, $length)
