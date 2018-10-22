@@ -76,10 +76,14 @@ final class Core
     public static function polyfillAes256Ctr($plaintext, $key, $nonce)
     {
         static $aes256ecbNative = null;
+        static $aes256cbcNative = null;
         if (\is_null($aes256ecbNative)) {
             $aes256ecbNative = \in_array('aes-256-ecb', \openssl_get_cipher_methods(), true);
         }
-        if (!$aes256ecbNative) {
+        if (\is_null($aes256cbcNative)) {
+            $aes256cbcNative = \in_array('aes-256-cbc', \openssl_get_cipher_methods(), true);
+        }
+        if (!$aes256ecbNative && !$aes256cbcNative) {
             throw new Ex\EnvironmentIsBrokenException(
                 'Cipher method not supported. We tried to polyfill ' . self::CIPHER_METHOD .
                 ' (which was not supported) using AES-256-ECB, but it wasn\'t supported either. ' .
@@ -100,13 +104,17 @@ final class Core
             $stream .= $nonce;
             $nonce = self::incrementCounter($nonce, 1);
         }
-        /** @var string $xor */
-        $xor = \openssl_encrypt(
-            $stream,
-            'aes-256-ecb',
-            $key,
-            OPENSSL_RAW_DATA
-        );
+        if ($aes256ecbNative) {
+            /** @var string $xor */
+            $xor = \openssl_encrypt(
+                $stream,
+                'aes-256-ecb',
+                $key,
+                OPENSSL_RAW_DATA
+            );
+        } else {
+            $xor = self::polyfillAes256Ecb($stream, $key);
+        }
         Core::ensureTrue(
             \is_string($xor),
             'OpenSSL failed to produce a keystream.'
@@ -114,6 +122,45 @@ final class Core
         return (string) (
             $plaintext ^ self::ourSubstr($xor, 0, $length)
         );
+    }
+
+    /**
+     * Recreate AES-ECB using AES-CBC with a NULL IV.
+     *
+     * This is a workaround for a very weird corner case with OpenSSL/LibreSSL
+     * with some HTTP daemons on some Linux distributions, wherein they only
+     * provide AES-256-CBC, not AES-256-CTR or AES-256-ECB.
+     *
+     * @param string $stream
+     * @param string $key
+     * @return string
+     *
+     * @ref https://github.com/defuse/php-encryption/issues/420
+     *
+     * @throws Ex\EnvironmentIsBrokenException
+     */
+    public static function polyfillAes256Ecb($stream, $key)
+    {
+        $blocks = self::ourStrlen($stream) >> 4;
+        $pieces = [];
+        $start = 0;
+        $iv = str_repeat("\0", 16);
+        for ($i = 0; $i < $blocks; ++$i) {
+            $piece = \openssl_encrypt(
+                self::ourSubstr($stream, $start, 16),
+                'aes-256-cbc',
+                $key,
+                OPENSSL_RAW_DATA | OPENSSL_NO_PADDING,
+                $iv
+            );
+            self::ensureTrue(
+                \is_string($piece),
+                'OpenSSL failed to encrypt a block'
+            );
+            $pieces[] = $piece;
+            $start += 16;
+        }
+        return implode('', $pieces);
     }
 
     /**
