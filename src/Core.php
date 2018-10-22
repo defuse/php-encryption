@@ -146,8 +146,9 @@ final class Core
         $start = 0;
         $iv = str_repeat("\0", 16);
         for ($i = 0; $i < $blocks; ++$i) {
+            /** @var string $piece */
             $piece = \openssl_encrypt(
-                self::ourSubstr($stream, $start, 16),
+                (string) self::ourSubstr($stream, $start, 16),
                 'aes-256-cbc',
                 $key,
                 OPENSSL_RAW_DATA | OPENSSL_NO_PADDING,
