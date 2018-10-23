@@ -45,13 +45,17 @@ class RuntimeTests extends Crypto
             $test_state = 2;
 
             Core::ensureFunctionExists('openssl_get_cipher_methods');
-            if (\in_array(Core::CIPHER_METHOD, \openssl_get_cipher_methods()) === false) {
-                throw new Ex\EnvironmentIsBrokenException(
-                    'Cipher method not supported. This is normally caused by an outdated ' .
-                    'version of OpenSSL (and/or OpenSSL compiled for FIPS compliance). ' .
-                    'Please upgrade to a newer version of OpenSSL that supports ' .
-                    Core::CIPHER_METHOD . ' to use this library.'
-                );
+            if (\in_array(Core::CIPHER_METHOD, \openssl_get_cipher_methods(), true) === false) {
+                if (\in_array('aes-256-ecb', \openssl_get_cipher_methods(), true) === false) {
+                    if (\in_array('aes-256-cbc', \openssl_get_cipher_methods(), true) === false) {
+                        throw new Ex\EnvironmentIsBrokenException(
+                            'Cipher method not supported. This is normally caused by an outdated ' .
+                            'version of OpenSSL (and/or OpenSSL compiled for FIPS compliance). ' .
+                            'Please upgrade to a newer version of OpenSSL that supports ' .
+                            Core::CIPHER_METHOD . ' to use this library.'
+                        );
+                    }
+                }
             }
 
             RuntimeTests::AESTestVector();
