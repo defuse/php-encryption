@@ -142,7 +142,6 @@ final class Core
     public static function polyfillAes256Ecb($stream, $key)
     {
         $blocks = self::ourStrlen($stream) >> 4;
-        $pieces = [];
         $start = 0;
         $iv = str_repeat("\0", 16);
         for ($i = 0; $i < $blocks; ++$i) {
@@ -158,10 +157,12 @@ final class Core
                 \is_string($piece),
                 'OpenSSL failed to encrypt a block'
             );
-            $pieces[] = $piece;
+            for ($j = 0; $j < 16; ++$j) {
+                $stream[$start + $j] = $piece[$j];
+            }
             $start += 16;
         }
-        return implode('', $pieces);
+        return $stream;
     }
 
     /**
