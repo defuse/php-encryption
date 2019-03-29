@@ -2,7 +2,8 @@
 # must be installed and in your $PATH. Run it from inside the dist/ directory.
 
 box := $(shell which box)
-composer := "composer"
+composer := $(shell which composer)
+gitcommit := $(shell git rev-parse HEAD)
 
 .PHONY: all
 all: build-phar
