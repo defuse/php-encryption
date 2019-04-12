@@ -495,7 +495,7 @@ final class File
         $inc = (int) (Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE);
 
         /* Get the HMAC. */
-        if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === false) {
+        if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === -1) {
             throw new Ex\IOException(
                 'Cannot seek to beginning of MAC within input file'
             );
@@ -522,14 +522,14 @@ final class File
         Core::ensureTrue(\is_resource($hmac) || \is_object($hmac), 'Cannot initialize a hash context');
 
         /* Reset file pointer to the beginning of the file after the header */
-        if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+        if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === -1) {
             throw new Ex\IOException(
                 'Cannot read seek within input file'
             );
         }
 
         /* Seek to the start of the actual ciphertext. */
-        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize, SEEK_CUR) === false) {
+        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize, SEEK_CUR) === -1) {
             throw new Ex\IOException(
                 'Cannot seek input file to beginning of ciphertext'
             );
@@ -591,7 +591,7 @@ final class File
         /* PASS #2: Decrypt and write output. */
 
         /* Rewind to the start of the actual ciphertext. */
-        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === -1) {
             throw new Ex\IOException(
                 'Could not move the input file pointer during decryption'
             );
