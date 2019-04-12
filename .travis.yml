@@ -21,9 +21,10 @@ matrix:
     - php: "hhvm"
       env: USE_PSALM=1
   allow_failures:
+    - php: "5.4"
+    - php: "5.5"
     - php: "nightly"
     - php: "hhvm"
-
 install:
     - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
     - composer install
