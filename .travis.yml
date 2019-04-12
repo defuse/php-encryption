@@ -26,7 +26,6 @@ matrix:
     - php: "nightly"
     - php: "hhvm"
 install:
-    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
     - composer install
     - curl -LSs https://box-project.github.io/box2/installer.php | php
     - mkdir ~/box
@@ -36,6 +35,8 @@ script:
     - ./test.sh
     - PATH=$PATH:~/box/ make -C dist/ build-phar
     - ./test.sh dist/defuse-crypto.phar
+    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
+    - if [[ $USE_PSALM -eq 1 ]]; then composer install; fi
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
 
 after_success:
