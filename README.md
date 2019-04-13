@@ -9,9 +9,15 @@ php-encryption
 [![Downloads](https://img.shields.io/packagist/dt/defuse/php-encryption.svg)](https://packagist.org/packages/defuse/php-encryption)
 
 This is a library for encrypting data with a key or password in PHP. **It
-requires PHP 5.6 or newer and OpenSSL 1.0.1 or newer.** The current version is
-v2.2.1, which is expected to remain stable and supported by its authors with
-security and bugfixes until at least January 1st, 2020.
+requires PHP 5.6 or newer and OpenSSL 1.0.1 or newer.** We recommend using
+a version of PHP that [still has security
+support](https://www.php.net/supported-versions.php), which at the time of
+writing means PHP 7.1 or later. Using this library with an unsupported version
+of PHP could lead to security vulnerabilities.
+
+The current version of `php-encryption` is v2.2.1. This library is expected to
+remain stable and supported by its authors with security and bugfixes until at
+least January 1st, 2021.
 
 The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
 [Scott Arciszewski](https://paragonie.com/blog/author/scott-arcizewski) as well
