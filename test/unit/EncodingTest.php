@@ -5,6 +5,9 @@ use \Defuse\Crypto\Core;
 
 class EncodingTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @group slow
+     */
     public function testEncodeDecodeEquivalency()
     {
         for ($length = 0; $length < 50; $length++) {
@@ -49,6 +52,7 @@ class EncodingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Defuse\Crypto\Exception\BadFormatException
      * @expectedExceptionMessage checksum doesn't match
+     * @group slow
      */
     public function testIncorrectChecksum()
     {
@@ -71,6 +75,7 @@ class EncodingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Defuse\Crypto\Exception\BadFormatException
      * @expectedExceptionMessage not a hex string
+     * @group slow
      */
     public function testBadHexEncoding()
     {

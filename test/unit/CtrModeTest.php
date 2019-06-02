@@ -139,6 +139,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @group slow
      */
     public function testIncrementByZero()
     {
@@ -160,6 +161,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider allNonZeroByteValuesProvider
      * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @group slow
      */
     public function testIncrementCausingOverflowInFirstByte($lsb)
     {
@@ -171,6 +173,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @group slow
      */
     public function testIncrementWithShortIvLength()
     {
@@ -182,6 +185,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @group slow
      */
     public function testIncrementWithLongIvLength()
     {
@@ -193,6 +197,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     * @group slow
      */
     public function testIncrementByNonInteger()
     {
@@ -202,6 +207,9 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @group slow
+     */
     public function testCompatibilityWithOpenSSL()
     {
         /* Plaintext is 0x300 blocks. */
