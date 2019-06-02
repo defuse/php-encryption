@@ -47,9 +47,10 @@ class PasswordTest extends PHPUnit_Framework_TestCase
 
     /**
      * Check that changing the password actually changes the password.
+     *
      * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
-    function testPasswordActuallyChanges()
+    public function testPasswordActuallyChanges()
     {
         $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
         $pkey1->changePassword('password', 'new password');
@@ -60,7 +61,7 @@ class PasswordTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Defuse\Crypto\Exception\BadFormatException
      */
-    function testMalformedLoad()
+    public function testMalformedLoad()
     {
         $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
         $pkey1_enc_ascii = $pkey1->saveToAsciiSafeString();

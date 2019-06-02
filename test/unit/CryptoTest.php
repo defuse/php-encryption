@@ -10,8 +10,8 @@ class CryptoTest extends PHPUnit_Framework_TestCase
     # Test for issue #165 -- encrypting then decrypting empty string fails.
     public function testEmptyString()
     {
-        $str    = '';
-        $key    = Key::createNewRandomKey();
+        $str = '';
+        $key = Key::createNewRandomKey();
         $cipher = Crypto::encrypt($str, $key);
         $this->assertSame(
             $str,
@@ -65,9 +65,9 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         }
 
         // Decrypting with the wrong password.
-        $password       = 'password';
-        $data           = 'abcdef';
-        $ciphertext     = Crypto::encryptWithPassword($data, $password, true);
+        $password = 'password';
+        $data = 'abcdef';
+        $ciphertext = Crypto::encryptWithPassword($data, $password, true);
         $wrong_password = 'wrong_password';
         try {
             Crypto::decryptWithPassword($ciphertext, $wrong_password, true);
@@ -76,16 +76,16 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         }
 
         // TypeError; password needs to be a string, not an object
-        $password        = Key::createNewRandomKey();
+        $password = Key::createNewRandomKey();
         try {
-            $ciphertext     = Crypto::encryptWithPassword($data, $password, true);
+            $ciphertext = Crypto::encryptWithPassword($data, $password, true);
             $this->fail('Crypto::encryptWithPassword() should not accept key objects');
         } catch (\TypeError $e) { /* expected */
         }
 
         // Ciphertext too small.
-        $password        = \random_bytes(32);
-        $ciphertext      = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
+        $password = \random_bytes(32);
+        $ciphertext = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
         try {
             Crypto::decryptWithPassword($ciphertext, $password, true);
             throw new Ex\EnvironmentIsBrokenException();
@@ -125,7 +125,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptTypeErrorB()
     {
-        Crypto::encrypt("plaintext", 3, false);
+        Crypto::encrypt('plaintext', 3, false);
     }
 
     /**
@@ -134,7 +134,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
     public function testEncryptTypeErrorC()
     {
         $key = Key::createNewRandomKey();
-        Crypto::encrypt("plaintext", $key, 3);
+        Crypto::encrypt('plaintext', $key, 3);
     }
 
     /**
@@ -142,7 +142,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptWithPasswordTypeErrorA()
     {
-        Crypto::encryptWithPassword(3, "password", false);
+        Crypto::encryptWithPassword(3, 'password', false);
     }
 
     /**
@@ -150,7 +150,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptWithPasswordTypeErrorB()
     {
-        Crypto::encryptWithPassword("plaintext", 3, false);
+        Crypto::encryptWithPassword('plaintext', 3, false);
     }
 
     /**
@@ -158,7 +158,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptWithPasswordTypeErrorC()
     {
-        Crypto::encryptWithPassword("plaintext", "password", 3);
+        Crypto::encryptWithPassword('plaintext', 'password', 3);
     }
 
     /**
@@ -175,7 +175,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testDecryptTypeErrorB()
     {
-        Crypto::decrypt("ciphertext", 3, false);
+        Crypto::decrypt('ciphertext', 3, false);
     }
 
     /**
@@ -184,7 +184,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
     public function testDecryptTypeErrorC()
     {
         $key = Key::createNewRandomKey();
-        Crypto::decrypt("ciphertext", $key, 3);
+        Crypto::decrypt('ciphertext', $key, 3);
     }
 
     /**
@@ -192,7 +192,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testDecryptWithPasswordTypeErrorA()
     {
-        Crypto::decryptWithPassword(3, "password", false);
+        Crypto::decryptWithPassword(3, 'password', false);
     }
 
     /**
@@ -200,7 +200,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testDecryptWithPasswordTypeErrorB()
     {
-        Crypto::decryptWithPassword("ciphertext", 3, false);
+        Crypto::decryptWithPassword('ciphertext', 3, false);
     }
 
     /**
@@ -208,7 +208,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testDecryptWithPasswordTypeErrorC()
     {
-        Crypto::decryptWithPassword("ciphertext", "password", 3);
+        Crypto::decryptWithPassword('ciphertext', 'password', 3);
     }
 
     /**
@@ -216,7 +216,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testLegacyDecryptTypeErrorA()
     {
-        Crypto::legacyDecrypt(3, "key");
+        Crypto::legacyDecrypt(3, 'key');
     }
 
     /**
@@ -224,7 +224,6 @@ class CryptoTest extends PHPUnit_Framework_TestCase
      */
     public function testLegacyDecryptTypeErrorB()
     {
-        Crypto::legacyDecrypt("ciphertext", 3);
+        Crypto::legacyDecrypt('ciphertext', 3);
     }
-
 }

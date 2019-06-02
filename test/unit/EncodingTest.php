@@ -57,14 +57,14 @@ class EncodingTest extends PHPUnit_Framework_TestCase
             $header,
             Core::secureRandom(Core::KEY_BYTE_SIZE)
         );
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 0] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 1] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 3] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 4] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 5] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 6] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 7] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 8] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 0] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 1] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 3] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 4] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 5] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 6] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 7] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 8] = 'f';
         Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);
     }
 

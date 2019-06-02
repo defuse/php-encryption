@@ -262,10 +262,10 @@ class Crypto
         $keys = $secret->deriveKeys($salt);
         $ekey = $keys->getEncryptionKey();
         $akey = $keys->getAuthenticationKey();
-        $iv     = Core::secureRandom(Core::BLOCK_BYTE_SIZE);
+        $iv = Core::secureRandom(Core::BLOCK_BYTE_SIZE);
 
         $ciphertext = Core::CURRENT_VERSION . $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv);
-        $auth       = \hash_hmac(Core::HASH_FUNCTION_NAME, $ciphertext, $akey, true);
+        $auth = \hash_hmac(Core::HASH_FUNCTION_NAME, $ciphertext, $akey, true);
         $ciphertext = $ciphertext . $auth;
 
         if ($raw_binary) {

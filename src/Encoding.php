@@ -6,8 +6,8 @@ use Defuse\Crypto\Exception as Ex;
 
 final class Encoding
 {
-    const CHECKSUM_BYTE_SIZE     = 32;
-    const CHECKSUM_HASH_ALGO     = 'sha256';
+    const CHECKSUM_BYTE_SIZE = 32;
+    const CHECKSUM_HASH_ALGO = 'sha256';
     const SERIALIZE_HEADER_BYTES = 4;
 
     /**
@@ -51,16 +51,16 @@ final class Encoding
     public static function hexToBin($hex_string)
     {
         $hex_pos = 0;
-        $bin     = '';
+        $bin = '';
         $hex_len = Core::ourStrlen($hex_string);
-        $state   = 0;
-        $c_acc   = 0;
+        $state = 0;
+        $c_acc = 0;
 
         while ($hex_pos < $hex_len) {
-            $c        = \ord($hex_string[$hex_pos]);
-            $c_num    = $c ^ 48;
-            $c_num0   = ($c_num - 10) >> 8;
-            $c_alpha  = ($c & ~32) - 55;
+            $c = \ord($hex_string[$hex_pos]);
+            $c_num = $c ^ 48;
+            $c_num0 = ($c_num - 10) >> 8;
+            $c_alpha = ($c & ~32) - 55;
             $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
             if (($c_num0 | $c_alpha0) === 0) {
                 throw new Ex\BadFormatException(
@@ -86,6 +86,7 @@ final class Encoding
      * number of trailing whitespace characters through side-channels.
      *
      * @param string $string
+     *
      * @return string
      */
     public static function trimTrailingWhitespace($string = '')
@@ -101,7 +102,7 @@ final class Encoding
 
             /* Null Byte (0x00), a.k.a. \0 */
             // if ($chr === 0x00) $length -= 1;
-            $sub = (($chr - 1) >> 8 ) & 1;
+            $sub = (($chr - 1) >> 8) & 1;
             $length -= $sub;
             $last -= $sub;
 

@@ -50,8 +50,7 @@ class LegacyDecryptTest extends PHPUnit_Framework_TestCase
      */
     public function testLegacyDecryptTooShort()
     {
-        $too_short = str_repeat("a", Core::LEGACY_MAC_BYTE_SIZE);
-        Crypto::legacyDecrypt($too_short, "0123456789ABCDEF");
+        $too_short = str_repeat('a', Core::LEGACY_MAC_BYTE_SIZE);
+        Crypto::legacyDecrypt($too_short, '0123456789ABCDEF');
     }
-
 }

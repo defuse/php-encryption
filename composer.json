@@ -27,7 +27,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^4|^5",
-        "nikic/php-parser": "^2.0|^3.0|^4.0"
+        "nikic/php-parser": "^2.0|^3.0|^4.0",
+        "friendsofphp/php-cs-fixer": "^2.15"
     },
     "bin": [
         "bin/generate-defuse-key"

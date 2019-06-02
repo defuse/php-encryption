@@ -6,27 +6,27 @@ use Defuse\Crypto\Exception as Ex;
 
 final class Core
 {
-    const HEADER_VERSION_SIZE               = 4;
-    const MINIMUM_CIPHERTEXT_SIZE           = 84;
+    const HEADER_VERSION_SIZE = 4;
+    const MINIMUM_CIPHERTEXT_SIZE = 84;
 
-    const CURRENT_VERSION                   = "\xDE\xF5\x02\x00";
+    const CURRENT_VERSION = "\xDE\xF5\x02\x00";
 
-    const CIPHER_METHOD                     = 'aes-256-ctr';
-    const BLOCK_BYTE_SIZE                   = 16;
-    const KEY_BYTE_SIZE                     = 32;
-    const SALT_BYTE_SIZE                    = 32;
-    const MAC_BYTE_SIZE                     = 32;
-    const HASH_FUNCTION_NAME                = 'sha256';
-    const ENCRYPTION_INFO_STRING            = 'DefusePHP|V2|KeyForEncryption';
-    const AUTHENTICATION_INFO_STRING        = 'DefusePHP|V2|KeyForAuthentication';
-    const BUFFER_BYTE_SIZE                  = 1048576;
+    const CIPHER_METHOD = 'aes-256-ctr';
+    const BLOCK_BYTE_SIZE = 16;
+    const KEY_BYTE_SIZE = 32;
+    const SALT_BYTE_SIZE = 32;
+    const MAC_BYTE_SIZE = 32;
+    const HASH_FUNCTION_NAME = 'sha256';
+    const ENCRYPTION_INFO_STRING = 'DefusePHP|V2|KeyForEncryption';
+    const AUTHENTICATION_INFO_STRING = 'DefusePHP|V2|KeyForAuthentication';
+    const BUFFER_BYTE_SIZE = 1048576;
 
-    const LEGACY_CIPHER_METHOD              = 'aes-128-cbc';
-    const LEGACY_BLOCK_BYTE_SIZE            = 16;
-    const LEGACY_KEY_BYTE_SIZE              = 16;
-    const LEGACY_HASH_FUNCTION_NAME         = 'sha256';
-    const LEGACY_MAC_BYTE_SIZE              = 32;
-    const LEGACY_ENCRYPTION_INFO_STRING     = 'DefusePHP|KeyForEncryption';
+    const LEGACY_CIPHER_METHOD = 'aes-128-cbc';
+    const LEGACY_BLOCK_BYTE_SIZE = 16;
+    const LEGACY_KEY_BYTE_SIZE = 16;
+    const LEGACY_HASH_FUNCTION_NAME = 'sha256';
+    const LEGACY_MAC_BYTE_SIZE = 32;
+    const LEGACY_ENCRYPTION_INFO_STRING = 'DefusePHP|KeyForEncryption';
     const LEGACY_AUTHENTICATION_INFO_STRING = 'DefusePHP|KeyForAuthentication';
 
     /*
@@ -82,7 +82,7 @@ final class Core
             Core::ensureTrue(\is_int($sum), 'Integer overflow in CTR mode nonce increment');
 
             $ctr[$i] = \pack('C', $sum & 0xFF);
-            $inc     = $sum >> 8;
+            $inc = $sum >> 8;
         }
         return $ctr;
     }
@@ -160,7 +160,7 @@ final class Core
         Core::ensureTrue(Core::ourStrlen($prk) >= $digest_length);
 
         // T(0) = ''
-        $t          = '';
+        $t = '';
         $last_block = '';
         for ($block_index = 1; Core::ourStrlen($t) < $length; ++$block_index) {
             // T(i) = HMAC-Hash(PRK, T(i-1) | info | 0x??)
@@ -213,7 +213,7 @@ final class Core
         // length.
         Core::ensureTrue(Core::ourStrlen($expected) === Core::ourStrlen($given));
 
-        $blind           = Core::secureRandom(32);
+        $blind = Core::secureRandom(32);
         $message_compare = \hash_hmac(Core::HASH_FUNCTION_NAME, $given, $blind);
         $correct_compare = \hash_hmac(Core::HASH_FUNCTION_NAME, $expected, $blind);
         return $correct_compare === $message_compare;
@@ -222,9 +222,10 @@ final class Core
      * Throws an exception if the constant doesn't exist.
      *
      * @param string $name
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
+     * @return void
      */
     public static function ensureConstantExists($name)
     {
@@ -235,9 +236,10 @@ final class Core
      * Throws an exception if the function doesn't exist.
      *
      * @param string $name
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
+     * @return void
      */
     public static function ensureFunctionExists($name)
     {
@@ -249,9 +251,10 @@ final class Core
      *
      * @param bool $condition
      * @param string $message
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
+     * @return void
      */
     public static function ensureTrue($condition, $message = '')
     {
@@ -333,7 +336,7 @@ final class Core
 
         if ($length < 0) {
             throw new \InvalidArgumentException(
-                "Negative lengths are not supported with ourSubstr."
+                'Negative lengths are not supported with ourSubstr.'
             );
         }
 

@@ -17,6 +17,7 @@ class RuntimeTests extends Crypto
      * Runs the runtime tests.
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
      * @return void
      */
     public static function runtimeTest()
@@ -76,11 +77,12 @@ class RuntimeTests extends Crypto
      * High-level tests of Crypto operations.
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
      * @return void
      */
     private static function testEncryptDecrypt()
     {
-        $key  = Key::createNewRandomKey();
+        $key = Key::createNewRandomKey();
         $data = "EnCrYpT EvErYThInG\x00\x00";
 
         // Make sure encrypting then decrypting doesn't change the message.
@@ -120,10 +122,10 @@ class RuntimeTests extends Crypto
         }
 
         // Decrypting with the wrong key.
-        $key        = Key::createNewRandomKey();
-        $data       = 'abcdef';
+        $key = Key::createNewRandomKey();
+        $data = 'abcdef';
         $ciphertext = Crypto::encrypt($data, $key, true);
-        $wrong_key  = Key::createNewRandomKey();
+        $wrong_key = Key::createNewRandomKey();
         try {
             Crypto::decrypt($ciphertext, $wrong_key, true);
             throw new Ex\EnvironmentIsBrokenException();
@@ -131,7 +133,7 @@ class RuntimeTests extends Crypto
         }
 
         // Ciphertext too small.
-        $key        = Key::createNewRandomKey();
+        $key = Key::createNewRandomKey();
         $ciphertext = \str_repeat('A', Core::MINIMUM_CIPHERTEXT_SIZE - 1);
         try {
             Crypto::decrypt($ciphertext, $key, true);
@@ -144,6 +146,7 @@ class RuntimeTests extends Crypto
      * Test HKDF against test vectors.
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
      * @return void
      */
     private static function HKDFTestVector()
@@ -151,11 +154,11 @@ class RuntimeTests extends Crypto
         // HKDF test vectors from RFC 5869
 
         // Test Case 1
-        $ikm    = \str_repeat("\x0b", 22);
-        $salt   = Encoding::hexToBin('000102030405060708090a0b0c');
-        $info   = Encoding::hexToBin('f0f1f2f3f4f5f6f7f8f9');
+        $ikm = \str_repeat("\x0b", 22);
+        $salt = Encoding::hexToBin('000102030405060708090a0b0c');
+        $info = Encoding::hexToBin('f0f1f2f3f4f5f6f7f8f9');
         $length = 42;
-        $okm    = Encoding::hexToBin(
+        $okm = Encoding::hexToBin(
             '3cb25f25faacd57a90434f64d0362f2a' .
             '2d2d0a90cf1a5a4c5db02d56ecc4c5bf' .
             '34007208d5b887185865'
@@ -164,9 +167,9 @@ class RuntimeTests extends Crypto
         Core::ensureTrue($computed_okm === $okm);
 
         // Test Case 7
-        $ikm    = \str_repeat("\x0c", 22);
+        $ikm = \str_repeat("\x0c", 22);
         $length = 42;
-        $okm    = Encoding::hexToBin(
+        $okm = Encoding::hexToBin(
             '2c91117204d745f3500d636a62f64f0a' .
             'b3bae548aa53d423b0d1f27ebba6f5e5' .
             '673a081d70cce7acfc48'
@@ -179,13 +182,14 @@ class RuntimeTests extends Crypto
      * Test HMAC against test vectors.
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
      * @return void
      */
     private static function HMACTestVector()
     {
         // HMAC test vector From RFC 4231 (Test Case 1)
-        $key     = \str_repeat("\x0b", 20);
-        $data    = 'Hi There';
+        $key = \str_repeat("\x0b", 20);
+        $data = 'Hi There';
         $correct = 'b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7';
         Core::ensureTrue(
             \hash_hmac(Core::HASH_FUNCTION_NAME, $data, $key) === $correct
@@ -196,6 +200,7 @@ class RuntimeTests extends Crypto
      * Test AES against test vectors.
      *
      * @throws Ex\EnvironmentIsBrokenException
+     *
      * @return void
      */
     private static function AESTestVector()
@@ -205,7 +210,7 @@ class RuntimeTests extends Crypto
             '603deb1015ca71be2b73aef0857d7781' .
             '1f352c073b6108d72d9810a30914dff4'
         );
-        $iv        = Encoding::hexToBin('f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff');
+        $iv = Encoding::hexToBin('f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff');
         $plaintext = Encoding::hexToBin(
             '6bc1bee22e409f96e93d7e117393172a' .
             'ae2d8a571e03ac9c9eb76fac45af8e51' .

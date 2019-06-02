@@ -1,0 +1,40 @@
+<?php
+
+return PhpCsFixer\Config::create()
+    ->setRiskyAllowed(true)
+    ->setRules([
+        '@PSR2' => true,
+        'blank_line_after_opening_tag' => true,
+        'function_typehint_space' => true,
+        'trailing_comma_in_multiline_array' => true,
+        'no_blank_lines_after_class_opening' => true,
+        'no_blank_lines_after_phpdoc' => true,
+        'no_short_bool_cast' => true,
+        'no_unneeded_control_parentheses' => true,
+        'no_unused_imports' => true,
+        'phpdoc_indent' => true,
+        'phpdoc_no_access' => true,
+        'phpdoc_no_package' => true,
+        'phpdoc_scalar' => true,
+        'phpdoc_separation' => true,
+        'phpdoc_trim' => true,
+        'phpdoc_types' => true,
+        'phpdoc_var_without_name' => true,
+        'single_quote' => true,
+        'space_after_semicolon' => true,
+        'standardize_not_equals' => true,
+        'ternary_operator_spaces' => true,
+        'trim_array_spaces' => true,
+        'binary_operator_spaces' => true,
+        'multiline_whitespace_before_semicolons' => true,
+        'php_unit_construct' => true,
+        'phpdoc_order' => true,
+        'array_syntax' => ['syntax' => 'short'],
+    ])
+
+    ->setFinder(
+        PhpCsFixer\Finder::create()
+            ->name('/\.php|\.php.dist$/')
+            ->in(['src', 'test'])
+    )
+;

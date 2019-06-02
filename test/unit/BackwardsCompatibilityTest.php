@@ -6,17 +6,17 @@ use \Defuse\Crypto\Key;
 
 class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
 {
-
-	/* helper function to create a key with raw bytes */
-	public function keyHelper($rawkey) {
-		$key = Key::createNewRandomKey();
-		$func = function ($bytes) {
-				$this->key_bytes = $bytes;
-		};
-		$helper = $func->bindTo($key,$key);
-		$helper($rawkey);
-		return $key;
-	}
+    /* helper function to create a key with raw bytes */
+    public function keyHelper($rawkey)
+    {
+        $key = Key::createNewRandomKey();
+        $func = function ($bytes) {
+            $this->key_bytes = $bytes;
+        };
+        $helper = $func->bindTo($key, $key);
+        $helper($rawkey);
+        return $key;
+    }
 
     /**
      * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
@@ -37,7 +37,7 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
         /* Make it try to parse the binary as hex. */
         $plain = Crypto::decrypt(
             $cipher,
-            $this->keyHelper (
+            $this->keyHelper(
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" .
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
             ),
@@ -64,7 +64,7 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
         /* This time, treat the binary as binary. */
         $plain = Crypto::decrypt(
             $cipher,
-            $this->keyHelper (
+            $this->keyHelper(
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" .
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
             ),
