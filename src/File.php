@@ -320,6 +320,9 @@ final class File
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
+     * @psalm-suppress PossiblyInvalidArgument
+     *      Fixes erroneous errors caused by PHP 7.2 switching the return value
+     *      of hash_init from a resource to a HashContext.
      */
     private static function encryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
     {
@@ -346,7 +349,7 @@ final class File
         $iv     = Core::secureRandom($ivsize);
 
         /* Initialize a streaming HMAC state. */
-        /** @var resource $hmac */
+        /** @var mixed $hmac */
         $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
         Core::ensureTrue(
             \is_resource($hmac) || \is_object($hmac),
@@ -430,6 +433,9 @@ final class File
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @psalm-suppress PossiblyInvalidArgument
+     *      Fixes erroneous errors caused by PHP 7.2 switching the return value
+     *      of hash_init from a resource to a HashContext.
      */
     public static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
     {
@@ -483,7 +489,7 @@ final class File
         $inc = (int) (Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE);
 
         /* Get the HMAC. */
-        if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === false) {
+        if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === -1) {
             throw new Ex\IOException(
                 'Cannot seek to beginning of MAC within input file'
             );
@@ -505,19 +511,19 @@ final class File
         $stored_mac = self::readBytes($inputHandle, Core::MAC_BYTE_SIZE);
 
         /* Initialize a streaming HMAC state. */
-        /** @var resource $hmac */
+        /** @var mixed $hmac */
         $hmac = \hash_init(Core::HASH_FUNCTION_NAME, HASH_HMAC, $akey);
         Core::ensureTrue(\is_resource($hmac) || \is_object($hmac), 'Cannot initialize a hash context');
 
         /* Reset file pointer to the beginning of the file after the header */
-        if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+        if (\fseek($inputHandle, Core::HEADER_VERSION_SIZE, SEEK_SET) === -1) {
             throw new Ex\IOException(
                 'Cannot read seek within input file'
             );
         }
 
         /* Seek to the start of the actual ciphertext. */
-        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize, SEEK_CUR) === false) {
+        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize, SEEK_CUR) === -1) {
             throw new Ex\IOException(
                 'Cannot seek input file to beginning of ciphertext'
             );
@@ -528,7 +534,7 @@ final class File
         \hash_update($hmac, $header);
         \hash_update($hmac, $file_salt);
         \hash_update($hmac, $iv);
-        /** @var resource $hmac2 */
+        /** @var mixed $hmac2 */
         $hmac2 = \hash_copy($hmac);
 
         $break = false;
@@ -559,7 +565,7 @@ final class File
             \hash_update($hmac, $read);
 
             /* Remember this buffer-sized chunk's HMAC. */
-            /** @var resource $chunk_mac */
+            /** @var mixed $chunk_mac */
             $chunk_mac = \hash_copy($hmac);
             Core::ensureTrue(\is_resource($chunk_mac) || \is_object($chunk_mac), 'Cannot duplicate a hash context');
             $macs []= \hash_final($chunk_mac);
@@ -579,7 +585,7 @@ final class File
         /* PASS #2: Decrypt and write output. */
 
         /* Rewind to the start of the actual ciphertext. */
-        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === false) {
+        if (\fseek($inputHandle, Core::SALT_BYTE_SIZE + $ivsize + Core::HEADER_VERSION_SIZE, SEEK_SET) === -1) {
             throw new Ex\IOException(
                 'Could not move the input file pointer during decryption'
             );
@@ -613,7 +619,7 @@ final class File
              * remembered from pass #1 to ensure attackers didn't change the
              * ciphertext after MAC verification. */
             \hash_update($hmac2, $read);
-            /** @var resource $calc_mac */
+            /** @var mixed $calc_mac */
             $calc_mac = \hash_copy($hmac2);
             Core::ensureTrue(\is_resource($calc_mac) || \is_object($calc_mac), 'Cannot duplicate a hash context');
             $calc = \hash_final($calc_mac);

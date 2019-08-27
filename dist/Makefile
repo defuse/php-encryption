@@ -2,7 +2,8 @@
 # must be installed and in your $PATH. Run it from inside the dist/ directory.
 
 box := $(shell which box)
-composer := "composer"
+composer := $(shell which composer)
+gitcommit := $(shell git rev-parse HEAD)
 
 .PHONY: all
 all: build-phar
@@ -33,5 +34,6 @@ defuse-crypto.phar: dist/box.json composer.lock
 	php -d phar.readonly=0 $(box) build -c box.json -v
 
 composer.lock:
+	$(composer) config autoloader-suffix $(gitcommit)
 	$(composer) install --no-dev
 
