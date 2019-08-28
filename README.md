@@ -1,5 +1,6 @@
 php-encryption
 ===============
+`composer require defuse/php-encryption`
 
 [![Build Status](https://travis-ci.org/defuse/php-encryption.svg?branch=master)](https://travis-ci.org/defuse/php-encryption)
 [![codecov](https://codecov.io/gh/defuse/php-encryption/branch/master/graph/badge.svg)](https://codecov.io/gh/defuse/php-encryption)
