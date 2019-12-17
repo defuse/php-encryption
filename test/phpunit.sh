@@ -67,7 +67,9 @@ if [ $? -eq 0 ]; then
     php -d mbstring.func_overload=0 phpunit.phar $COVERAGE1_ARGS --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
     # Run the test suite again with funky func_overload.
     # This is deprecated in PHP 7 and PHPUnit is no longer compatible with the options.
-    # php -d mbstring.func_overload=7 phpunit.phar $COVERAGE2_ARGS --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
+    if [[ $PHP_VERSION -le 50600 ]]; then
+        php -d mbstring.func_overload=7 phpunit.phar $COVERAGE2_ARGS --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
+    fi
     EXITCODE=$?
     # Cleanup
     if [ "$clean" -eq 1 ]; then
