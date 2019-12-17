@@ -228,7 +228,10 @@ final class Core
      */
     public static function ensureConstantExists($name)
     {
-        Core::ensureTrue(\defined($name));
+        Core::ensureTrue(
+            \defined($name),
+            'Constant '.$name.' does not exists'
+        );
     }
 
     /**
@@ -241,7 +244,10 @@ final class Core
      */
     public static function ensureFunctionExists($name)
     {
-        Core::ensureTrue(\function_exists($name));
+        Core::ensureTrue(
+            \function_exists($name),
+            'function '.$name.' does not exists'
+        );
     }
 
     /**
