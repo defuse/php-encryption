@@ -8,6 +8,10 @@ php-encryption
 [![License](https://poser.pugx.org/defuse/php-encryption/license)](https://packagist.org/packages/defuse/php-encryption)
 [![Downloads](https://img.shields.io/packagist/dt/defuse/php-encryption.svg)](https://packagist.org/packages/defuse/php-encryption)
 
+```terminal
+composer require defuse/php-encryption
+```
+
 This is a library for encrypting data with a key or password in PHP. **It
 requires PHP 5.6 or newer and OpenSSL 1.0.1 or newer.** We recommend using
 a version of PHP that [still has security
