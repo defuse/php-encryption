@@ -2,10 +2,12 @@
 /test/unit/File/big-generated-file
 /composer.lock
 /vendor
+/coverage*.xml
 defuse-crypto.phar
 defuse-crypto.phar.sig
 composer.phar
 box.phar
+.php_cs.cache
 phpunit.phar
 phpunit.phar.asc
 test/unit/File/tmp

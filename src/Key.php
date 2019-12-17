@@ -7,7 +7,7 @@ use Defuse\Crypto\Exception as Ex;
 final class Key
 {
     const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
-    const KEY_BYTE_SIZE       = 32;
+    const KEY_BYTE_SIZE = 32;
 
     /**
      * @var string
@@ -90,5 +90,4 @@ final class Key
         );
         $this->key_bytes = $bytes;
     }
-
 }

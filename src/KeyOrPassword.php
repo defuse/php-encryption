@@ -6,8 +6,8 @@ use Defuse\Crypto\Exception as Ex;
 
 final class KeyOrPassword
 {
-    const PBKDF2_ITERATIONS    = 100000;
-    const SECRET_TYPE_KEY      = 1;
+    const PBKDF2_ITERATIONS = 100000;
+    const SECRET_TYPE_KEY = 1;
     const SECRET_TYPE_PASSWORD = 2;
 
     /**

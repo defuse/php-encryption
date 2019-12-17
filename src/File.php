@@ -12,10 +12,11 @@ final class File
      * @param string $inputFilename
      * @param string $outputFilename
      * @param Key    $key
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
+     *
+     * @return void
      */
     public static function encryptFile($inputFilename, $outputFilename, Key $key)
     {
@@ -33,10 +34,11 @@ final class File
      * @param string $inputFilename
      * @param string $outputFilename
      * @param string $password
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
+     *
+     * @return void
      */
     public static function encryptFileWithPassword($inputFilename, $outputFilename, $password)
     {
@@ -53,11 +55,12 @@ final class File
      * @param string $inputFilename
      * @param string $outputFilename
      * @param Key    $key
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     *
+     * @return void
      */
     public static function decryptFile($inputFilename, $outputFilename, Key $key)
     {
@@ -75,11 +78,12 @@ final class File
      * @param string $inputFilename
      * @param string $outputFilename
      * @param string $password
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     *
+     * @return void
      */
     public static function decryptFileWithPassword($inputFilename, $outputFilename, $password)
     {
@@ -97,10 +101,11 @@ final class File
      * @param resource $inputHandle
      * @param resource $outputHandle
      * @param Key      $key
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     *
+     * @return void
      */
     public static function encryptResource($inputHandle, $outputHandle, Key $key)
     {
@@ -119,11 +124,12 @@ final class File
      * @param resource $inputHandle
      * @param resource $outputHandle
      * @param string   $password
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     *
+     * @return void
      */
     public static function encryptResourceWithPassword($inputHandle, $outputHandle, $password)
     {
@@ -141,11 +147,12 @@ final class File
      * @param resource $inputHandle
      * @param resource $outputHandle
      * @param Key      $key
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     *
+     * @return void
      */
     public static function decryptResource($inputHandle, $outputHandle, Key $key)
     {
@@ -163,11 +170,12 @@ final class File
      * @param resource $inputHandle
      * @param resource $outputHandle
      * @param string   $password
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     *
+     * @return void
      */
     public static function decryptResourceWithPassword($inputHandle, $outputHandle, $password)
     {
@@ -184,10 +192,11 @@ final class File
      * @param string        $inputFilename
      * @param string        $outputFilename
      * @param KeyOrPassword $secret
-     * @return void
      *
      * @throws Ex\CryptoException
      * @throws Ex\IOException
+     *
+     * @return void
      */
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
@@ -249,10 +258,11 @@ final class File
      * @param string        $inputFilename
      * @param string        $outputFilename
      * @param KeyOrPassword $secret
-     * @return void
      *
      * @throws Ex\CryptoException
      * @throws Ex\IOException
+     *
+     * @return void
      */
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
@@ -316,10 +326,12 @@ final class File
      * @param resource      $inputHandle
      * @param resource      $outputHandle
      * @param KeyOrPassword $secret
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
+     *
+     * @return void
+     *
      * @psalm-suppress PossiblyInvalidArgument
      *      Fixes erroneous errors caused by PHP 7.2 switching the return value
      *      of hash_init from a resource to a HashContext.
@@ -346,7 +358,7 @@ final class File
         $akey = $keys->getAuthenticationKey();
 
         $ivsize = Core::BLOCK_BYTE_SIZE;
-        $iv     = Core::secureRandom($ivsize);
+        $iv = Core::secureRandom($ivsize);
 
         /* Initialize a streaming HMAC state. */
         /** @var mixed $hmac */
@@ -434,11 +446,13 @@ final class File
      * @param resource      $inputHandle
      * @param resource      $outputHandle
      * @param KeyOrPassword $secret
-     * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
+     *
+     * @return void
+     *
      * @psalm-suppress PossiblyInvalidArgument
      *      Fixes erroneous errors caused by PHP 7.2 switching the return value
      *      of hash_init from a resource to a HashContext.
@@ -477,7 +491,7 @@ final class File
 
         /* Get the IV. */
         $ivsize = Core::BLOCK_BYTE_SIZE;
-        $iv     = self::readBytes($inputHandle, $ivsize);
+        $iv = self::readBytes($inputHandle, $ivsize);
 
         /* Derive the authentication and encryption keys. */
         $keys = $secret->deriveKeys($file_salt);
@@ -556,7 +570,7 @@ final class File
             /* Read the next buffer-sized chunk (or less). */
             if ($pos + Core::BUFFER_BYTE_SIZE >= $cipher_end) {
                 $break = true;
-                $read  = self::readBytes(
+                $read = self::readBytes(
                     $inputHandle,
                     $cipher_end - $pos + 1
                 );
@@ -574,7 +588,7 @@ final class File
             /** @var mixed $chunk_mac */
             $chunk_mac = \hash_copy($hmac);
             Core::ensureTrue(\is_resource($chunk_mac) || \is_object($chunk_mac), 'Cannot duplicate a hash context');
-            $macs []= \hash_final($chunk_mac);
+            $macs [] = \hash_final($chunk_mac);
         }
 
         /* Get the final HMAC, which should match the stored one. */
@@ -610,7 +624,7 @@ final class File
             /* Read the next buffer-sized chunk (or less). */
             if ($pos + Core::BUFFER_BYTE_SIZE >= $cipher_end) {
                 $at_file_end = true;
-                $read   = self::readBytes(
+                $read = self::readBytes(
                     $inputHandle,
                     $cipher_end - $pos + 1
                 );
@@ -672,11 +686,11 @@ final class File
      *
      * @param resource $stream
      * @param int      $num_bytes
-     * @return string
      *
      * @throws Ex\IOException
      * @throws Ex\EnvironmentIsBrokenException
      *
+     * @return string
      * @return string
      */
     public static function readBytes($stream, $num_bytes)
@@ -687,7 +701,7 @@ final class File
             return '';
         }
 
-        $buf       = '';
+        $buf = '';
         $remaining = $num_bytes;
         while ($remaining > 0 && ! \feof($stream)) {
             /** @var string $read */
@@ -714,10 +728,10 @@ final class File
      * @param resource $stream
      * @param string   $buf
      * @param int      $num_bytes
-     * @return int
      *
      * @throws Ex\IOException
      *
+     * @return int
      * @return string
      */
     public static function writeBytes($stream, $buf, $num_bytes = null)

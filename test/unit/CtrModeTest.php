@@ -86,9 +86,9 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
              *      FF FF FF FF FF 00 00 ... 00
                                  ^- offset
              */
-            $start        = str_repeat("\xFF", $offset) . "\xFE" . str_repeat("\xFF", 16 - $offset - 1);
+            $start = str_repeat("\xFF", $offset) . "\xFE" . str_repeat("\xFF", 16 - $offset - 1);
             $expected_end = str_repeat("\xFF", $offset + 1) . str_repeat("\x00", 16 - $offset - 1);
-            $actual_end   = \Defuse\Crypto\Core::incrementCounter($start, 1);
+            $actual_end = \Defuse\Crypto\Core::incrementCounter($start, 1);
             $this->assertSame(
                 \bin2hex($expected_end),
                 \bin2hex($actual_end),
@@ -165,7 +165,7 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
     {
         /* Smallest value that will overflow. */
         $increment = (PHP_INT_MAX - $lsb) + 1;
-        $start     = str_repeat("\x00", 15) . chr($lsb);
+        $start = str_repeat("\x00", 15) . chr($lsb);
         \Defuse\Crypto\Core::incrementCounter($start, $increment);
     }
 

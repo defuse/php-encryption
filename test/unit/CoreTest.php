@@ -39,12 +39,10 @@ class CoreTest extends PHPUnit_Framework_TestCase
                 );
             } else {
                 // The behavior was changed for PHP 7. It used to be...
-                $this->assertSame(
-                    false,
+                $this->assertFalse(
                     substr('ABC', 3, 0)
                 );
-                $this->assertSame(
-                    false,
+                $this->assertFalse(
                     substr('ABC', 3)
                 );
             }
@@ -79,8 +77,7 @@ class CoreTest extends PHPUnit_Framework_TestCase
         // See: https://secure.php.net/manual/en/function.mb-substr.php#50275
 
         // We want to be like substr, so confirm that behavior.
-        $this->assertSame(
-            false,
+        $this->assertFalse(
             substr('abc', 5, 2)
         );
 
@@ -92,8 +89,7 @@ class CoreTest extends PHPUnit_Framework_TestCase
                     \mb_substr('abc', 5, 2)
                 );
             } else {
-                $this->assertSame(
-                    false,
+                $this->assertFalse(
                     \mb_substr('abc', 5, 2)
                 );
             }
@@ -101,8 +97,7 @@ class CoreTest extends PHPUnit_Framework_TestCase
         }
 
         // Check if we actually have that behavior.
-        $this->assertSame(
-            false,
+        $this->assertFalse(
             Core::ourSubstr('abc', 5, 2)
         );
     }

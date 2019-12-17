@@ -14,7 +14,7 @@ class KeyTest extends PHPUnit_Framework_TestCase
     public function testSaveAndLoadKey()
     {
         $key1 = Key::createNewRandomKey();
-        $str  = $key1->saveToAsciiSafeString();
+        $str = $key1->saveToAsciiSafeString();
         $key2 = Key::loadFromAsciiSafeString($str);
         $this->assertSame($key1->getRawBytes(), $key2->getRawBytes());
     }
@@ -25,8 +25,8 @@ class KeyTest extends PHPUnit_Framework_TestCase
      */
     public function testIncorrectHeader()
     {
-        $key    = Key::createNewRandomKey();
-        $str    = $key->saveToAsciiSafeString();
+        $key = Key::createNewRandomKey();
+        $str = $key->saveToAsciiSafeString();
         $str[0] = 'f';
         Key::loadFromAsciiSafeString($str);
     }

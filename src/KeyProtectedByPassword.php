@@ -76,10 +76,12 @@ final class KeyProtectedByPassword
      * Decrypts the protected key, returning an unprotected Key object that can
      * be used for encryption and decryption.
      *
+     *
+     * @param string $password
+     *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      *
-     * @param string $password
      * @return Key
      */
     public function unlockKey($password)
@@ -98,8 +100,8 @@ final class KeyProtectedByPassword
              * here in order to make the API simpler, avoiding the need to
              * document that this method might throw an Ex\BadFormatException. */
             throw new Ex\WrongKeyOrModifiedCiphertextException(
-                "The decrypted key was found to be in an invalid format. " .
-                "This very likely indicates it was modified by an attacker."
+                'The decrypted key was found to be in an invalid format. ' .
+                'This very likely indicates it was modified by an attacker.'
             );
         }
     }
