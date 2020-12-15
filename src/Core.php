@@ -405,7 +405,7 @@ final class Core
 
         $algorithm = \strtolower($algorithm);
         Core::ensureTrue(
-            \in_array($algorithm, \hash_algos(), true),
+            in_array($algorithm, \hash_algos(), true),
             'Invalid or unsupported hash algorithm.'
         );
 
@@ -415,7 +415,7 @@ final class Core
             'ripemd160', 'ripemd256', 'ripemd320', 'whirlpool',
         ];
         Core::ensureTrue(
-            \in_array($algorithm, $ok_algorithms, true),
+            in_array($algorithm, $ok_algorithms, true),
             'Algorithm is not a secure cryptographic hash function.'
         );
 
