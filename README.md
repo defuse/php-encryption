@@ -21,7 +21,7 @@ of PHP could lead to security vulnerabilities.
 
 The current version of `php-encryption` is v2.2.1. This library is expected to
 remain stable and supported by its authors with security and bugfixes until at
-least January 1st, 2021.
+least January 1st, 2022.
 
 The library is a joint effort between [Taylor Hornby](https://defuse.ca/) and
 [Scott Arciszewski](https://paragonie.com/blog/author/scott-arcizewski) as well
