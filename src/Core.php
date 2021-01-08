@@ -415,7 +415,7 @@ final class Core
             'ripemd160', 'ripemd256', 'ripemd320', 'whirlpool',
         ];
         Core::ensureTrue(
-            \in_array($algorithm, $ok_algorithms, true),
+            \in_array($algorithm, (array) $ok_algorithms, true),
             'Algorithm is not a secure cryptographic hash function.'
         );
 
