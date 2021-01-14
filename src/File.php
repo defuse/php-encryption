@@ -10,7 +10,7 @@ final class File
      * Encrypts the input file, saving the ciphertext to the output file.
      *
      * @param string $inputFilename
-     * @param string $outputFilename
+     * @param string $outputFilename must be a different path from $inputFilename
      * @param Key    $key
      * @return void
      *
@@ -31,7 +31,7 @@ final class File
      * make password cracking more expensive.
      *
      * @param string $inputFilename
-     * @param string $outputFilename
+     * @param string $outputFilename must be a different path from $inputFilename
      * @param string $password
      * @return void
      *
@@ -182,7 +182,7 @@ final class File
      * Encrypts a file with either a key or a password.
      *
      * @param string        $inputFilename
-     * @param string        $outputFilename
+     * @param string        $outputFilename must be a different path from $inputFilename
      * @param KeyOrPassword $secret
      * @return void
      *
@@ -191,6 +191,10 @@ final class File
      */
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
+        if ($inputFilename === $outputFilename) {
+            throw new Ex\IOException('Input and outputFilename must be different.');
+        }
+
         /* Open the input file. */
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
@@ -247,7 +251,7 @@ final class File
      * Decrypts a file with either a key or a password.
      *
      * @param string        $inputFilename
-     * @param string        $outputFilename
+     * @param string        $outputFilename must be a different path from $inputFilename
      * @param KeyOrPassword $secret
      * @return void
      *
@@ -256,6 +260,10 @@ final class File
      */
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
+        if ($inputFilename === $outputFilename) {
+            throw new Ex\IOException('Input and outputFilename must be different.');
+        }
+
         /* Open the input file. */
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {

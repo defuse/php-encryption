@@ -452,4 +452,22 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
         return $data;
     }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage Input and outputFilename must be different
+     */
+    public function testEncryptInputAndOutputFilenameMustBeDifferent()
+    {
+        File::encryptFile('/path/to/file', '/path/to/file', $this->key);
+    }
+
+    /**
+     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedExceptionMessage Input and outputFilename must be different
+     */
+    public function testDecryptInputAndOutputFilenameMustBeDifferent()
+    {
+        File::decryptFile('/path/to/file', '/path/to/file', $this->key);
+    }
 }
