@@ -79,10 +79,14 @@ class CoreTest extends PHPUnit_Framework_TestCase
         // See: https://secure.php.net/manual/en/function.mb-substr.php#50275
 
         // We want to be like substr, so confirm that behavior.
-        $this->assertSame(
-            false,
-            substr('abc', 5, 2)
-        );
+        if (PHP_VERSION_ID < 80000) {
+            // In PHP 8.0, substr starts returning '' instead of the empty string.
+            // Core::ourSubstr should behave the OLD way.
+            $this->assertSame(
+                false,
+                substr('abc', 5, 2)
+            );
+        }
 
         // Confirm that mb_substr does not have that behavior.
         if (function_exists('mb_substr')) {
