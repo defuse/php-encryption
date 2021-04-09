@@ -80,7 +80,7 @@ class CoreTest extends PHPUnit_Framework_TestCase
 
         // We want to be like substr, so confirm that behavior.
         if (PHP_VERSION_ID < 80000) {
-            // In PHP 8.0, substr starts returning '' instead of the empty string.
+            // In PHP 8.0, substr starts returning '' instead of false.
             // Core::ourSubstr should behave the OLD way.
             $this->assertSame(
                 false,
