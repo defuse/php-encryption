@@ -28,7 +28,9 @@ install:
     - curl -LSs https://box-project.github.io/box2/installer.php | php
     - mkdir ~/box
     - mv box.phar ~/box/box
-
+before_script:
+    - echo "xdebug.mode = coverage" > extra_php_config.ini
+    - phpenv config-add extra_php_config.ini
 script:
     - ./test.sh
     - PATH=$PATH:~/box/ make -C dist/ build-phar
