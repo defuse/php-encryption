@@ -229,10 +229,10 @@ application is using don't compute it either.
 
 Then, when the user logs in, Dave's code will load the protected key from the
 user's account record, unlock it to get a `Key` object, and save the `Key`
-object somewhere safe (like temporary memory-backed session storage). Note that
-wherever Dave's code saves the key, it must be destroyed once the user logs out,
-or else the attacker might be able to find users' keys even if they were never
-logged in during the attack.
+object somewhere safe (like temporary memory-backed session storage or
+a cookie). Note that wherever Dave's code saves the key, it must be destroyed
+once the user logs out, or else the attacker might be able to find users' keys
+even if they were never logged in during the attack.
 
 ```php
 <?php
@@ -245,7 +245,7 @@ $protected_key_encoded = // ... load it from the user's account record
 $protected_key = KeyProtectedByPassword::loadFromAsciiSafeString($protected_key_encoded);
 $user_key = $protected_key->unlockKey($password);
 $user_key_encoded = $user_key->saveToAsciiSafeString();
-// ... save $user_key_encoded in the session
+// ... save $user_key_encoded in a cookie
 ```
 
 ```php
@@ -255,7 +255,7 @@ $user_key_encoded = $user_key->saveToAsciiSafeString();
 ```
 
 When a user adds their credit card number, Dave's code will get the key from the
-session and use it to encrypt the credit card number:
+memory-backed session or cookie and use it to encrypt the credit card number:
 
 ```php
 <?php
@@ -264,7 +264,7 @@ use Defuse\Crypto\Key;
 
 // ...
 
-$user_key_encoded = // ... get it out of the session ...
+$user_key_encoded = // ... get it out of the cookie ...
 $user_key = Key::loadFromAsciiSafeString($user_key_encoded);
 
 // ...
@@ -283,7 +283,7 @@ use Defuse\Crypto\Key;
 
 // ...
 
-$user_key_encoded = // ... get it out of the session
+$user_key_encoded = // ... get it out of the cookie
 $user_key = Key::loadFromAsciiSafeString($user_key_encoded);
 
 // ...
