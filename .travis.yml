@@ -25,6 +25,7 @@ matrix:
   allow_failures:
     - php: "nightly"
     - php: "hhvm"
+    - php: "8.0"
 install:
     - composer install
     - curl -LSs https://box-project.github.io/box2/installer.php | php

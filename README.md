@@ -13,11 +13,12 @@ composer require defuse/php-encryption
 ```
 
 This is a library for encrypting data with a key or password in PHP. **It
-requires PHP 5.6 or newer and OpenSSL 1.0.1 or newer.** We recommend using
-a version of PHP that [still has security
+requires PHP 5.6 or newer and OpenSSL 1.0.1 or newer.** We recommend using a
+version of PHP that [still has security
 support](https://www.php.net/supported-versions.php), which at the time of
-writing means PHP 7.1 or later. Using this library with an unsupported version
-of PHP could lead to security vulnerabilities.
+writing means PHP 7.3 or later. Using this library with an unsupported
+version of PHP could lead to security vulnerabilities. This library is not
+currently tested against PHP 8.0.
 
 The current version of `php-encryption` is v2.2.1. This library is expected to
 remain stable and supported by its authors with security and bugfixes until at
