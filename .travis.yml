@@ -28,12 +28,14 @@ install:
     - curl -LSs https://box-project.github.io/box2/installer.php | php
     - mkdir ~/box
     - mv box.phar ~/box/box
-
+before_script:
+    - echo "xdebug.mode = coverage" > extra_php_config.ini
+    - phpenv config-add extra_php_config.ini
 script:
     - ./test.sh
     - PATH=$PATH:~/box/ make -C dist/ build-phar
     - ./test.sh dist/defuse-crypto.phar
-    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:^1|^2|^3"; fi
+    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
     - if [[ $USE_PSALM -eq 1 ]]; then composer install; fi
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
 

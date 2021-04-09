@@ -372,6 +372,9 @@ final class File
         $thisIv = $iv;
 
         /* How many blocks do we encrypt at a time? We increment by this value. */
+        /**
+         * @psalm-suppress RedundantCast
+         */
         $inc = (int) (Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE);
 
         /* Loop until we reach the end of the input file. */
@@ -492,6 +495,9 @@ final class File
         $thisIv = $iv;
 
         /* How many blocks do we encrypt at a time? We increment by this value. */
+        /**
+         * @psalm-suppress RedundantCast
+         */
         $inc = (int) (Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE);
 
         /* Get the HMAC. */
@@ -676,8 +682,6 @@ final class File
      *
      * @throws Ex\IOException
      * @throws Ex\EnvironmentIsBrokenException
-     *
-     * @return string
      */
     public static function readBytes($stream, $num_bytes)
     {
@@ -717,8 +721,6 @@ final class File
      * @return int
      *
      * @throws Ex\IOException
-     *
-     * @return string
      */
     public static function writeBytes($stream, $buf, $num_bytes = null)
     {

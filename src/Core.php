@@ -440,6 +440,9 @@ final class Core
             $last = $xorsum = \hash_hmac($algorithm, $last, $password, true);
             // perform the other $count - 1 iterations
             for ($j = 1; $j < $count; $j++) {
+                /**
+                 * @psalm-suppress InvalidOperand
+                 */
                 $xorsum ^= ($last = \hash_hmac($algorithm, $last, $password, true));
             }
             $output .= $xorsum;
