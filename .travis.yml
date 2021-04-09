@@ -33,7 +33,7 @@ script:
     - ./test.sh
     - PATH=$PATH:~/box/ make -C dist/ build-phar
     - ./test.sh dist/defuse-crypto.phar
-    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:^1|^2|^3"; fi
+    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
     - if [[ $USE_PSALM -eq 1 ]]; then composer install; fi
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
 
