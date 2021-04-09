@@ -10,7 +10,7 @@ all: build-phar
 
 .PHONY: sign-phar
 sign-phar:
-	gpg -u 7B4B2D98 --armor --output defuse-crypto.phar.sig --detach-sig defuse-crypto.phar
+	gpg -u DD2E507F7BDB1669 --armor --output defuse-crypto.phar.sig --detach-sig defuse-crypto.phar
 
 # ensure we run in clean tree. export git tree and run there.
 .PHONY: build-phar
