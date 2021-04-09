@@ -342,7 +342,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedException Throwable
      * @expectedExceptionMessage array given
      */
     public function testNonStringSourcePathEncrypt()
@@ -351,7 +351,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedException Throwable
      * @expectedExceptionMessage array given
      */
     public function testNonStringDestinationPathEncrypt()
@@ -361,7 +361,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedException Throwable
      * @expectedExceptionMessage array given
      */
     public function testNonStringSourcePathDecrypt()
@@ -370,7 +370,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
+     * @expectedException Throwable
      * @expectedExceptionMessage array given
      */
     public function testNonStringDestinationPathDecrypt()
