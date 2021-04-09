@@ -19,7 +19,7 @@ writing means PHP 7.3 or later. Using this library with an unsupported
 version of PHP could lead to security vulnerabilities. This library is not
 currently tested against PHP 8.0.
 
-The current version of `php-encryption` is v2.2.1. This library is expected to
+The current version of `php-encryption` is v2.3. This library is expected to
 remain stable and supported by its authors with security and bugfixes until at
 least January 1st, 2022.
 
