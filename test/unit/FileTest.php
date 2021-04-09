@@ -343,44 +343,6 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringSourcePathEncrypt()
-    {
-        File::encryptFile([], 'output-file', $this->key);
-    }
-
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringDestinationPathEncrypt()
-    {
-        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::encryptFile($src, [], $this->key);
-    }
-
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringSourcePathDecrypt()
-    {
-        File::decryptFile([], 'output-file', $this->key);
-    }
-
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringDestinationPathDecrypt()
-    {
-        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::decryptFile($src, [], $this->key);
-    }
-
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
      * @expectedExceptionMessage must be a resource
      */
     public function testNonResourceInputEncrypt()

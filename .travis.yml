@@ -14,15 +14,18 @@ matrix:
       env: USE_PSALM=1
     - php: "7.3"
       env: USE_PSALM=1
+    - php: "7.4"
+      env: USE_PSALM=1
+    - php: "8.0"
+      env: USE_PSALM=1
     - php: "nightly"
       env: USE_PSALM=1
     - php: "hhvm"
       env: USE_PSALM=1
   allow_failures:
-    - php: "5.4"
-    - php: "5.5"
     - php: "nightly"
     - php: "hhvm"
+    - php: "8.0"
 install:
     - composer install
     - curl -LSs https://box-project.github.io/box2/installer.php | php
@@ -35,7 +38,7 @@ script:
     - ./test.sh
     - PATH=$PATH:~/box/ make -C dist/ build-phar
     - ./test.sh dist/defuse-crypto.phar
-    - if [[ $USE_PSALM -eq 1 ]]; then composer require --dev "vimeo/psalm:dev-master"; fi
+    - if [[ $USE_PSALM -eq 1 ]]; then composer require --with-all-dependencies --dev "vimeo/psalm:dev-master"; fi
     - if [[ $USE_PSALM -eq 1 ]]; then composer install; fi
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
 
