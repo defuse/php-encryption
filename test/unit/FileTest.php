@@ -342,44 +342,6 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Throwable
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringSourcePathEncrypt()
-    {
-        File::encryptFile([], 'output-file', $this->key);
-    }
-
-    /**
-     * @expectedException Throwable
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringDestinationPathEncrypt()
-    {
-        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::encryptFile($src, [], $this->key);
-    }
-
-    /**
-     * @expectedException Throwable
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringSourcePathDecrypt()
-    {
-        File::decryptFile([], 'output-file', $this->key);
-    }
-
-    /**
-     * @expectedException Throwable
-     * @expectedExceptionMessage array given
-     */
-    public function testNonStringDestinationPathDecrypt()
-    {
-        $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        File::decryptFile($src, [], $this->key);
-    }
-
-    /**
      * @expectedException \Defuse\Crypto\Exception\IOException
      * @expectedExceptionMessage must be a resource
      */
