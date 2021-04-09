@@ -18,7 +18,7 @@ support](https://www.php.net/supported-versions.php), which at the time of
 writing means PHP 7.3 or later. Using this library with an unsupported
 version of PHP could lead to security vulnerabilities.
 
-The current version of `php-encryption` is v2.3. This library is expected to
+The current version of `php-encryption` is v2.3.1. This library is expected to
 remain stable and supported by its authors with security and bugfixes until at
 least January 1st, 2022.
 
