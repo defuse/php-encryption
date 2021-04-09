@@ -191,6 +191,10 @@ final class File
      */
     private static function encryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
+        if (file_exists($inputFilename) && file_exists($outputFilename) && realpath($inputFilename) === realpath($outputFilename)) {
+            throw new Ex\IOException('Input and output filenames must be different.');
+        }
+
         /* Open the input file. */
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
@@ -256,6 +260,10 @@ final class File
      */
     private static function decryptFileInternal($inputFilename, $outputFilename, KeyOrPassword $secret)
     {
+        if (file_exists($inputFilename) && file_exists($outputFilename) && realpath($inputFilename) === realpath($outputFilename)) {
+            throw new Ex\IOException('Input and output filenames must be different.');
+        }
+
         /* Open the input file. */
         $if = @\fopen($inputFilename, 'rb');
         if ($if === false) {
