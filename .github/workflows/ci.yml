@@ -23,6 +23,9 @@ jobs:
           ini-values: post_max_size=256M, max_execution_time=180
           tools: psalm, phpunit:${{ matrix.phpunit-versions }}
 
+      - name: Fix permissions
+        run: sudo chmod -R 0777 .
+
       - name: Install dependencies
         run: composer self-update --1; composer install
 
@@ -50,6 +53,9 @@ jobs:
           extensions: mbstring, intl, sodium
           ini-values: post_max_size=256M, max_execution_time=180
           tools: psalm, phpunit:${{ matrix.phpunit-versions }}
+
+      - name: Fix permissions
+        run: sudo chmod -R 0777 .
 
       - name: Install dependencies
         run: composer install
@@ -80,6 +86,9 @@ jobs:
           ini-values: post_max_size=256M, max_execution_time=180
           tools: psalm, phpunit:${{ matrix.phpunit-versions }}
 
+      - name: Fix permissions
+        run: sudo chmod -R 0777 .
+
       - name: Install dependencies
         run: composer install
 
@@ -91,7 +100,7 @@ jobs:
 
       - name: Install Psalm
         if: contains(['7.4', '8.0], ${{ matrix.php-version }})
-        run: composer require --dev vimeo/psalm:^4; cp psalm-above-3.xml psalm.xml
+        run: composer require --dev vimeo/psalm:^4
 
       - name: Static Analysis
         if: contains(['7.4', '8.0], ${{ matrix.php-version }})
