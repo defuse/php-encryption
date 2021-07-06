@@ -202,6 +202,9 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @group slow
+     */
     public function testCompatibilityWithOpenSSL()
     {
         /* Plaintext is 0x300 blocks. */

@@ -29,6 +29,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      * Test encryption from one file name to a destination file name
      *
      * @dataProvider fileToFileProvider
+     * @group slow
      *
      * @param string $srcName source file name
      */
@@ -63,6 +64,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
      * Test encryption from one file name to a destination file name (password).
      *
      * @dataProvider fileToFileProvider
+     * @group slow
      *
      * @param string $srcName source file name
      */
@@ -95,6 +97,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider fileToFileProvider
+     * @group slow
      *
      * @param string $src source handle
      */
