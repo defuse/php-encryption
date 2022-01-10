@@ -80,7 +80,7 @@ final class Encoding
     }
     
     /**
-     * Remove trialing whitespace without table look-ups or branches.
+     * Remove trailing whitespace without table look-ups or branches.
      *
      * Calling this function may leak the length of the string as well as the
      * number of trailing whitespace characters through side-channels.
