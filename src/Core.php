@@ -285,7 +285,7 @@ final class Core
     {
         static $exists = null;
         if ($exists === null) {
-            $exists = \extension_loaded('mbstring') && \ini_get('mbstring.func_overload') !== false && (int)\ini_get('mbstring.func_overload') & MB_OVERLOAD_STRING;
+            $exists = \extension_loaded('mbstring') && \function_exists('mb_strlen');
         }
         if ($exists) {
             $length = \mb_strlen($str, '8bit');
@@ -311,7 +311,7 @@ final class Core
     {
         static $exists = null;
         if ($exists === null) {
-            $exists = \extension_loaded('mbstring') && \ini_get('mbstring.func_overload') !== false && (int)\ini_get('mbstring.func_overload') & MB_OVERLOAD_STRING;
+            $exists = \extension_loaded('mbstring') && \function_exists('mb_substr');
         }
 
         // This is required to make mb_substr behavior identical to substr.
