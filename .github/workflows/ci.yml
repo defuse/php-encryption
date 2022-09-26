@@ -103,5 +103,5 @@ jobs:
         run: composer require --dev vimeo/psalm:^4
 
       - name: Static Analysis
-        if: contains(['7.4', '8.0], ${{ matrix.php-version }})
+        if: contains(['7.4', '8.0'], ${{ matrix.php-version }})
         run: vendor/bin/psalm
