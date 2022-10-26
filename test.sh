@@ -7,7 +7,7 @@ if [ ! -e $BIG_GENERATED_FILE ] || [ $(wc -c < $BIG_GENERATED_FILE) -ne "2097152
     dd if=/dev/urandom "of=$BIG_GENERATED_FILE" bs=1M count=200
 fi
 
-if [ -n "$1" ]; then
+if [ -f "$1" ]; then
     BOOTSTRAP="$1"
     MEASURECOVERAGE="0"
 else
@@ -16,9 +16,15 @@ else
     MEASURECOVERAGE="1"
 fi
 
+if [ "$2" == "fast" ]; then
+    EXCLUDE_SLOW="1"
+else
+    EXCLUDE_SLOW="0"
+fi
+
 # loading bootstrap should output nothing
 load=$(php -r "require '$BOOTSTRAP';")
 test -z "$load"
 
-./test/phpunit.sh "$BOOTSTRAP" "$MEASURECOVERAGE"
+./test/phpunit.sh "$BOOTSTRAP" "$MEASURECOVERAGE" "$EXCLUDE_SLOW"
 echo ""

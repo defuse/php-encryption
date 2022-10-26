@@ -3,10 +3,10 @@
 # This was written by Scott Arciszewski. I copied it from his Halite project:
 # https://github.com/paragonie/halite
 
-origdir=`pwd`
-cdir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $origdir
-parentdir="$(dirname $cdir)"
+origdir=$(pwd)
+cdir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+cd "$origdir" || exit
+parentdir="$(dirname "$cdir")"
 PHP_VERSION=$(php -r "echo PHP_VERSION_ID;");
 
 clean=0 # Clean up?
@@ -62,13 +62,21 @@ if [ $? -eq 0 ]; then
         COVERAGE1_ARGS=""
         COVERAGE2_ARGS=""
     fi
+
+    # switch for excluding slow tests
+    if [ "$3" -eq "1" ]; then
+        EXCLUDE_SLOW="--exclude-group slow"
+    else
+        EXCLUDE_SLOW=""
+    fi
+
     echo -e "\033[33mBegin Unit Testing\033[0m"
     # Run the test suite with normal func_overload.
-    php -d mbstring.func_overload=0 phpunit.phar $COVERAGE1_ARGS --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
+    php -d mbstring.func_overload=0 phpunit.phar $COVERAGE1_ARGS $EXCLUDE_SLOW --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
     # Run the test suite again with funky func_overload.
     # This is deprecated in PHP 7 and PHPUnit is no longer compatible with the options.
     if [[ $PHP_VERSION -le 50600 ]]; then
-        php -d mbstring.func_overload=7 phpunit.phar $COVERAGE2_ARGS --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
+        php -d mbstring.func_overload=7 phpunit.phar $COVERAGE2_ARGS $EXCLUDE_SLOW --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
     fi
     EXITCODE=$?
     # Cleanup
