@@ -3,9 +3,10 @@
 use \Defuse\Crypto\Core;
 use \Defuse\Crypto\Crypto;
 use \Defuse\Crypto\Key;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Defuse\Crypto\Exception as Ex;
 
-class CryptoTest extends PHPUnit_Framework_TestCase
+class CryptoTest extends TestCase
 {
     # Test for issue #165 -- encrypting then decrypting empty string fails.
     public function testEmptyString()
@@ -23,6 +24,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase
     // We can't runtime-test the password stuff because it runs PBKDF2.
     public function testEncryptDecryptWithPassword()
     {
+        $this->expectNotToPerformAssertions();
         $data = "EnCrYpT EvErYThInG\x00\x00";
         $password = 'password';
 
@@ -93,137 +95,105 @@ class CryptoTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testDecryptRawAsHex()
     {
         $ciphertext = Crypto::encryptWithPassword('testdata', 'password', true);
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         Crypto::decryptWithPassword($ciphertext, 'password', false);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testDecryptHexAsRaw()
     {
         $ciphertext = Crypto::encryptWithPassword('testdata', 'password', false);
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         Crypto::decryptWithPassword($ciphertext, 'password', true);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testEncryptTypeErrorA()
     {
         $key = Key::createNewRandomKey();
+        $this->expectException(\TypeError::class);
         Crypto::encrypt(3, $key, false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testEncryptTypeErrorB()
     {
+        $this->expectException(\TypeError::class);
         Crypto::encrypt("plaintext", 3, false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testEncryptTypeErrorC()
     {
         $key = Key::createNewRandomKey();
+        $this->expectException(\TypeError::class);
         Crypto::encrypt("plaintext", $key, 3);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testEncryptWithPasswordTypeErrorA()
     {
+        $this->expectException(\TypeError::class);
         Crypto::encryptWithPassword(3, "password", false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testEncryptWithPasswordTypeErrorB()
     {
+        $this->expectException(\TypeError::class);
         Crypto::encryptWithPassword("plaintext", 3, false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testEncryptWithPasswordTypeErrorC()
     {
+        $this->expectException(\TypeError::class);
         Crypto::encryptWithPassword("plaintext", "password", 3);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testDecryptTypeErrorA()
     {
         $key = Key::createNewRandomKey();
+        $this->expectException(\TypeError::class);
         Crypto::decrypt(3, $key, false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testDecryptTypeErrorB()
     {
+        $this->expectException(\TypeError::class);
         Crypto::decrypt("ciphertext", 3, false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testDecryptTypeErrorC()
     {
         $key = Key::createNewRandomKey();
+        $this->expectException(\TypeError::class);
         Crypto::decrypt("ciphertext", $key, 3);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testDecryptWithPasswordTypeErrorA()
     {
+        $this->expectException(\TypeError::class);
         Crypto::decryptWithPassword(3, "password", false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testDecryptWithPasswordTypeErrorB()
     {
+        $this->expectException(\TypeError::class);
         Crypto::decryptWithPassword("ciphertext", 3, false);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testDecryptWithPasswordTypeErrorC()
     {
+        $this->expectException(\TypeError::class);
         Crypto::decryptWithPassword("ciphertext", "password", 3);
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testLegacyDecryptTypeErrorA()
     {
+        $this->expectException(\TypeError::class);
         Crypto::legacyDecrypt(3, "key");
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testLegacyDecryptTypeErrorB()
     {
+        $this->expectException(\TypeError::class);
         Crypto::legacyDecrypt("ciphertext", 3);
     }
 

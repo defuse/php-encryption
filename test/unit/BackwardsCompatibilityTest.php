@@ -3,25 +3,22 @@
 use \Defuse\Crypto\Crypto;
 use \Defuse\Crypto\Encoding;
 use \Defuse\Crypto\Key;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
+class BackwardsCompatibilityTest extends TestCase
 {
 
-	/* helper function to create a key with raw bytes */
-	public function keyHelper($rawkey) {
-		$key = Key::createNewRandomKey();
-		$func = function ($bytes) {
-				$this->key_bytes = $bytes;
-		};
-		$helper = $func->bindTo($key,$key);
-		$helper($rawkey);
-		return $key;
-	}
+    /* helper function to create a key with raw bytes */
+    public function keyHelper($rawkey) {
+        $key = Key::createNewRandomKey();
+        $func = function ($bytes) {
+                $this->key_bytes = $bytes;
+        };
+        $helper = $func->bindTo($key,$key);
+        $helper($rawkey);
+        return $key;
+    }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     * @expectedExceptionMessage invalid hex encoding
-     */
     public function testDecryptLegacyWithWrongMethodStraightUpHex()
     {
         $cipher = Encoding::hexToBin(
@@ -34,6 +31,9 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
             '00000000000000000000000000000000'
         );
 
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectExceptionMessage('invalid hex encoding');
+
         /* Make it try to parse the binary as hex. */
         $plain = Crypto::decrypt(
             $cipher,
@@ -45,10 +45,6 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     * @expectedExceptionMessage Bad version header
-     */
     public function testDecryptLegacyWithWrongMethodStraightUpBinary()
     {
         $cipher = Encoding::hexToBin(
@@ -60,6 +56,9 @@ class BackwardsCompatibilityTest extends PHPUnit_Framework_TestCase
             /* Make it longer than the minimum length. */
             '00000000000000000000000000000000'
         );
+
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectExceptionMessage('Bad version header');
 
         /* This time, treat the binary as binary. */
         $plain = Crypto::decrypt(

@@ -33,19 +33,12 @@ if [ "$clean" -eq 1 ]; then
 fi
 
 # Let's grab the latest release and its signature
+phpunitversion=$([ $PHP_VERSION -ge 80100 ] && echo "10" || ([ $PHP_VERSION -ge 70200 ] && echo "8" || echo "5"))
 if [ ! -f phpunit.phar ]; then
-    if [[ $PHP_VERSION -ge 50600 ]]; then
-        wget -O phpunit.phar https://phar.phpunit.de/phpunit-5.7.phar
-    else
-        wget -O phpunit.phar https://phar.phpunit.de/phpunit-4.8.phar
-    fi
+    wget -O phpunit.phar https://phar.phpunit.de/phpunit-$phpunitversion.phar
 fi
 if [ ! -f phpunit.phar.asc ]; then
-    if [[ $PHP_VERSION -ge 50600 ]]; then
-        wget -O phpunit.phar.asc https://phar.phpunit.de/phpunit-5.7.phar.asc
-    else
-        wget -O phpunit.phar.asc https://phar.phpunit.de/phpunit-4.8.phar.asc
-    fi
+    wget -O phpunit.phar.asc https://phar.phpunit.de/phpunit-$phpunitversion.phar.asc
 fi
 
 # What are the major/minor versions?
@@ -56,19 +49,19 @@ gpg --verify phpunit.phar.asc phpunit.phar
 if [ $? -eq 0 ]; then
     echo
     if [ "$2" -eq "1" ]; then
-        COVERAGE1_ARGS="--coverage-clover=$parentdir/coverage1.xml -c $parentdir/test/phpunit.xml"
-        COVERAGE2_ARGS="--coverage-clover=$parentdir/coverage2.xml -c $parentdir/test/phpunit.xml"
+        COVERAGE1_ARGS="--coverage-clover=$parentdir/coverage1.xml"
+        COVERAGE2_ARGS="--coverage-clover=$parentdir/coverage2.xml"
     else
         COVERAGE1_ARGS=""
         COVERAGE2_ARGS=""
     fi
     echo -e "\033[33mBegin Unit Testing\033[0m"
     # Run the test suite with normal func_overload.
-    php -d mbstring.func_overload=0 phpunit.phar $COVERAGE1_ARGS --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
+    php -d mbstring.func_overload=0 phpunit.phar -c "$parentdir/test/phpunit-$phpunitversion.xml" $COVERAGE1_ARGS --bootstrap "$parentdir/$1" "$parentdir/test/unit" && \
     # Run the test suite again with funky func_overload.
     # This is deprecated in PHP 7 and PHPUnit is no longer compatible with the options.
     if [[ $PHP_VERSION -le 50600 ]]; then
-        php -d mbstring.func_overload=7 phpunit.phar $COVERAGE2_ARGS --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
+        php -d mbstring.func_overload=7 phpunit.phar -c "$parentdir/test/phpunit-$phpunitversion.xml" $COVERAGE2_ARGS --bootstrap "$parentdir/$1"  "$parentdir/test/unit"
     fi
     EXITCODE=$?
     # Cleanup

@@ -1,10 +1,11 @@
 <?php
 
 use \Defuse\Crypto\Core;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class CtrModeTest extends PHPUnit_Framework_TestCase
+class CtrModeTest extends TestCase
 {
-    public function counterTestVectorProvider()
+    public static function counterTestVectorProvider()
     {
         return [
             /* First byte, no overflow. */
@@ -126,29 +127,25 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
-     */
     public function testIncrementByNegativeValue()
     {
+        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
             -1
         );
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
-     */
     public function testIncrementByZero()
     {
+        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
             0
         );
     }
 
-    public function allNonZeroByteValuesProvider()
+    public static function allNonZeroByteValuesProvider()
     {
         $all_bytes = [];
         for ($i = 1; $i <= 0xff; $i++) {
@@ -159,43 +156,37 @@ class CtrModeTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider allNonZeroByteValuesProvider
-     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
     public function testIncrementCausingOverflowInFirstByte($lsb)
     {
         /* Smallest value that will overflow. */
         $increment = (PHP_INT_MAX - $lsb) + 1;
         $start     = str_repeat("\x00", 15) . chr($lsb);
+        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
         \Defuse\Crypto\Core::incrementCounter($start, $increment);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
-     */
     public function testIncrementWithShortIvLength()
     {
+        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 15),
             1
         );
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
-     */
     public function testIncrementWithLongIvLength()
     {
+        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 17),
             1
         );
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\EnvironmentIsBrokenException
-     */
     public function testIncrementByNonInteger()
     {
+        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
         \Defuse\Crypto\Core::incrementCounter(
             str_repeat("\x00", 16),
             1.0

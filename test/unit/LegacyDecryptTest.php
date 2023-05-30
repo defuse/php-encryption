@@ -3,8 +3,9 @@
 use \Defuse\Crypto\Core;
 use \Defuse\Crypto\Crypto;
 use \Defuse\Crypto\Encoding;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class LegacyDecryptTest extends PHPUnit_Framework_TestCase
+class LegacyDecryptTest extends TestCase
 {
     public function testDecryptLegacyCiphertext()
     {
@@ -24,9 +25,6 @@ class LegacyDecryptTest extends PHPUnit_Framework_TestCase
         $this->assertSame($plain, 'This is a test message');
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testDecryptLegacyCiphertextWrongKey()
     {
         $cipher = Encoding::hexToBin(
@@ -37,6 +35,7 @@ class LegacyDecryptTest extends PHPUnit_Framework_TestCase
             '024b5e2009106870f1db25d8b85fd01f'
         );
 
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         $plain = Crypto::legacyDecrypt(
             $cipher,
             "\x01\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
@@ -44,13 +43,11 @@ class LegacyDecryptTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     * @expectedExceptionMessage short
-     */
     public function testLegacyDecryptTooShort()
     {
         $too_short = str_repeat("a", Core::LEGACY_MAC_BYTE_SIZE);
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectExceptionMessage('short');
         Crypto::legacyDecrypt($too_short, "0123456789ABCDEF");
     }
 
