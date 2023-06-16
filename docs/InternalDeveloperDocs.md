@@ -141,7 +141,7 @@ Test the `.phar`:
 
 ```
 cd ../
-./test.sh dist/defuse-crypto.phar
+./test.sh dist/phar-testing-autoload.php
 ```
 
 Sign the `.phar`:
