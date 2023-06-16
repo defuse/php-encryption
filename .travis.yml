@@ -32,7 +32,7 @@ matrix:
     - php: "hhvm"
     # Travis-CI's 8.2 is currently broken, see:
     # https://github.com/defuse/php-encryption/pull/506#issuecomment-1594084107
-    - php: "8.2"
+    #- php: "8.2"
 install:
     - composer install
 before_script:
