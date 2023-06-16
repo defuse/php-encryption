@@ -22,6 +22,7 @@ matrix:
       env: USE_PSALM=1
     - php: "8.2"
       env: USE_PSALM=1
+      dist: focal
     - php: "nightly"
       env: USE_PSALM=1
     - php: "hhvm"
