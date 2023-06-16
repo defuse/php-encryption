@@ -100,7 +100,10 @@ final class Core
     {
         self::ensureFunctionExists('random_bytes');
         try {
-            return \random_bytes($octets);
+            if ($octets == 0) {
+                return "";
+            }
+            return \random_bytes(max(1, $octets));
         } catch (\Exception $ex) {
             throw new Ex\EnvironmentIsBrokenException(
                 'Your system does not have a secure random number generator.'

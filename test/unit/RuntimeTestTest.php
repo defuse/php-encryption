@@ -7,7 +7,6 @@ class RuntimeTestTest extends TestCase
 {
     public function testRuntimeTest()
     {
-        $this->expectNotToPerformAssertions();
         RuntimeTests::runtimeTest();
     }
 }

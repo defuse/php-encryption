@@ -24,7 +24,6 @@ class CryptoTest extends TestCase
     // We can't runtime-test the password stuff because it runs PBKDF2.
     public function testEncryptDecryptWithPassword()
     {
-        $this->expectNotToPerformAssertions();
         $data = "EnCrYpT EvErYThInG\x00\x00";
         $password = 'password';
 

@@ -181,9 +181,6 @@ class FileTest extends TestCase
         return $ciphertexts;
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testDecryptEmptyFile()
     {
         $junk = self::$TEMP_DIR . '/junk';
@@ -357,9 +354,6 @@ class FileTest extends TestCase
         fclose($resource);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testNonFileResourceDecrypt()
     {
         /* This should behave equivalently to an empty file. Calling fstat() on

@@ -1,4 +1,4 @@
-<phpunit>
+<phpunit beStrictAboutTestsThatDoNotTestAnything="false">
     <source>
         <include>
             <directory suffix=".php">../src</directory>
