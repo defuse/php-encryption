@@ -127,4 +127,24 @@ class CoreTest extends TestCase
     {
         $this->assertSame('bc', Core::ourSubstr('abc', 1, 500));
     }
+
+    public function testSecureRandomZeroLength()
+    {
+        $this->expectException(\Defuse\Crypto\Exception\CryptoException::class);
+        $this->expectExceptionMessage('zero or negative');
+        Core::secureRandom(0);
+    }
+
+    public function testSecureRandomNegativeLength()
+    {
+        $this->expectException(\Defuse\Crypto\Exception\CryptoException::class);
+        $this->expectExceptionMessage('zero or negative');
+        Core::secureRandom(-1);
+    }
+
+    public function testSecureRandomPositiveLength()
+    {
+        $x = Core::secureRandom(10);
+        $this->assertSame(10, strlen($x));
+    }
 }
