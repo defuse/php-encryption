@@ -1,4 +1,4 @@
-<phpunit>
+<phpunit beStrictAboutTestsThatDoNotTestAnything="false">
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">../src</directory>
