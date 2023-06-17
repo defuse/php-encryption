@@ -9,5 +9,7 @@
         <DocblockTypeContradiction errorLevel="info" />
         <RedundantCondition errorLevel="info" />
         <RedundantConditionGivenDocblockType errorLevel="info" />
+        <!-- It's complaining about our #[\SensitiveParameter]s for no reason -->
+        <InvalidAttribute errorLevel="info" />
     </issueHandlers>
 </psalm>
