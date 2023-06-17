@@ -1,0 +1,9 @@
+<phpunit beStrictAboutTestsThatDoNotTestAnything="false">
+    <source>
+        <include>
+            <directory suffix=".php">../src</directory>
+        </include>
+    </source>
+    <coverage includeUncoveredFiles="true">
+    </coverage>
+</phpunit>

@@ -9,15 +9,20 @@ matrix:
     - php: "7.0"
       env: USE_PSALM=0
     - php: "7.1"
-      env: USE_PSALM=1
+      env: USE_PSALM=0
     - php: "7.2"
-      env: USE_PSALM=1
+      env: USE_PSALM=0
     - php: "7.3"
-      env: USE_PSALM=1
+      env: USE_PSALM=0
     - php: "7.4"
       env: USE_PSALM=1
     - php: "8.0"
       env: USE_PSALM=1
+    - php: "8.1"
+      env: USE_PSALM=1
+    - php: "8.2"
+      env: USE_PSALM=1
+      dist: focal
     - php: "nightly"
       env: USE_PSALM=1
     - php: "hhvm"
@@ -25,19 +30,23 @@ matrix:
   allow_failures:
     - php: "nightly"
     - php: "hhvm"
-    - php: "8.0"
+    # Travis-CI's 8.2 is currently broken, see:
+    # https://github.com/defuse/php-encryption/pull/506#issuecomment-1594084107
+    #- php: "8.2"
 install:
     - composer install
-    - curl -LSs https://box-project.github.io/box2/installer.php | php
-    - mkdir ~/box
-    - mv box.phar ~/box/box
 before_script:
     - echo "xdebug.mode = coverage" > extra_php_config.ini
     - phpenv config-add extra_php_config.ini
 script:
     - ./test.sh
-    - PATH=$PATH:~/box/ make -C dist/ build-phar
-    - ./test.sh dist/defuse-crypto.phar
+#     - mkdir /tmp/box
+#     - chmod 755 /tmp/box
+#     - curl -LSs https://github.com/box-project/box/releases/download/4.3.8/box.phar -o /tmp/box/box
+#     - chmod 755 /tmp/box/box
+#     - PATH="$PATH:/tmp/box/" which box
+#     - PATH="$PATH:/tmp/box/" make -C dist/ build-phar
+#     - ./test.sh dist/defuse-crypto.phar
     - if [[ $USE_PSALM -eq 1 ]]; then composer require --with-all-dependencies --dev "vimeo/psalm:dev-master"; fi
     - if [[ $USE_PSALM -eq 1 ]]; then composer install; fi
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi

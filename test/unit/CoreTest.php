@@ -1,8 +1,9 @@
 <?php
 
 use \Defuse\Crypto\Core;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class CoreTest extends PHPUnit_Framework_TestCase
+class CoreTest extends TestCase
 {
     // The specific bug the following two tests check for did not fail when
     // mbstring.func_overload=0 so it is crucial to run these tests with
@@ -111,11 +112,9 @@ class CoreTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testOurSubstrNegativeLength()
     {
+        $this->expectException(\InvalidArgumentException::class);
         Core::ourSubstr('abc', 0, -1);
     }
 
@@ -127,5 +126,25 @@ class CoreTest extends PHPUnit_Framework_TestCase
     public function testOurSubstrLengthIsMax()
     {
         $this->assertSame('bc', Core::ourSubstr('abc', 1, 500));
+    }
+
+    public function testSecureRandomZeroLength()
+    {
+        $this->expectException(\Defuse\Crypto\Exception\CryptoException::class);
+        $this->expectExceptionMessage('zero or negative');
+        Core::secureRandom(0);
+    }
+
+    public function testSecureRandomNegativeLength()
+    {
+        $this->expectException(\Defuse\Crypto\Exception\CryptoException::class);
+        $this->expectExceptionMessage('zero or negative');
+        Core::secureRandom(-1);
+    }
+
+    public function testSecureRandomPositiveLength()
+    {
+        $x = Core::secureRandom(10);
+        $this->assertSame(10, strlen($x));
     }
 }

@@ -196,7 +196,9 @@ final class File
         }
 
         /* Open the input file. */
+        self::removePHPUnitErrorHandler();
         $if = @\fopen($inputFilename, 'rb');
+        self::restorePHPUnitErrorHandler();
         if ($if === false) {
             throw new Ex\IOException(
                 'Cannot open input file for encrypting: ' .
@@ -209,7 +211,9 @@ final class File
         }
 
         /* Open the output file. */
+        self::removePHPUnitErrorHandler();
         $of = @\fopen($outputFilename, 'wb');
+        self::restorePHPUnitErrorHandler();
         if ($of === false) {
             \fclose($if);
             throw new Ex\IOException(
@@ -265,7 +269,9 @@ final class File
         }
 
         /* Open the input file. */
+        self::removePHPUnitErrorHandler();
         $if = @\fopen($inputFilename, 'rb');
+        self::restorePHPUnitErrorHandler();
         if ($if === false) {
             throw new Ex\IOException(
                 'Cannot open input file for decrypting: ' .
@@ -279,7 +285,9 @@ final class File
         }
 
         /* Open the output file. */
+        self::removePHPUnitErrorHandler();
         $of = @\fopen($outputFilename, 'wb');
+        self::restorePHPUnitErrorHandler();
         if ($of === false) {
             \fclose($if);
             throw new Ex\IOException(
@@ -770,9 +778,38 @@ final class File
     {
         $error = error_get_last();
         if ($error === null) {
-            return '[no PHP error]';
+            return '[no PHP error, or you have a custom error handler set]';
         } else {
             return $error['message'];
+        }
+    }
+
+    /**
+     * PHPUnit sets an error handler, which prevents getLastErrorMessage() from working,
+     * because error_get_last does not work when custom handlers are set.
+     *
+     * This is a workaround, which should be a no-op in production deployments, to make
+     * getLastErrorMessage() return the error messages that the PHPUnit tests expect.
+     *
+     * If, in a production deployment, a custom error handler is set, the exception
+     * handling will still work as usual, but the error messages will be confusing.
+     *
+     * @return void
+     */
+    private static function removePHPUnitErrorHandler() {
+        if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) {
+            set_error_handler(null);
+        }
+    }
+
+    /**
+     * Undoes what removePHPUnitErrorHandler did.
+     *
+     * @return void
+     */
+    private static function restorePHPUnitErrorHandler() {
+        if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) {
+            restore_error_handler();
         }
     }
 }

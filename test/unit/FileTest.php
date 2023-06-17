@@ -1,14 +1,15 @@
 <?php
 
 namespace Defuse\Crypto;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class FileTest extends \PHPUnit_Framework_TestCase
+class FileTest extends TestCase
 {
     private $key;
     private static $FILE_DIR;
     private static $TEMP_DIR;
 
-    public function setUp()
+    public function set_up()
     {
         self::$FILE_DIR = __DIR__ . '/File';
         self::$TEMP_DIR = self::$FILE_DIR . '/tmp';
@@ -19,7 +20,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $this->key = Key::createNewRandomKey();
     }
 
-    public function tearDown()
+    public function tear_down()
     {
         array_map('unlink', glob(self::$TEMP_DIR . '/*'));
         rmdir(self::$TEMP_DIR);
@@ -149,29 +150,27 @@ class FileTest extends \PHPUnit_Framework_TestCase
             'Original file mismatches the result of encrypt and decrypt');
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     * @expectedExceptionMessage Input file is too small to have been created by this library.
-     */
     public function testDecryptBadMagicNumber()
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, 'This file does not have the right magic number.');
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectExceptionMessage('Input file is too small to have been created by this library.');
         File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
     /**
      * @dataProvider garbageCiphertextProvider
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
     public function testDecryptGarbage($ciphertext)
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, $ciphertext);
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
-    public function garbageCiphertextProvider()
+    public static function garbageCiphertextProvider()
     {
         $ciphertexts = [
             [str_repeat('this is not anything that can be decrypted.', 100)],
@@ -182,19 +181,14 @@ class FileTest extends \PHPUnit_Framework_TestCase
         return $ciphertexts;
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testDecryptEmptyFile()
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, '');
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testDecryptTruncatedCiphertext()
     {
         // This tests for issue #115 on GitHub.
@@ -209,6 +203,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $truncated  = substr($ciphertext, 0, 64);
         file_put_contents($truncated_path, $truncated);
 
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         File::decryptFile($truncated_path, $plaintext_path, $this->key);
     }
 
@@ -243,10 +238,6 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($plaintext, $plaintext_decrypted);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     * @excpectedExceptionMessage Message Authentication failure; tampering detected.
-     */
     public function testExtraData()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
@@ -256,6 +247,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
         file_put_contents($dest, str_repeat('A', 2048), FILE_APPEND);
 
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectExceptionMessage('Integrity check failed.');
         File::decryptFile($dest, $dest . '.jpg', $this->key);
     }
 
@@ -265,129 +258,102 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Defuse\Crypto\Key', $result);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage No such file or directory
-     */
     public function testBadSourcePathEncrypt()
     {
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('No such file or directory');
         File::encryptFile('./i-do-not-exist', 'output-file', $this->key);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage No such file or directory
-     */
     public function testBadSourcePathDecrypt()
     {
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('No such file or directory');
         File::decryptFile('./i-do-not-exist', 'output-file', $this->key);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage No such file or directory
-     */
     public function testBadSourcePathEncryptWithPassword()
     {
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('No such file or directory');
         File::encryptFileWithPassword('./i-do-not-exist', 'output-file', 'password');
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage No such file or directory
-     */
     public function testBadSourcePathDecryptWithPassword()
     {
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('No such file or directory');
         File::decryptFileWithPassword('./i-do-not-exist', 'output-file', 'password');
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage Is a directory
-     */
     public function testBadDestinationPathEncrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('Is a directory');
         File::encryptFile($src, './', $this->key);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage Is a directory
-     */
     public function testBadDestinationPathDecrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('Is a directory');
         File::decryptFile($src, './', $this->key);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage Is a directory
-     */
     public function testBadDestinationPathEncryptWithPassword()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('Is a directory');
         File::encryptFileWithPassword($src, './', 'password');
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage Is a directory
-     */
     public function testBadDestinationPathDecryptWithPassword()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('Is a directory');
         File::decryptFileWithPassword($src, './', 'password');
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage must be a resource
-     */
     public function testNonResourceInputEncrypt()
     {
         $resource = fopen('php://memory', 'wb');
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('must be a resource');
         File::encryptResource('not a resource', $resource, $this->key);
         fclose($resource);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage must be a resource
-     */
     public function testNonResourceOutputEncrypt()
     {
         $resource = fopen('php://memory', 'wb');
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('must be a resource');
         File::encryptResource($resource, 'not a resource', $this->key);
         fclose($resource);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage must be a resource
-     */
     public function testNonResourceInputDecrypt()
     {
         $resource = fopen('php://memory', 'wb');
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('must be a resource');
         File::decryptResource('not a resource', $resource, $this->key);
         fclose($resource);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\IOException
-     * @expectedExceptionMessage must be a resource
-     */
     public function testNonResourceOutputDecrypt()
     {
         $resource = fopen('php://memory', 'wb');
+        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectExceptionMessage('must be a resource');
         File::decryptResource($resource, 'not a resource', $this->key);
         fclose($resource);
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testNonFileResourceDecrypt()
     {
         /* This should behave equivalently to an empty file. Calling fstat() on
@@ -396,14 +362,15 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $output = fopen('php://memory', 'wb');
         try {
             File::decryptResource($stdin, $output, $this->key);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             fclose($output);
             fclose($stdin);
+            $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
             throw $ex;
         }
     }
 
-    public function fileToFileProvider()
+    public static function fileToFileProvider()
     {
         $data = [];
 

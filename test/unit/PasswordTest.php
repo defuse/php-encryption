@@ -1,8 +1,9 @@
 <?php
 
 use \Defuse\Crypto\KeyProtectedByPassword;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class PasswordTest extends PHPUnit_Framework_TestCase
+class PasswordTest extends TestCase
 {
     public function testKeyProtectedByPasswordCorrect()
     {
@@ -15,12 +16,10 @@ class PasswordTest extends PHPUnit_Framework_TestCase
         $this->assertSame($key1->getRawBytes(), $key2->getRawBytes());
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
-     */
     public function testKeyProtectedByPasswordWrong()
     {
         $pkey = KeyProtectedByPassword::createRandomPasswordProtectedKey('rightpassword');
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         $key1 = $pkey->unlockKey('wrongpassword');
     }
 
@@ -47,19 +46,16 @@ class PasswordTest extends PHPUnit_Framework_TestCase
 
     /**
      * Check that changing the password actually changes the password.
-     * @expectedException \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
     function testPasswordActuallyChanges()
     {
         $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
         $pkey1->changePassword('password', 'new password');
 
+        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         $pkey1->unlockKey('password');
     }
 
-    /**
-     * @expectedException \Defuse\Crypto\Exception\BadFormatException
-     */
     function testMalformedLoad()
     {
         $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
@@ -67,6 +63,7 @@ class PasswordTest extends PHPUnit_Framework_TestCase
 
         $pkey1_enc_ascii[0] = "\xFF";
 
+        $this->expectException(\Defuse\Crypto\Exception\BadFormatException::class);
         KeyProtectedByPassword::loadFromAsciiSafeString($pkey1_enc_ascii);
     }
 }
