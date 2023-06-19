@@ -17,9 +17,11 @@ matrix:
     - php: "7.4"
       env: USE_PSALM=1
     - php: "8.0"
-      env: USE_PSALM=1
+      # psalm currently doesn't like our \[#SensitiveParameter]s
+      env: USE_PSALM=0
     - php: "8.1"
-      env: USE_PSALM=1
+      # psalm currently doesn't like our \[#SensitiveParameter]s
+      env: USE_PSALM=0
     - php: "8.2"
       env: USE_PSALM=1
       dist: focal

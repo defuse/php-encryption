@@ -38,7 +38,12 @@ final class File
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\IOException
      */
-    public static function encryptFileWithPassword($inputFilename, $outputFilename, $password)
+    public static function encryptFileWithPassword(
+        $inputFilename,
+        $outputFilename,
+        #[\SensitiveParameter]
+        $password
+    )
     {
         self::encryptFileInternal(
             $inputFilename,
@@ -81,7 +86,12 @@ final class File
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      */
-    public static function decryptFileWithPassword($inputFilename, $outputFilename, $password)
+    public static function decryptFileWithPassword(
+        $inputFilename,
+        $outputFilename,
+        #[\SensitiveParameter]
+        $password
+    )
     {
         self::decryptFileInternal(
             $inputFilename,
@@ -125,7 +135,12 @@ final class File
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      */
-    public static function encryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    public static function encryptResourceWithPassword(
+        $inputHandle,
+        $outputHandle,
+        #[\SensitiveParameter]
+        $password
+    )
     {
         self::encryptResourceInternal(
             $inputHandle,
@@ -169,7 +184,12 @@ final class File
      * @throws Ex\IOException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      */
-    public static function decryptResourceWithPassword($inputHandle, $outputHandle, $password)
+    public static function decryptResourceWithPassword(
+        $inputHandle,
+        $outputHandle,
+        #[\SensitiveParameter]
+        $password
+    )
     {
         self::decryptResourceInternal(
             $inputHandle,

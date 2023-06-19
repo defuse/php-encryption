@@ -386,7 +386,15 @@ final class Core
      *
      * @return string A $key_length-byte key derived from the password and salt.
      */
-    public static function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = false)
+    public static function pbkdf2(
+        $algorithm,
+        #[\SensitiveParameter]
+        $password,
+        $salt,
+        $count,
+        $key_length,
+        $raw_output = false
+    )
     {
         // Type checks:
         if (! \is_string($algorithm)) {
