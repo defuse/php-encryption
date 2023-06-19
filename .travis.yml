@@ -5,30 +5,52 @@ matrix:
   fast_finish: true
   include:
     - php: "5.6"
-      env: USE_PSALM=0
+      env: 
+        - USE_PSALM=0
+        - BUILD_PHAR=0
     - php: "7.0"
-      env: USE_PSALM=0
+      env: 
+        - USE_PSALM=0
+        - BUILD_PHAR=0
     - php: "7.1"
-      env: USE_PSALM=0
+      env: 
+        - USE_PSALM=0
+        - BUILD_PHAR=0
     - php: "7.2"
-      env: USE_PSALM=0
+      env: 
+        - USE_PSALM=0
+        - BUILD_PHAR=0
     - php: "7.3"
-      env: USE_PSALM=0
+      env:
+        - USE_PSALM=0
+        - BUILD_PHAR=0
     - php: "7.4"
-      env: USE_PSALM=1
+      env: 
+        - USE_PSALM=1
+        - BUILD_PHAR=0
     - php: "8.0"
       # psalm currently doesn't like our \[#SensitiveParameter]s
-      env: USE_PSALM=0
+      env: 
+        - USE_PSALM=0
+        - BUILD_PHAR=0
     - php: "8.1"
       # psalm currently doesn't like our \[#SensitiveParameter]s
-      env: USE_PSALM=0
+      env: 
+        - USE_PSALM=0
+        - BUILD_PHAR=1
     - php: "8.2"
-      env: USE_PSALM=1
+      env:
+        - USE_PSALM=1
+        - BUILD_PHAR=1
       dist: focal
     - php: "nightly"
-      env: USE_PSALM=1
+      env: 
+        - USE_PSALM=1
+        - BUILD_PHAR=1
     - php: "hhvm"
-      env: USE_PSALM=1
+      env: 
+        - USE_PSALM=1
+        - BUILD_PHAR=1
   allow_failures:
     - php: "nightly"
     - php: "hhvm"
@@ -42,13 +64,13 @@ before_script:
     - phpenv config-add extra_php_config.ini
 script:
     - ./test.sh
-#     - mkdir /tmp/box
-#     - chmod 755 /tmp/box
-#     - curl -LSs https://github.com/box-project/box/releases/download/4.3.8/box.phar -o /tmp/box/box
-#     - chmod 755 /tmp/box/box
-#     - PATH="$PATH:/tmp/box/" which box
-#     - PATH="$PATH:/tmp/box/" make -C dist/ build-phar
-#     - ./test.sh dist/defuse-crypto.phar
+    - if [[ $BUILD_PHAR -eq 1 ]]; then mkdir /tmp/box; fi
+    - if [[ $BUILD_PHAR -eq 1 ]]; then chmod 755 /tmp/box; fi
+    - if [[ $BUILD_PHAR -eq 1 ]]; then curl -LSs https://github.com/box-project/box/releases/download/4.3.8/box.phar -o /tmp/box/box; fi
+    - if [[ $BUILD_PHAR -eq 1 ]]; then chmod 755 /tmp/box/box; fi
+    - if [[ $BUILD_PHAR -eq 1 ]]; then PATH="$PATH:/tmp/box/" which box; fi
+    - if [[ $BUILD_PHAR -eq 1 ]]; then PATH="$PATH:/tmp/box/" make -C dist/ build-phar; fi
+    - if [[ $BUILD_PHAR -eq 1 ]]; then ./test.sh dist/phar-testing-autoload.php; fi
     - if [[ $USE_PSALM -eq 1 ]]; then composer require --with-all-dependencies --dev "vimeo/psalm:dev-master"; fi
     - if [[ $USE_PSALM -eq 1 ]]; then composer install; fi
     - if [[ $USE_PSALM -eq 1 ]]; then vendor/bin/psalm; fi
