@@ -99,22 +99,22 @@ a formal audit, please [contact Taylor Hornby](https://defuse.ca/contact.htm).
 Public Keys
 ------------
 
-The GnuPG public key used to sign current and older releases is available in
-[dist/signingkey.asc](https://github.com/defuse/php-encryption/raw/master/dist/signingkey.asc). Its fingerprint is:
+The GnuPG public key used to sign the current and new releases is available in
+[dist/signingkey.asc](https://github.com/defuse/php-encryption/raw/master/dist/signingkey-new.asc). Its fingerprint is:
 
 ```
-2FA6 1D8D 99B9 2658 6BAC  3D53 385E E055 A129 1538
+6DD6 E677 0281 5846 FC85  25A3 DD2E 507F 7BDB 1669
 ```
 
 You can verify it against Taylor Hornby's [contact
 page](https://defuse.ca/contact.htm) and
 [twitter](https://twitter.com/DefuseSec/status/723741424253059074).
 
-Due to the old key expiring, new releases will be signed with a new public key
-available in [dist/signingkey-new.asc](https://github.com/defuse/php-encryption/raw/master/dist/signingkey-new.asc). Its fingerprint is:
+Older releases were signed with a (now-expired) available in
+[dist/signingkey-old.asc](https://github.com/defuse/php-encryption/raw/master/dist/signingkey-new.asc). The old key's fingerprint is:
 
 ```
-6DD6 E677 0281 5846 FC85  25A3 DD2E 507F 7BDB 1669
+2FA6 1D8D 99B9 2658 6BAC  3D53 385E E055 A129 1538
 ```
 
 A signature of this new key by the old key is available in
