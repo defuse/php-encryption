@@ -1,7 +1,7 @@
 php-encryption
 ===============
 
-![Build Status](https://github.com/defuse/php-encryption/actions/workflows/ci.yml/badge.svg)
+![Build Status](https://app.travis-ci.com/defuse/php-encryption.svg?branch=master)
 [![codecov](https://codecov.io/gh/defuse/php-encryption/branch/master/graph/badge.svg)](https://codecov.io/gh/defuse/php-encryption)
 [![Latest Stable Version](https://poser.pugx.org/defuse/php-encryption/v/stable)](https://packagist.org/packages/defuse/php-encryption)
 [![License](https://poser.pugx.org/defuse/php-encryption/license)](https://packagist.org/packages/defuse/php-encryption)
