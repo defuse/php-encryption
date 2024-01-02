@@ -23,6 +23,7 @@
     "require": {
         "paragonie/random_compat": ">= 2",
         "ext-openssl": "*",
+        "ext-hash": "*",
         "php":  ">=5.6.0"
     },
     "require-dev": {
